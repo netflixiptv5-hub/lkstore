@@ -120,7 +120,7 @@ def init_db():
     # Default config
     defaults = {
         'welcome_text': '🌟 𝗦𝗘𝗝𝗔 𝗕𝗘𝗠 𝗩𝗜𝗡𝗗𝗢 𝗔 𝗟𝗞 𝗦𝗧𝗢𝗥𝗘 ⭐⭐⭐⭐⭐\n\n🔥 Logins Premium com entrega automática!\n💰 Carregue seu saldo via PIX e compre na hora!',
-        'welcome_photo': '',
+        'welcome_photo': 'AgACAgEAAxkDAAOXadPssYTB7O1e8iKvwInbn987KvQAAoENaxv3YqFGIWtpZ-ziTU8BAAMCAAN4AAM7BA',
     }
     for k, v in defaults.items():
         conn.execute("INSERT OR IGNORE INTO bot_config (key, value) VALUES (?, ?)", (k, v))
@@ -193,21 +193,33 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⛔ Você foi bloqueado. Entre em contato com o suporte.")
         return
     
-    welcome_text = get_config('welcome_text')
+    balance = get_balance(user.id)
     welcome_photo = get_config('welcome_photo')
+    
+    text = (
+        f"𝙎𝙀𝙅𝘼 𝘽𝙀𝙈 𝙑𝙄𝙉𝘿𝙊 𝘼 𝙇𝙆 𝙎𝙏𝙊𝙍𝙀  ⭐️⭐️⭐️⭐️⭐️\n\n"
+        f"𝙇𝙀𝙄𝘼 𝘾𝙊𝙈 𝘼𝙏𝙀𝙉𝘾𝘼𝙊  ⚠️\n\n"
+        f"☑️ 𝘼𝙣𝙩𝙚𝙨 𝙙𝙚 𝙖𝙙𝙞𝙘𝙞𝙤𝙣𝙖𝙧 𝙨𝙖𝙡𝙙𝙤 𝙫𝙚𝙧𝙞𝙛𝙞𝙦𝙪𝙚 𝙨𝙚 𝙤 𝙦𝙪𝙚 𝙙𝙚𝙨𝙚𝙟𝙖 𝙘𝙤𝙢𝙥𝙧𝙖𝙧 𝙚𝙨𝙩𝙖 𝙙𝙞𝙨𝙥𝙤𝙣𝙞𝙫𝙚𝙡! 𝙉𝙖𝙤 𝙛𝙖𝙯𝙚𝙢𝙤𝙨 𝙧𝙚𝙚𝙢𝙗𝙤𝙡𝙨𝙤.\n"
+        f"☑️ 𝙎𝙚 𝙖 𝙘𝙤𝙣𝙩𝙖 𝙦𝙪𝙚 𝙫𝙤𝙘𝙚 𝙙𝙚𝙨𝙚𝙟𝙖 𝙣𝙖𝙤 𝙚𝙨𝙩𝙞𝙫𝙚𝙧 𝙙𝙞𝙨𝙥𝙤𝙣𝙞𝙫𝙚𝙡 𝙚𝙣𝙩𝙧𝙚 𝙚𝙢 𝙘𝙤𝙣𝙩𝙖𝙩𝙤!\n"
+        f"☑️ Todos Logins tem a garantia e duração de 30 dias!\n\n"
+        f"🧾 Seu perfil:\n"
+        f"├👤 Id: {user.id}\n"
+        f"├💸 Saldo: R${balance:.2f}\n"
+        f"└🥇 Cliente LK Store"
+    )
     
     if welcome_photo:
         try:
             await update.message.reply_photo(
                 photo=welcome_photo,
-                caption=welcome_text,
-                reply_markup=main_menu_keyboard(),
-                parse_mode=ParseMode.HTML
+                caption=text,
+                reply_markup=main_menu_keyboard()
             )
+            return
         except:
-            await update.message.reply_text(welcome_text, reply_markup=main_menu_keyboard(), parse_mode=ParseMode.HTML)
-    else:
-        await update.message.reply_text(welcome_text, reply_markup=main_menu_keyboard(), parse_mode=ParseMode.HTML)
+            pass
+    
+    await update.message.reply_text(text, reply_markup=main_menu_keyboard())
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
