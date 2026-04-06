@@ -26,6 +26,7 @@ from telegram.constants import ParseMode
 # ===== CONFIG =====
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8701402389:AAGAj33V5dgLJp2JbP8QJUd9hXTSL2f0_TY")
 MP_ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN", "APP_USR-2507246895625254-100915-cba2bb9c86daed78244bcf5748f74642-1505061824")
+SUPPORT_BOT_TOKEN = os.environ.get("SUPPORT_BOT_TOKEN", "8510312690:AAEz8nzI3PU-_MJJ8iHUkMoQnDjR_UYFgdU")
 ADMIN_IDS = [925542353]
 SUPPORT_BOT = "https://t.me/SUPORTESLKLOGINSSTORE77_BOT?start=suporte"
 DB_PATH = os.environ.get("DB_PATH", "lkstore.db")
@@ -181,14 +182,22 @@ def is_banned(telegram_id):
     return row and row['banned'] == 1
 
 # ===== MAIN MENU =====
-def main_menu_keyboard():
-    return InlineKeyboardMarkup([
+def main_menu_keyboard(user_id=None):
+    maint = get_config('maintenance') or '0'
+    buttons = [
         [InlineKeyboardButton("🛒 COMPRAR", callback_data="buy"),
          InlineKeyboardButton("💰 SALDO", callback_data="balance")],
         [InlineKeyboardButton("📋 MEUS PEDIDOS", callback_data="orders"),
          InlineKeyboardButton("🎁 RESGATAR GIFT", callback_data="gift")],
-        [InlineKeyboardButton("🆘 SUPORTE", url=SUPPORT_BOT)],
-    ])
+    ]
+    # Suporte só aparece se NÃO está em manutenção
+    if maint != '1':
+        support = get_config('support_link') or SUPPORT_BOT
+        buttons.append([InlineKeyboardButton("🆘 SUPORTE", url=support)])
+    # Botão ADM só pra admin
+    if user_id and is_admin(user_id):
+        buttons.append([InlineKeyboardButton("⚙️ ADMIN", callback_data="adm_main")])
+    return InlineKeyboardMarkup(buttons)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -230,13 +239,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_photo(
                 photo=welcome_photo,
                 caption=text,
-                reply_markup=main_menu_keyboard()
+                reply_markup=main_menu_keyboard(user.id)
             )
             return
         except:
             pass
     
-    await update.message.reply_text(text, reply_markup=main_menu_keyboard())
+    await update.message.reply_text(text, reply_markup=main_menu_keyboard(user.id))
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -260,7 +269,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"├💸 Saldo: R${balance:.2f}\n"
             f"└🥇 Cliente LK Store"
         )
-        await safe_edit(query, text, reply_markup=main_menu_keyboard())
+        await safe_edit(query, text, reply_markup=main_menu_keyboard(user.id))
 
 # ===== COMPRAR =====
 async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
@@ -1466,6 +1475,20 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         current = get_config('maintenance') or '0'
         new_val = '0' if current == '1' else '1'
         set_config('maintenance', new_val)
+        # Signal support bot maintenance toggle
+        try:
+            async with aiohttp.ClientSession() as session:
+                # Send /manutencao command to support bot via admin
+                url = f"https://api.telegram.org/bot{SUPPORT_BOT_TOKEN}/sendMessage"
+                # We use a trick: send message from support bot to admin to trigger /manutencao
+                # Actually we just notify admin that support bot needs toggle too
+                status = "ATIVADA 🔧" if new_val == '1' else "DESATIVADA ✅"
+                await session.post(url, json={
+                    "chat_id": query.from_user.id,
+                    "text": f"🔧 Manutenção {status}\n\n⚠️ Para ativar/desativar no bot de suporte também, envie /manutencao no @SUPORTESLKLOGINSSTORE77_BOT"
+                })
+        except:
+            pass
         await admin_panel(update, context)
     
     # ===== ADMINS =====
