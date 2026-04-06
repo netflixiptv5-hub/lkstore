@@ -146,9 +146,14 @@ def ensure_user(telegram_id, username=None, first_name=None):
     conn = get_db()
     user = conn.execute("SELECT * FROM users WHERE telegram_id = ?", (str(telegram_id),)).fetchone()
     if not user:
-        conn.execute("INSERT INTO users (telegram_id, username, first_name) VALUES (?, ?, ?)",
-                     (str(telegram_id), username, first_name))
+        bonus = float(get_config('bonus_registro') or '0')
+        conn.execute("INSERT INTO users (telegram_id, username, first_name, balance) VALUES (?, ?, ?, ?)",
+                     (str(telegram_id), username, first_name, bonus))
         conn.commit()
+        if bonus > 0:
+            conn.execute("INSERT INTO transactions (telegram_id, type, amount, description) VALUES (?, 'credit', ?, 'Bônus de registro')",
+                         (str(telegram_id), bonus))
+            conn.commit()
     else:
         conn.execute("UPDATE users SET username = ?, first_name = ? WHERE telegram_id = ?",
                      (username, first_name, str(telegram_id)))
@@ -191,6 +196,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if is_banned(user.id):
         await update.message.reply_text("⛔ Você foi bloqueado. Entre em contato com o suporte.")
+        return
+    
+    # Maintenance mode
+    maint = get_config('maintenance') or '0'
+    if maint == '1' and not is_admin(user.id):
+        await update.message.reply_text("🔧 Bot em manutenção. Volte mais tarde!")
+        return
+    
+    # Force username check
+    force_username = get_config('force_username') or '0'
+    if force_username == '1' and not user.username and not is_admin(user.id):
+        await update.message.reply_text("⚠️ Você precisa definir um @username no Telegram para usar o bot!")
         return
     
     balance = get_balance(user.id)
@@ -497,8 +514,14 @@ async def pix_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     try:
         amount = float(context.args[0])
-        if amount < 1:
-            raise ValueError
+        pix_min = float(get_config('pix_min') or '1')
+        pix_max = float(get_config('pix_max') or '500')
+        if amount < pix_min:
+            await update.message.reply_text(f"❌ Valor mínimo: R${pix_min:.0f}")
+            return
+        if amount > pix_max:
+            await update.message.reply_text(f"❌ Valor máximo: R${pix_max:.0f}")
+            return
     except (IndexError, ValueError):
         await update.message.reply_text("❌ Use: /pix VALOR\nExemplo: /pix 50\nMínimo: R$1")
         return
@@ -658,14 +681,34 @@ async def check_payment_job(context: ContextTypes.DEFAULT_TYPE):
             if p:
                 conn.execute("UPDATE payments SET status = 'approved' WHERE mp_payment_id = ?", (mp_id,))
                 conn.commit()
-                update_balance(p['telegram_id'], p['amount'], f"PIX R${p['amount']:.2f}")
+                
+                credit_amount = p['amount']
+                bonus_text = ""
+                
+                # Saldo em dobro
+                saldo_dobro = get_config('saldo_dobro') or '0'
+                saldo_dobro_min = float(get_config('saldo_dobro_min') or '0')
+                if saldo_dobro == '1' and credit_amount >= saldo_dobro_min:
+                    credit_amount = credit_amount * 2
+                    bonus_text += f"\n🎉 Saldo em dobro! +R${p['amount']:.2f} bônus"
+                
+                # Porcentagem por recarga
+                porcent = get_config('porcent_recarga') or '0'
+                porcent_min = float(get_config('porcent_recarga_min') or '0')
+                porcent_val = float(get_config('porcent_recarga_porcent') or '0')
+                if porcent == '1' and credit_amount >= porcent_min and porcent_val > 0:
+                    bonus = p['amount'] * (porcent_val / 100)
+                    credit_amount += bonus
+                    bonus_text += f"\n🎊 Bônus {porcent_val:.0f}%: +R${bonus:.2f}"
+                
+                update_balance(p['telegram_id'], credit_amount, f"PIX R${p['amount']:.2f}")
                 balance = get_balance(p['telegram_id'])
                 conn.close()
                 
                 await context.bot.send_message(
                     chat_id=data['chat_id'],
                     text=f"✅ <b>PAGAMENTO CONFIRMADO!</b>\n\n"
-                         f"💰 +R${data['amount']:.2f} creditado\n"
+                         f"💰 +R${credit_amount:.2f} creditado{bonus_text}\n"
                          f"💎 Saldo atual: R${balance:.2f}",
                     parse_mode=ParseMode.HTML,
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🛒 Comprar", callback_data="buy"), InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]])
@@ -1362,34 +1405,860 @@ async def importar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(text, parse_mode=ParseMode.HTML)
 
-# /admin - show admin panel
+# ===== FULL ADMIN PANEL WITH INLINE MENUS =====
+
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Main /adm command - show admin dashboard"""
     if not is_admin(update.effective_user.id):
         return
     
+    conn = get_db()
+    total_users = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()['c']
+    total_stock = conn.execute("SELECT COUNT(*) as c FROM products WHERE sold = 0").fetchone()['c']
+    maint = get_config('maintenance') or '0'
+    conn.close()
+    
+    maint_text = "sim ⛔" if maint == '1' else "não ✅"
+    
     text = (
-        "⚙️ <b>PAINEL ADMIN</b>\n\n"
-        "📦 <b>Estoque:</b>\n"
-        "  /addlogin - Adicionar logins\n"
-        "  /estoque - Ver estoque\n"
-        "  /removelogin - Remover logins\n\n"
-        "👥 <b>Usuários:</b>\n"
-        "  /ban ID - Bloquear usuário\n"
-        "  /unban ID - Desbloquear\n"
-        "  /addsaldo ID VALOR - Dar saldo\n"
-        "  /removesaldo ID VALOR - Tirar saldo\n\n"
-        "🎁 <b>Gift:</b>\n"
-        "  /gift VALOR - Gerar gift card\n\n"
-        "📢 <b>Spam:</b>\n"
-        "  /spam - Enviar spam\n\n"
-        "📊 <b>Relatórios:</b>\n"
-        "  /historico - Histórico de vendas\n"
-        "  /stats - Estatísticas\n\n"
-        "🎨 <b>Personalizar:</b>\n"
-        "  /setwelcome TEXTO - Mudar boas-vindas\n"
-        "  /setphoto - Mudar foto (responda a uma foto)\n"
+        f"⚙️ <b>Menu de Administração</b>\n\n"
+        f"🔧 Status do Bot:\n"
+        f"· 🏆 Bot VIP 🏆\n"
+        f"· 🔧 Manutenção: {maint_text}\n\n"
+        f"👥 Usuários Cadastrados:\n"
+        f"- Total: <b>{total_users}</b>\n\n"
+        f"📦 Estoque: <b>{total_stock}</b> logins disponíveis"
     )
     
+    buttons = [
+        [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_main")],
+        [InlineKeyboardButton(f"🔧 Manutenção: {'sim' if maint == '1' else 'não'}", callback_data="adm_toggle_maint")],
+        [InlineKeyboardButton("👑 Administradores", callback_data="adm_admins")],
+        [InlineKeyboardButton("🛒 Configurar vendas", callback_data="adm_vendas"),
+         InlineKeyboardButton("💠 Configurar Pix", callback_data="adm_pix")],
+        [InlineKeyboardButton("💰 Configurar saldos/gift", callback_data="adm_saldos"),
+         InlineKeyboardButton("👤 Configurar usuários", callback_data="adm_users")],
+        [InlineKeyboardButton("⚙️ Mais configurações", callback_data="adm_mais")],
+    ]
+    
+    if update.callback_query:
+        await safe_edit(update.callback_query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(buttons))
+
+
+async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle all admin panel callbacks"""
+    query = update.callback_query
+    if not is_admin(query.from_user.id):
+        await query.answer("⛔ Sem permissão", show_alert=True)
+        return
+    await query.answer()
+    
+    data = query.data
+    
+    # ===== MAIN MENU =====
+    if data == "adm_main":
+        await admin_panel(update, context)
+    
+    # ===== TOGGLE MAINTENANCE =====
+    elif data == "adm_toggle_maint":
+        current = get_config('maintenance') or '0'
+        new_val = '0' if current == '1' else '1'
+        set_config('maintenance', new_val)
+        await admin_panel(update, context)
+    
+    # ===== ADMINS =====
+    elif data == "adm_admins":
+        admins_text = "\n".join(f"  · <code>{a}</code>" for a in ADMIN_IDS)
+        text = (
+            f"👑 <b>Administradores</b>\n\n"
+            f"{admins_text}\n\n"
+            f"Adicionar admin: <code>/addadmin ID</code>\n"
+            f"Remover admin: <code>/removeadmin ID</code>"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_admins")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_main")]
+        ]))
+    
+    # ===== CONFIGURAR VENDAS =====
+    elif data == "adm_vendas":
+        conn = get_db()
+        total_stock = conn.execute("SELECT COUNT(*) as c FROM products WHERE sold = 0").fetchone()['c']
+        products = conn.execute(
+            "SELECT name, price, COUNT(*) as qty FROM products WHERE sold = 0 GROUP BY name, price ORDER BY name"
+        ).fetchall()
+        conn.close()
+        
+        stock_detail = ""
+        for p in products:
+            stock_detail += f"  📦 {p['name']} - R${p['price']:.0f} ({p['qty']} un)\n"
+        if not stock_detail:
+            stock_detail = "  Vazio!\n"
+        
+        text = (
+            f"🛒 <b>Configuração de Vendas</b>\n\n"
+            f"🛒 Comando para ativar/desativar módulo de logins:\n"
+            f"<code>/modulologins 1 ou 0</code>\n\n"
+            f"📦 <b>{total_stock} logins no estoque</b>\n\n"
+            f"{stock_detail}"
+        )
+        
+        buttons = [
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_vendas")],
+            [InlineKeyboardButton(f"🛒 {total_stock} logins no estoque", callback_data="adm_estoque_detail")],
+            [InlineKeyboardButton("🛒 Adicionar logins", callback_data="adm_add_logins")],
+            [InlineKeyboardButton("🛒 Alterar modo de vendas", callback_data="adm_modo_vendas")],
+            [InlineKeyboardButton("💰 Alterar preços", callback_data="adm_alterar_precos")],
+            [InlineKeyboardButton("😀 Alterar nome dos logins", callback_data="adm_alterar_nomes")],
+            [InlineKeyboardButton("💚 Baixar todos logins no estoque", callback_data="adm_baixar_estoque")],
+            [InlineKeyboardButton("💚 Baixar logins vendidos hoje", callback_data="adm_baixar_vendidos_hoje")],
+            [InlineKeyboardButton("💚 Baixar logins vendidos ontem", callback_data="adm_baixar_vendidos_ontem")],
+            [InlineKeyboardButton("💚 Baixar logins vendidos essa semana", callback_data="adm_baixar_vendidos_semana")],
+            [InlineKeyboardButton("💚 Baixar todos logins vendidos no total", callback_data="adm_baixar_vendidos_total")],
+            [InlineKeyboardButton("💚 Baixar logins vendidos por nome", callback_data="adm_baixar_vendidos_nome")],
+            [InlineKeyboardButton("🗑 Deletar todos logins do estoque", callback_data="adm_deletar_estoque")],
+            [InlineKeyboardButton("🗑 Deletar login específico", callback_data="adm_deletar_login")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_main")]
+        ]
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    
+    # ===== CONFIGURAR PIX =====
+    elif data == "adm_pix":
+        mp_token = get_config('mp_token') or MP_ACCESS_TOKEN
+        pix_min = get_config('pix_min') or '1'
+        pix_max = get_config('pix_max') or '500'
+        pix_manual_key = get_config('pix_manual_key') or 'Não definido'
+        pix_manual_name = get_config('pix_manual_name') or 'Não definido'
+        pix_method = get_config('pix_method') or 'MERCADOPAGO'
+        
+        text = (
+            f"💠 <b>Configurações de Pix</b>\n\n"
+            f"🔹 Pix Atual: <b>{pix_method}</b>\n"
+            f"- Ranking de pix inseridos: /rankingpix\n\n"
+            f"💠 <b>Configuração de Limites de Recarga</b>\n"
+            f"- Pix Mínimo Atual: <b>{pix_min}</b>\n"
+            f"- Pix Máximo Atual: <b>{pix_max}</b>\n"
+            f"- Comando para alterar o pix mínimo: <code>/recargaminima Valor</code>\n"
+            f"- Pix Máximo: <code>/recargamaxima Valor</code>\n\n"
+            f"💠 <b>Verificação de Pendências no Pix</b>\n"
+            f"- Listar Todos os Pix Pendentes: /listarpix\n"
+            f"- Cancelar Pix por ID: <code>/cancelarpix Id</code>\n\n"
+            f"💠 <b>Configurações Específicas por Banco</b>\n\n"
+            f"🔵 <b>Pix MERCADO PAGO:</b>\n"
+            f"- Token atual: <code>{mp_token[:20]}...</code>\n"
+            f"- Definir Token: <code>/definirtokenmp TOKEN</code>\n\n"
+            f"⚫️ <b>Pix MANUAL:</b>\n"
+            f"- Chave pix manual atual: <b>{pix_manual_key}</b>\n"
+            f"- Nome pix manual atual: <b>{pix_manual_name}</b>\n"
+            f"- Definir Chave Pix: <code>/chavepix CHAVE</code>\n"
+            f"- Definir Nome: <code>/nomepix NOME</code>"
+        )
+        
+        buttons = [
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_pix")],
+            [InlineKeyboardButton("🔵 Usar Mercado Pago", callback_data="adm_pix_mp")],
+            [InlineKeyboardButton("⚫️ Usar Pix Manual", callback_data="adm_pix_manual")],
+            [InlineKeyboardButton("📋 Listar Pix Pendentes", callback_data="adm_listar_pix")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_main")]
+        ]
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    
+    elif data == "adm_pix_mp":
+        set_config('pix_method', 'MERCADOPAGO')
+        await query.answer("✅ Pix alterado para MERCADO PAGO", show_alert=True)
+        # Refresh pix menu
+        query.data = "adm_pix"
+        await adm_callback(update, context)
+    
+    elif data == "adm_pix_manual":
+        set_config('pix_method', 'MANUAL')
+        await query.answer("✅ Pix alterado para MANUAL", show_alert=True)
+        query.data = "adm_pix"
+        await adm_callback(update, context)
+    
+    elif data == "adm_listar_pix":
+        conn = get_db()
+        pending = conn.execute(
+            "SELECT * FROM payments WHERE status = 'pending' ORDER BY created_at DESC LIMIT 20"
+        ).fetchall()
+        conn.close()
+        
+        if not pending:
+            text = "📋 Nenhum PIX pendente."
+        else:
+            text = "📋 <b>PIX PENDENTES</b>\n\n"
+            for p in pending:
+                text += (f"🔹 ID: <code>{p['mp_payment_id']}</code>\n"
+                        f"   User: {p['telegram_id']} | R${p['amount']:.2f}\n"
+                        f"   📅 {p['created_at']}\n\n")
+        
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_listar_pix")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_pix")]
+        ]))
+    
+    # ===== CONFIGURAR SALDOS/GIFT =====
+    elif data == "adm_saldos":
+        saldo_dobro = get_config('saldo_dobro') or '0'
+        saldo_dobro_min = get_config('saldo_dobro_min') or '0'
+        bonus_registro = get_config('bonus_registro') or '0'
+        porcent_recarga = get_config('porcent_recarga') or '0'
+        porcent_recarga_min = get_config('porcent_recarga_min') or '0'
+        porcent_recarga_val = get_config('porcent_recarga_porcent') or '0'
+        protecao_saldo = get_config('protecao_saldo') or '0'
+        
+        sdobro_status = "Ativado ✅" if saldo_dobro == '1' else "Desativado ❌"
+        porcent_status = "Ativado ✅" if porcent_recarga == '1' else "Desativado ❌"
+        
+        text = (
+            f"💰 <b>Configuração de Saldo e Gifts</b>\n\n"
+            f"◆ <b>Saldo em Dobro:</b>\n"
+            f"· Status Atual: {sdobro_status}\n"
+            f"· Valor Mínimo para Ativar: {saldo_dobro_min}\n"
+            f"· Comando para Alterar: <code>/saldoemdobro SITUAÇÃO VALOR</code>\n"
+            f"(Situação: 1=LIGADO, 0=DESLIGADO | Valor: Mínimo para dobrar o saldo)\n\n"
+            f"🎊 <b>Porcentagem por Recarga:</b>\n"
+            f"· Status Atual: {porcent_status}\n"
+            f"· Valor Mínimo para Ativar: {porcent_recarga_min}\n"
+            f"· Porcentagem: {porcent_recarga_val}%\n"
+            f"· Comando para Alterar: <code>/porcentagemrecarga SITUAÇÃO VALOR PORCENTAGEM</code>\n\n"
+            f"💰 <b>Bônus de Registro:</b>\n"
+            f"· Bônus atual: R${bonus_registro}\n"
+            f"· Comando para Alterar: <code>/bonusregistro VALOR</code>\n\n"
+            f"🎁 <b>Configuração de Gifts:</b>\n"
+            f"· Gerar Gift: <code>/gift VALOR</code>\n"
+            f"· Gerar Múltiplos Gifts: <code>/gengifts QUANTIDADE VALOR</code>\n"
+            f"· Resgatar Gift: <code>/resgatar CÓDIGO</code>\n"
+            f"· Adicionar Saldo: <code>/addsaldo ID_TELEGRAM VALOR</code>\n"
+            f"· Proteção de saldo: <code>/protecaosaldo VALOR</code>\n"
+            f"· Remover Saldo: <code>/removesaldo ID_TELEGRAM VALOR</code>"
+        )
+        
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_saldos")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_main")]
+        ]))
+    
+    # ===== CONFIGURAR USUARIOS =====
+    elif data == "adm_users":
+        force_username = get_config('force_username') or '0'
+        force_channel = get_config('force_channel') or '0'
+        channel_link = get_config('channel_link') or 'Não definido'
+        
+        fu_status = "True" if force_username == '1' else "False"
+        fc_status = "True" if force_channel == '1' else "False"
+        
+        text = (
+            f"👤 <b>Configuração de usuários</b>\n\n"
+            f"- Forçar usuário a criar um username para utilizar o bot: <b>{fu_status}</b>\n\n"
+            f"- Forçar usuário a entrar em seu canal para utilizar o bot: <b>{fc_status}</b>\n"
+            f"  – {channel_link}\n"
+            f"  (O canal deve ser público e o bot deve ser admin no canal.)\n\n"
+            f"- Alterar link do canal: <code>/linkcanal LINK</code>\n\n"
+            f"- Ver informações e banir/desbanir usuários: <code>/userinfo ID_TELEGRAM</code>\n\n"
+            f"💬 <b>Spam para usuários</b>\n\n"
+            f"- Comando para enviar spam: <code>/enviarspam TEXTO</code>\n"
+            f"(Você também pode enviar fotos e texto no chat do bot para spam com foto e texto, seja imediato ou agendado.)"
+        )
+        
+        buttons = [
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_users")],
+            [InlineKeyboardButton(f"{'DESATIVAR' if force_username == '1' else 'ATIVAR'} forçar username", callback_data="adm_toggle_username")],
+            [InlineKeyboardButton(f"{'DESATIVAR' if force_channel == '1' else 'ATIVAR'} forçar entrar em canal", callback_data="adm_toggle_channel")],
+            [InlineKeyboardButton("🔽 Baixar usuários cadastrados", callback_data="adm_baixar_users")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_main")]
+        ]
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    
+    elif data == "adm_toggle_username":
+        current = get_config('force_username') or '0'
+        set_config('force_username', '0' if current == '1' else '1')
+        query.data = "adm_users"
+        await adm_callback(update, context)
+    
+    elif data == "adm_toggle_channel":
+        current = get_config('force_channel') or '0'
+        set_config('force_channel', '0' if current == '1' else '1')
+        query.data = "adm_users"
+        await adm_callback(update, context)
+    
+    elif data == "adm_baixar_users":
+        conn = get_db()
+        users = conn.execute("SELECT telegram_id, username, first_name, balance, created_at FROM users ORDER BY created_at DESC").fetchall()
+        conn.close()
+        
+        content = "ID_TELEGRAM|USERNAME|NOME|SALDO|CADASTRO\n"
+        for u in users:
+            content += f"{u['telegram_id']}|{u['username'] or ''}|{u['first_name'] or ''}|{u['balance']:.2f}|{u['created_at']}\n"
+        
+        buf = BytesIO(content.encode('utf-8'))
+        buf.name = "usuarios_cadastrados.txt"
+        await query.message.reply_document(document=buf, filename="usuarios_cadastrados.txt",
+            caption=f"👥 {len(users)} usuários cadastrados")
+    
+    # ===== MAIS CONFIGURAÇÕES =====
+    elif data == "adm_mais":
+        text = "⚙️ <b>Mais configurações</b>"
+        buttons = [
+            [InlineKeyboardButton("🤖 Testar bot", callback_data="adm_testar"),
+             InlineKeyboardButton("💬 Alterar textos/fotos", callback_data="adm_textos")],
+            [InlineKeyboardButton("🗑 Limpar cache do bot", callback_data="adm_limpar_cache")],
+            [InlineKeyboardButton("📊 Estatísticas", callback_data="adm_stats")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_main")]
+        ]
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    
+    elif data == "adm_testar":
+        await query.message.reply_text("🤖 Bot está funcionando normalmente! ✅")
+    
+    elif data == "adm_limpar_cache":
+        await query.answer("✅ Cache limpo!", show_alert=True)
+    
+    elif data == "adm_stats":
+        conn = get_db()
+        total_users = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()['c']
+        total_sales = conn.execute("SELECT COUNT(*) as c FROM sales").fetchone()['c']
+        total_revenue = conn.execute("SELECT COALESCE(SUM(price), 0) as s FROM sales").fetchone()['s']
+        total_stock = conn.execute("SELECT COUNT(*) as c FROM products WHERE sold = 0").fetchone()['c']
+        total_balance = conn.execute("SELECT COALESCE(SUM(balance), 0) as s FROM users").fetchone()['s']
+        today_sales = conn.execute(
+            "SELECT COUNT(*) as c, COALESCE(SUM(price), 0) as s FROM sales WHERE date(created_at) = date('now','localtime')"
+        ).fetchone()
+        conn.close()
+        
+        text = (
+            f"📊 <b>ESTATÍSTICAS</b>\n\n"
+            f"👥 Usuários: {total_users}\n"
+            f"🛒 Vendas total: {total_sales}\n"
+            f"💰 Receita total: R${total_revenue:.2f}\n"
+            f"📦 Estoque: {total_stock}\n"
+            f"💎 Saldo total users: R${total_balance:.2f}\n\n"
+            f"📅 <b>HOJE:</b>\n"
+            f"🛒 Vendas: {today_sales['c']}\n"
+            f"💰 Receita: R${today_sales['s']:.2f}"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_stats")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
+        ]))
+    
+    # ===== ALTERAR TEXTOS/FOTOS =====
+    elif data == "adm_textos":
+        text = "💬 <b>Alterar textos</b>"
+        buttons = [
+            [InlineKeyboardButton("💬 Textos tela inicial", callback_data="adm_texto_inicio")],
+            [InlineKeyboardButton("💬 Mensagem após a compra", callback_data="adm_texto_compra")],
+            [InlineKeyboardButton("📌 Link de suporte", callback_data="adm_link_suporte")],
+            [InlineKeyboardButton("📸 Foto de boas-vindas", callback_data="adm_foto_welcome")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
+        ]
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    
+    elif data == "adm_texto_inicio":
+        current = get_config('welcome_text') or 'Padrão'
+        text = (
+            f"💬 <b>Texto da tela inicial</b>\n\n"
+            f"Texto atual:\n<i>{current[:500]}</i>\n\n"
+            f"Para alterar use:\n<code>/setwelcome SEU TEXTO AQUI</code>"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_textos")]
+        ]))
+    
+    elif data == "adm_texto_compra":
+        current = get_config('msg_pos_compra') or '𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀'
+        text = (
+            f"💬 <b>Mensagem após a compra</b>\n\n"
+            f"Mensagem atual:\n<i>{current[:500]}</i>\n\n"
+            f"Para alterar use:\n<code>/setmsgcompra SUA MENSAGEM</code>"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_textos")]
+        ]))
+    
+    elif data == "adm_link_suporte":
+        text = (
+            f"📌 <b>Link de suporte</b>\n\n"
+            f"Atual: {SUPPORT_BOT}\n\n"
+            f"Para alterar use:\n<code>/setsuporte LINK</code>"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_textos")]
+        ]))
+    
+    elif data == "adm_foto_welcome":
+        text = (
+            "📸 <b>Foto de boas-vindas</b>\n\n"
+            "Para alterar: envie uma foto no chat e responda a ela com /setphoto"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_textos")]
+        ]))
+    
+    # ===== VENDAS - SUB ACTIONS =====
+    elif data == "adm_add_logins":
+        text = (
+            "🛒 <b>Adicionar Logins</b>\n\n"
+            "Modo 1 - Um por um:\n"
+            "<code>/addlogin PRODUTO===PREÇO===email senha===VALIDADE===MENSAGEM</code>\n\n"
+            "Modo 2 - Importar arquivo:\n"
+            "Envie um arquivo .txt e responda com /importar\n\n"
+            "Formato do arquivo (cada linha):\n"
+            "<code>PRODUTO|PREÇO|email senha||00|VALIDADE|MSG</code>"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]
+        ]))
+    
+    elif data == "adm_estoque_detail":
+        conn = get_db()
+        products = conn.execute(
+            "SELECT name, price, COUNT(*) as qty FROM products WHERE sold = 0 GROUP BY name, price ORDER BY name"
+        ).fetchall()
+        conn.close()
+        
+        text = "📦 <b>ESTOQUE DETALHADO</b>\n\n"
+        for p in products:
+            text += f"📦 {p['name']} - R${p['price']:.0f} → {p['qty']} un\n"
+        if not products:
+            text += "Vazio!"
+        
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_estoque_detail")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]
+        ]))
+    
+    elif data == "adm_modo_vendas":
+        mode = get_config('venda_mode') or 'automatico'
+        text = (
+            f"🛒 <b>Modo de Vendas</b>\n\n"
+            f"Modo atual: <b>{mode.upper()}</b>\n\n"
+            f"<code>/modovenda automatico</code> - Entrega automática\n"
+            f"<code>/modovenda manual</code> - Entrega manual"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]
+        ]))
+    
+    elif data == "adm_alterar_precos":
+        conn = get_db()
+        products = conn.execute(
+            "SELECT DISTINCT name, price FROM products WHERE sold = 0 ORDER BY name"
+        ).fetchall()
+        conn.close()
+        
+        text = "💰 <b>Alterar Preços</b>\n\n"
+        for p in products:
+            text += f"📦 {p['name']} - R${p['price']:.0f}\n"
+        text += "\nComando: <code>/alterarpreco PRODUTO NOVO_PRECO</code>"
+        
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]
+        ]))
+    
+    elif data == "adm_alterar_nomes":
+        conn = get_db()
+        products = conn.execute("SELECT DISTINCT name FROM products WHERE sold = 0 ORDER BY name").fetchall()
+        conn.close()
+        
+        text = "😀 <b>Alterar Nome dos Logins</b>\n\nNomes atuais:\n"
+        for p in products:
+            text += f"  · {p['name']}\n"
+        text += "\nComando: <code>/alterarnome NOME_ATUAL===NOVO_NOME</code>"
+        
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]
+        ]))
+    
+    elif data == "adm_baixar_estoque":
+        conn = get_db()
+        items = conn.execute("SELECT name, price, credentials, validity FROM products WHERE sold = 0 ORDER BY name").fetchall()
+        conn.close()
+        
+        if not items:
+            await query.answer("📦 Estoque vazio!", show_alert=True)
+            return
+        
+        content = "PRODUTO|PREÇO|CREDENCIAIS|VALIDADE\n"
+        for i in items:
+            content += f"{i['name']}|{i['price']}|{i['credentials']}|{i['validity']}\n"
+        
+        buf = BytesIO(content.encode('utf-8'))
+        buf.name = "estoque_completo.txt"
+        await query.message.reply_document(document=buf, filename="estoque_completo.txt",
+            caption=f"📦 {len(items)} logins no estoque")
+    
+    elif data == "adm_baixar_vendidos_hoje":
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) = date('now','localtime') ORDER BY s.created_at DESC"
+        ).fetchall()
+        conn.close()
+        await _send_sales_file(query, items, "vendidos_hoje.txt", "Vendidos Hoje")
+    
+    elif data == "adm_baixar_vendidos_ontem":
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) = date('now','localtime','-1 day') ORDER BY s.created_at DESC"
+        ).fetchall()
+        conn.close()
+        await _send_sales_file(query, items, "vendidos_ontem.txt", "Vendidos Ontem")
+    
+    elif data == "adm_baixar_vendidos_semana":
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) >= date('now','localtime','-7 days') ORDER BY s.created_at DESC"
+        ).fetchall()
+        conn.close()
+        await _send_sales_file(query, items, "vendidos_semana.txt", "Vendidos Semana")
+    
+    elif data == "adm_baixar_vendidos_total":
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id ORDER BY s.created_at DESC"
+        ).fetchall()
+        conn.close()
+        await _send_sales_file(query, items, "vendidos_total.txt", "Vendidos Total")
+    
+    elif data == "adm_baixar_vendidos_nome":
+        context.user_data['adm_step'] = 'baixar_por_nome'
+        await safe_edit(query,
+            "📝 Digite o nome do produto para baixar os vendidos:",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]])
+        )
+    
+    elif data == "adm_deletar_estoque":
+        text = (
+            "🗑 <b>ATENÇÃO!</b>\n\n"
+            "Isso vai deletar TODOS os logins do estoque!\n\n"
+            "Tem certeza?"
+        )
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("✅ SIM, DELETAR TUDO", callback_data="adm_deletar_estoque_confirm")],
+            [InlineKeyboardButton("❌ Cancelar", callback_data="adm_vendas")]
+        ]))
+    
+    elif data == "adm_deletar_estoque_confirm":
+        conn = get_db()
+        deleted = conn.execute("DELETE FROM products WHERE sold = 0").rowcount
+        conn.commit()
+        conn.close()
+        await query.answer(f"🗑 {deleted} logins deletados!", show_alert=True)
+        query.data = "adm_vendas"
+        await adm_callback(update, context)
+    
+    elif data.startswith("adm_ban_"):
+        uid = data.replace("adm_ban_", "")
+        conn = get_db()
+        conn.execute("UPDATE users SET banned = 1 WHERE telegram_id = ?", (uid,))
+        conn.commit()
+        conn.close()
+        await query.answer(f"⛔ Usuário {uid} banido!", show_alert=True)
+    
+    elif data.startswith("adm_unban_"):
+        uid = data.replace("adm_unban_", "")
+        conn = get_db()
+        conn.execute("UPDATE users SET banned = 0 WHERE telegram_id = ?", (uid,))
+        conn.commit()
+        conn.close()
+        await query.answer(f"✅ Usuário {uid} desbanido!", show_alert=True)
+    
+    elif data == "adm_deletar_login":
+        context.user_data['adm_step'] = 'deletar_login'
+        conn = get_db()
+        products = conn.execute(
+            "SELECT DISTINCT name, COUNT(*) as qty FROM products WHERE sold = 0 GROUP BY name"
+        ).fetchall()
+        conn.close()
+        
+        text = "🗑 <b>Deletar Login Específico</b>\n\nDigite o nome do produto para deletar:\n\n"
+        for p in products:
+            text += f"  · {p['name']} ({p['qty']} un)\n"
+        text += "\nOu use: <code>/removelogin NOME</code>"
+        
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]
+        ]))
+
+
+async def _send_sales_file(query, items, filename, title):
+    """Helper to send sales as file"""
+    if not items:
+        await query.answer(f"📭 Nenhuma venda encontrada!", show_alert=True)
+        return
+    
+    content = "PRODUTO|PREÇO|CREDENCIAIS|COMPRADOR|DATA\n"
+    for i in items:
+        content += f"{i['product_name']}|{i['price']}|{i['credentials']}|{i['telegram_id']}({i['username'] or ''})|{i['created_at']}\n"
+    
+    buf = BytesIO(content.encode('utf-8'))
+    buf.name = filename
+    await query.message.reply_document(document=buf, filename=filename,
+        caption=f"📊 {title}: {len(items)} vendas")
+
+
+# ===== NEW ADMIN COMMANDS FOR PIX/SALDO CONFIGS =====
+
+async def recargaminima(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /recargaminima VALOR")
+        return
+    set_config('pix_min', context.args[0])
+    await update.message.reply_text(f"✅ Pix mínimo alterado para R${context.args[0]}")
+
+async def recargamaxima(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /recargamaxima VALOR")
+        return
+    set_config('pix_max', context.args[0])
+    await update.message.reply_text(f"✅ Pix máximo alterado para R${context.args[0]}")
+
+async def definirtokenmp(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /definirtokenmp TOKEN")
+        return
+    token = ' '.join(context.args)
+    set_config('mp_token', token)
+    global sdk
+    sdk = mercadopago.SDK(token)
+    await update.message.reply_text("✅ Token Mercado Pago atualizado!")
+
+async def chavepix(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /chavepix CHAVE")
+        return
+    set_config('pix_manual_key', ' '.join(context.args))
+    await update.message.reply_text("✅ Chave PIX manual atualizada!")
+
+async def nomepix(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /nomepix NOME")
+        return
+    set_config('pix_manual_name', ' '.join(context.args))
+    await update.message.reply_text("✅ Nome do PIX manual atualizado!")
+
+async def cancelarpix(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /cancelarpix ID_PAGAMENTO")
+        return
+    mp_id = context.args[0]
+    conn = get_db()
+    conn.execute("UPDATE payments SET status = 'cancelled' WHERE mp_payment_id = ?", (mp_id,))
+    conn.commit()
+    conn.close()
+    # Remove check job
+    jobs = context.job_queue.get_jobs_by_name(f"payment_{mp_id}")
+    for job in jobs:
+        job.schedule_removal()
+    await update.message.reply_text(f"✅ PIX {mp_id} cancelado!")
+
+async def listarpix(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    conn = get_db()
+    pending = conn.execute("SELECT * FROM payments WHERE status = 'pending' ORDER BY created_at DESC LIMIT 30").fetchall()
+    conn.close()
+    
+    if not pending:
+        await update.message.reply_text("📋 Nenhum PIX pendente.")
+        return
+    
+    text = "📋 <b>PIX PENDENTES</b>\n\n"
+    for p in pending:
+        text += f"🔹 ID: <code>{p['mp_payment_id']}</code> | User: {p['telegram_id']} | R${p['amount']:.2f} | {p['created_at']}\n"
+    await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
+async def saldoemdobro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if len(context.args) < 2:
+        await update.message.reply_text("Use: /saldoemdobro SITUAÇÃO VALOR\nEx: /saldoemdobro 1 50")
+        return
+    set_config('saldo_dobro', context.args[0])
+    set_config('saldo_dobro_min', context.args[1])
+    status = "ATIVADO ✅" if context.args[0] == '1' else "DESATIVADO ❌"
+    await update.message.reply_text(f"✅ Saldo em dobro: {status}\nValor mínimo: R${context.args[1]}")
+
+async def porcentagemrecarga(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if len(context.args) < 3:
+        await update.message.reply_text("Use: /porcentagemrecarga SITUAÇÃO VALOR PORCENTAGEM\nEx: /porcentagemrecarga 1 50 10")
+        return
+    set_config('porcent_recarga', context.args[0])
+    set_config('porcent_recarga_min', context.args[1])
+    set_config('porcent_recarga_porcent', context.args[2])
+    status = "ATIVADO ✅" if context.args[0] == '1' else "DESATIVADO ❌"
+    await update.message.reply_text(f"✅ Porcentagem por recarga: {status}\nMínimo: R${context.args[1]}\nPorcentagem: {context.args[2]}%")
+
+async def bonusregistro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /bonusregistro VALOR")
+        return
+    set_config('bonus_registro', context.args[0])
+    await update.message.reply_text(f"✅ Bônus de registro: R${context.args[0]}")
+
+async def protecaosaldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /protecaosaldo VALOR")
+        return
+    set_config('protecao_saldo', context.args[0])
+    await update.message.reply_text(f"✅ Proteção de saldo: R${context.args[0]}")
+
+async def gengifts(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if len(context.args) < 2:
+        await update.message.reply_text("Use: /gengifts QUANTIDADE VALOR\nEx: /gengifts 5 10")
+        return
+    qty = int(context.args[0])
+    amount = float(context.args[1])
+    
+    conn = get_db()
+    codes = []
+    for _ in range(qty):
+        code = 'LK' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        conn.execute("INSERT INTO gifts (code, amount, created_by) VALUES (?, ?, ?)",
+                     (code, amount, str(update.effective_user.id)))
+        codes.append(code)
+    conn.commit()
+    conn.close()
+    
+    text = f"🎁 <b>{qty} GIFTS GERADOS!</b>\n💰 Valor: R${amount:.2f} cada\n\n"
+    for c in codes:
+        text += f"<code>/resgatar {c}</code>\n"
+    await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
+async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /userinfo ID_TELEGRAM")
+        return
+    uid = context.args[0]
+    conn = get_db()
+    user = conn.execute("SELECT * FROM users WHERE telegram_id = ?", (uid,)).fetchone()
+    sales_count = conn.execute("SELECT COUNT(*) as c FROM sales WHERE telegram_id = ?", (uid,)).fetchone()['c']
+    total_spent = conn.execute("SELECT COALESCE(SUM(price), 0) as s FROM sales WHERE telegram_id = ?", (uid,)).fetchone()['s']
+    conn.close()
+    
+    if not user:
+        await update.message.reply_text("❌ Usuário não encontrado!")
+        return
+    
+    banned_text = "⛔ BANIDO" if user['banned'] else "✅ Normal"
+    text = (
+        f"👤 <b>Info do Usuário</b>\n\n"
+        f"🆔 ID: <code>{user['telegram_id']}</code>\n"
+        f"👤 Nome: {user['first_name'] or 'N/A'}\n"
+        f"📛 Username: @{user['username'] or 'N/A'}\n"
+        f"💰 Saldo: R${user['balance']:.2f}\n"
+        f"🛒 Compras: {sales_count}\n"
+        f"💸 Total gasto: R${total_spent:.2f}\n"
+        f"📅 Cadastro: {user['created_at']}\n"
+        f"🔒 Status: {banned_text}"
+    )
+    
+    buttons = []
+    if user['banned']:
+        buttons.append([InlineKeyboardButton("✅ Desbanir", callback_data=f"adm_unban_{uid}")])
+    else:
+        buttons.append([InlineKeyboardButton("⛔ Banir", callback_data=f"adm_ban_{uid}")])
+    
+    await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(buttons))
+
+async def enviarspam(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    text = update.message.text.replace('/enviarspam', '', 1).strip()
+    if not text:
+        await update.message.reply_text("Use: /enviarspam TEXTO")
+        return
+    
+    await update.message.reply_text("🚀 Enviando spam...")
+    sent, failed = await send_spam(context, 'text', None, text)
+    await update.message.reply_text(f"✅ Spam enviado!\n📨 {sent} enviados | ❌ {failed} falhas")
+
+async def alterarpreco(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    text = update.message.text.replace('/alterarpreco', '', 1).strip()
+    parts = text.rsplit(' ', 1)
+    if len(parts) < 2:
+        await update.message.reply_text("Use: /alterarpreco NOME_PRODUTO NOVO_PRECO")
+        return
+    name = parts[0].strip()
+    new_price = float(parts[1])
+    conn = get_db()
+    updated = conn.execute("UPDATE products SET price = ? WHERE name = ? AND sold = 0", (new_price, name)).rowcount
+    conn.commit()
+    conn.close()
+    await update.message.reply_text(f"✅ {updated} logins de '{name}' alterados para R${new_price:.0f}")
+
+async def alterarnome(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    text = update.message.text.replace('/alterarnome', '', 1).strip()
+    parts = text.split('===')
+    if len(parts) < 2:
+        await update.message.reply_text("Use: /alterarnome NOME_ATUAL===NOVO_NOME")
+        return
+    old_name = parts[0].strip()
+    new_name = parts[1].strip()
+    conn = get_db()
+    updated = conn.execute("UPDATE products SET name = ? WHERE name = ?", (new_name, old_name)).rowcount
+    conn.commit()
+    conn.close()
+    await update.message.reply_text(f"✅ {updated} logins renomeados de '{old_name}' para '{new_name}'")
+
+async def setmsgcompra(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    text = update.message.text.replace('/setmsgcompra', '', 1).strip()
+    if not text:
+        await update.message.reply_text("Use: /setmsgcompra MENSAGEM")
+        return
+    set_config('msg_pos_compra', text)
+    await update.message.reply_text("✅ Mensagem pós-compra atualizada!")
+
+async def setsuporte(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    text = update.message.text.replace('/setsuporte', '', 1).strip()
+    if not text:
+        await update.message.reply_text("Use: /setsuporte LINK")
+        return
+    set_config('support_link', text)
+    global SUPPORT_BOT
+    SUPPORT_BOT = text
+    await update.message.reply_text(f"✅ Link de suporte atualizado: {text}")
+
+async def linkcanal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        await update.message.reply_text("Use: /linkcanal LINK")
+        return
+    set_config('channel_link', ' '.join(context.args))
+    await update.message.reply_text("✅ Link do canal atualizado!")
+
+async def rankingpix(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    conn = get_db()
+    ranking = conn.execute(
+        "SELECT p.telegram_id, u.username, u.first_name, SUM(p.amount) as total, COUNT(*) as qty "
+        "FROM payments p LEFT JOIN users u ON p.telegram_id = u.telegram_id "
+        "WHERE p.status = 'approved' GROUP BY p.telegram_id ORDER BY total DESC LIMIT 20"
+    ).fetchall()
+    conn.close()
+    
+    if not ranking:
+        await update.message.reply_text("📊 Nenhum PIX aprovado ainda.")
+        return
+    
+    text = "🏆 <b>RANKING DE PIX</b>\n\n"
+    for i, r in enumerate(ranking, 1):
+        name = r['first_name'] or r['username'] or 'N/A'
+        text += f"{i}. {name} - R${r['total']:.2f} ({r['qty']} pix)\n"
     await update.message.reply_text(text, parse_mode=ParseMode.HTML)
 
 # ===== GENERIC MESSAGE HANDLER =====
@@ -1412,6 +2281,39 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         result = await handle_spam_times(update, context)
         if result:
             return
+    
+    # Admin step: baixar por nome
+    if context.user_data.get('adm_step') == 'baixar_por_nome' and is_admin(update.effective_user.id):
+        context.user_data['adm_step'] = None
+        product_name = text.strip()
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE s.product_name = ? ORDER BY s.created_at DESC",
+            (product_name,)
+        ).fetchall()
+        conn.close()
+        if not items:
+            await update.message.reply_text(f"📭 Nenhuma venda de '{product_name}'")
+        else:
+            content = "PRODUTO|PREÇO|CREDENCIAIS|COMPRADOR|DATA\n"
+            for i in items:
+                content += f"{i['product_name']}|{i['price']}|{i['credentials']}|{i['telegram_id']}({i['username'] or ''})|{i['created_at']}\n"
+            buf = BytesIO(content.encode('utf-8'))
+            buf.name = f"vendidos_{product_name}.txt"
+            await update.message.reply_document(document=buf, filename=f"vendidos_{product_name}.txt",
+                caption=f"📊 {len(items)} vendas de {product_name}")
+        return
+    
+    # Admin step: deletar login por nome
+    if context.user_data.get('adm_step') == 'deletar_login' and is_admin(update.effective_user.id):
+        context.user_data['adm_step'] = None
+        product_name = text.strip()
+        conn = get_db()
+        deleted = conn.execute("DELETE FROM products WHERE name = ? AND sold = 0", (product_name,)).rowcount
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"🗑 {deleted} logins de '{product_name}' deletados!")
+        return
     
     # Check gift code
     if context.user_data.get('awaiting_gift'):
@@ -1444,6 +2346,7 @@ def main():
     
     # Admin commands
     app.add_handler(CommandHandler("admin", admin_panel))
+    app.add_handler(CommandHandler("adm", admin_panel))
     app.add_handler(CommandHandler("addlogin", addlogin))
     app.add_handler(CommandHandler("addlogintelas", addlogin))
     app.add_handler(CommandHandler("estoque", estoque))
@@ -1453,14 +2356,38 @@ def main():
     app.add_handler(CommandHandler("addsaldo", addsaldo))
     app.add_handler(CommandHandler("removesaldo", removesaldo))
     app.add_handler(CommandHandler("gift", create_gift))
+    app.add_handler(CommandHandler("gengifts", gengifts))
     app.add_handler(CommandHandler("historico", historico))
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("setwelcome", setwelcome))
     app.add_handler(CommandHandler("setphoto", setphoto))
     app.add_handler(CommandHandler("spam", spam_command))
     app.add_handler(CommandHandler("importar", importar))
+    app.add_handler(CommandHandler("enviarspam", enviarspam))
+    # Pix config commands
+    app.add_handler(CommandHandler("recargaminima", recargaminima))
+    app.add_handler(CommandHandler("recargamaxima", recargamaxima))
+    app.add_handler(CommandHandler("definirtokenmp", definirtokenmp))
+    app.add_handler(CommandHandler("chavepix", chavepix))
+    app.add_handler(CommandHandler("nomepix", nomepix))
+    app.add_handler(CommandHandler("cancelarpix", cancelarpix))
+    app.add_handler(CommandHandler("listarpix", listarpix))
+    app.add_handler(CommandHandler("rankingpix", rankingpix))
+    # Saldo config commands
+    app.add_handler(CommandHandler("saldoemdobro", saldoemdobro))
+    app.add_handler(CommandHandler("porcentagemrecarga", porcentagemrecarga))
+    app.add_handler(CommandHandler("bonusregistro", bonusregistro))
+    app.add_handler(CommandHandler("protecaosaldo", protecaosaldo))
+    # User/vendas config commands
+    app.add_handler(CommandHandler("userinfo", userinfo))
+    app.add_handler(CommandHandler("alterarpreco", alterarpreco))
+    app.add_handler(CommandHandler("alterarnome", alterarnome))
+    app.add_handler(CommandHandler("setmsgcompra", setmsgcompra))
+    app.add_handler(CommandHandler("setsuporte", setsuporte))
+    app.add_handler(CommandHandler("linkcanal", linkcanal))
     
     # Callbacks
+    app.add_handler(CallbackQueryHandler(adm_callback, pattern="^adm_"))
     app.add_handler(CallbackQueryHandler(buy_callback, pattern="^buy$"))
     app.add_handler(CallbackQueryHandler(product_callback, pattern="^product_"))
     app.add_handler(CallbackQueryHandler(confirm_buy, pattern="^confirm_buy$"))
