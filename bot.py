@@ -29,6 +29,7 @@ MP_ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN", "APP_USR-2507246895625254-10
 SUPPORT_BOT_TOKEN = os.environ.get("SUPPORT_BOT_TOKEN", "8510312690:AAEz8nzI3PU-_MJJ8iHUkMoQnDjR_UYFgdU")
 ADMIN_IDS = [925542353]
 SUPPORT_BOT = "https://t.me/SUPORTESLKLOGINSSTORE77_BOT?start=suporte"
+SUPPORT_API_URL = os.environ.get("SUPPORT_API_URL", "https://web-production-1bdc2.up.railway.app")
 DB_PATH = os.environ.get("DB_PATH", "lkstore.db")
 
 logging.basicConfig(level=logging.INFO)
@@ -1477,7 +1478,7 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         set_config('maintenance', new_val)
         status = "ATIVADA 🔧" if new_val == '1' else "DESATIVADA ✅"
         # Also toggle support bot maintenance via API
-        support_api = get_config('support_api_url') or os.environ.get('SUPPORT_API_URL', '')
+        support_api = get_config('support_api_url') or SUPPORT_API_URL
         if support_api:
             try:
                 async with aiohttp.ClientSession() as session:
