@@ -1425,24 +1425,42 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn = get_db()
     total_users = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()['c']
     total_stock = conn.execute("SELECT COUNT(*) as c FROM products WHERE sold = 0").fetchone()['c']
-    maint = get_config('maintenance') or '0'
+    maint_vendas = get_config('maintenance') or '0'
     conn.close()
     
-    maint_text = "sim ⛔" if maint == '1' else "não ✅"
+    # Check support bot maintenance via API
+    maint_suporte = '0'
+    support_api = get_config('support_api_url') or SUPPORT_API_URL
+    if support_api:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{support_api}/api/maintenance", timeout=aiohttp.ClientTimeout(total=3)) as resp:
+                    data_resp = await resp.json()
+                    maint_suporte = '1' if data_resp.get('maintenance') else '0'
+        except:
+            maint_suporte = '?'
+    
+    mv_icon = "⛔" if maint_vendas == '1' else "✅"
+    ms_icon = "⛔" if maint_suporte == '1' else ("❓" if maint_suporte == '?' else "✅")
     
     text = (
         f"⚙️ <b>Menu de Administração</b>\n\n"
-        f"🔧 Status do Bot:\n"
+        f"🔧 Status dos Bots:\n"
         f"· 🏆 Bot VIP 🏆\n"
-        f"· 🔧 Manutenção: {maint_text}\n\n"
+        f"· 🛒 Bot Vendas: {'Manutenção' if maint_vendas == '1' else 'Online'} {mv_icon}\n"
+        f"· 🆘 Bot Suporte: {'Manutenção' if maint_suporte == '1' else 'Online'} {ms_icon}\n\n"
         f"👥 Usuários Cadastrados:\n"
         f"- Total: <b>{total_users}</b>\n\n"
         f"📦 Estoque: <b>{total_stock}</b> logins disponíveis"
     )
     
+    mv_btn = f"🛒 Bot Vendas: {'ON ⛔' if maint_vendas == '1' else 'OFF ✅'}"
+    ms_btn = f"🆘 Bot Suporte: {'ON ⛔' if maint_suporte == '1' else 'OFF ✅'}"
+    
     buttons = [
         [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_main")],
-        [InlineKeyboardButton(f"🔧 Manutenção: {'sim' if maint == '1' else 'não'}", callback_data="adm_toggle_maint")],
+        [InlineKeyboardButton(mv_btn, callback_data="adm_maint_vendas"),
+         InlineKeyboardButton(ms_btn, callback_data="adm_maint_suporte")],
         [InlineKeyboardButton("👑 Administradores", callback_data="adm_admins")],
         [InlineKeyboardButton("🛒 Configurar vendas", callback_data="adm_vendas"),
          InlineKeyboardButton("💠 Configurar Pix", callback_data="adm_pix")],
@@ -1471,31 +1489,31 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "adm_main":
         await admin_panel(update, context)
     
-    # ===== TOGGLE MAINTENANCE =====
-    elif data == "adm_toggle_maint":
+    # ===== TOGGLE MAINTENANCE VENDAS =====
+    elif data == "adm_maint_vendas":
         current = get_config('maintenance') or '0'
         new_val = '0' if current == '1' else '1'
         set_config('maintenance', new_val)
         status = "ATIVADA 🔧" if new_val == '1' else "DESATIVADA ✅"
-        # Also toggle support bot maintenance via API
+        await query.answer(f"🛒 Bot Vendas manutenção: {status}", show_alert=True)
+        await admin_panel(update, context)
+    
+    # ===== TOGGLE MAINTENANCE SUPORTE =====
+    elif data == "adm_maint_suporte":
         support_api = get_config('support_api_url') or SUPPORT_API_URL
-        if support_api:
-            try:
-                async with aiohttp.ClientSession() as session:
-                    action = "on" if new_val == '1' else "off"
-                    await session.post(f"{support_api}/api/maintenance", json={"action": action, "secret": "lkstore2026"}, timeout=aiohttp.ClientTimeout(total=5))
-            except:
-                pass
-        # Notify admin
         try:
             async with aiohttp.ClientSession() as session:
-                url = f"https://api.telegram.org/bot{SUPPORT_BOT_TOKEN}/sendMessage"
-                await session.post(url, json={
-                    "chat_id": query.from_user.id,
-                    "text": f"🔧 Manutenção {status}\n\nBot de vendas: botão suporte {'oculto' if new_val == '1' else 'visível'}\nBot de suporte: {'bloqueado' if new_val == '1' else 'liberado'}"
-                })
-        except:
-            pass
+                resp = await session.post(
+                    f"{support_api}/api/maintenance",
+                    json={"action": "toggle", "secret": "lkstore2026"},
+                    timeout=aiohttp.ClientTimeout(total=5)
+                )
+                result = await resp.json()
+                is_on = result.get('maintenance', False)
+                status = "ATIVADA 🔧" if is_on else "DESATIVADA ✅"
+                await query.answer(f"🆘 Bot Suporte manutenção: {status}", show_alert=True)
+        except Exception as e:
+            await query.answer(f"❌ Erro ao conectar com bot de suporte", show_alert=True)
         await admin_panel(update, context)
     
     # ===== ADMINS =====
