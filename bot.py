@@ -1475,17 +1475,23 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         current = get_config('maintenance') or '0'
         new_val = '0' if current == '1' else '1'
         set_config('maintenance', new_val)
-        # Signal support bot maintenance toggle
+        status = "ATIVADA 🔧" if new_val == '1' else "DESATIVADA ✅"
+        # Also toggle support bot maintenance via API
+        support_api = get_config('support_api_url') or os.environ.get('SUPPORT_API_URL', '')
+        if support_api:
+            try:
+                async with aiohttp.ClientSession() as session:
+                    action = "on" if new_val == '1' else "off"
+                    await session.post(f"{support_api}/api/maintenance", json={"action": action, "secret": "lkstore2026"}, timeout=aiohttp.ClientTimeout(total=5))
+            except:
+                pass
+        # Notify admin
         try:
             async with aiohttp.ClientSession() as session:
-                # Send /manutencao command to support bot via admin
                 url = f"https://api.telegram.org/bot{SUPPORT_BOT_TOKEN}/sendMessage"
-                # We use a trick: send message from support bot to admin to trigger /manutencao
-                # Actually we just notify admin that support bot needs toggle too
-                status = "ATIVADA 🔧" if new_val == '1' else "DESATIVADA ✅"
                 await session.post(url, json={
                     "chat_id": query.from_user.id,
-                    "text": f"🔧 Manutenção {status}\n\n⚠️ Para ativar/desativar no bot de suporte também, envie /manutencao no @SUPORTESLKLOGINSSTORE77_BOT"
+                    "text": f"🔧 Manutenção {status}\n\nBot de vendas: botão suporte {'oculto' if new_val == '1' else 'visível'}\nBot de suporte: {'bloqueado' if new_val == '1' else 'liberado'}"
                 })
         except:
             pass
