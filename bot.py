@@ -184,7 +184,6 @@ def is_banned(telegram_id):
 
 # ===== MAIN MENU =====
 def main_menu_keyboard(user_id=None):
-    maint_vendas = get_config('maintenance') or '0'
     maint_suporte = get_config('maintenance_suporte') or '0'
     buttons = [
         [InlineKeyboardButton("🛒 COMPRAR", callback_data="buy"),
@@ -192,8 +191,8 @@ def main_menu_keyboard(user_id=None):
         [InlineKeyboardButton("📋 MEUS PEDIDOS", callback_data="orders"),
          InlineKeyboardButton("🎁 RESGATAR GIFT", callback_data="gift")],
     ]
-    # Suporte só aparece se NENHUM dos dois está em manutenção
-    if maint_vendas != '1' and maint_suporte != '1':
+    # Suporte só aparece se bot de suporte NÃO está em manutenção
+    if maint_suporte != '1':
         support = get_config('support_link') or SUPPORT_BOT
         buttons.append([InlineKeyboardButton("🆘 SUPORTE", url=support)])
     # Botão ADM só pra admin
@@ -1429,19 +1428,7 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     maint_vendas = get_config('maintenance') or '0'
     conn.close()
     
-    # Check support bot maintenance via API, fallback to local config
     maint_suporte = get_config('maintenance_suporte') or '0'
-    support_api = get_config('support_api_url') or SUPPORT_API_URL
-    if support_api:
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"{support_api}/api/maintenance", timeout=aiohttp.ClientTimeout(total=3)) as resp:
-                    data_resp = await resp.json()
-                    maint_suporte = '1' if data_resp.get('maintenance') else '0'
-                    # Sync local
-                    set_config('maintenance_suporte', maint_suporte)
-        except:
-            pass  # use local fallback
     
     mv_icon = "⛔" if maint_vendas == '1' else "✅"
     ms_icon = "⛔" if maint_suporte == '1' else ("❓" if maint_suporte == '?' else "✅")
@@ -1503,22 +1490,24 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # ===== TOGGLE MAINTENANCE SUPORTE =====
     elif data == "adm_maint_suporte":
-        support_api = get_config('support_api_url') or SUPPORT_API_URL
+        current = get_config('maintenance_suporte') or '0'
+        new_val = '0' if current == '1' else '1'
+        set_config('maintenance_suporte', new_val)
+        
+        # Send command to support bot via Telegram API
+        cmd = "/maint_on" if new_val == '1' else "/maint_off"
         try:
             async with aiohttp.ClientSession() as session:
-                resp = await session.post(
-                    f"{support_api}/api/maintenance",
-                    json={"action": "toggle", "secret": "lkstore2026"},
-                    timeout=aiohttp.ClientTimeout(total=5)
-                )
-                result = await resp.json()
-                is_on = result.get('maintenance', False)
-                # Save state locally too (for hiding suporte button)
-                set_config('maintenance_suporte', '1' if is_on else '0')
-                status = "ATIVADA 🔧" if is_on else "DESATIVADA ✅"
-                await query.answer(f"🆘 Bot Suporte manutenção: {status}", show_alert=True)
-        except Exception as e:
-            await query.answer(f"❌ Erro ao conectar com bot de suporte", show_alert=True)
+                url = f"https://api.telegram.org/bot{SUPPORT_BOT_TOKEN}/sendMessage"
+                await session.post(url, json={
+                    "chat_id": query.from_user.id,
+                    "text": cmd
+                }, timeout=aiohttp.ClientTimeout(total=5))
+        except:
+            pass
+        
+        status = "ATIVADA 🔧" if new_val == '1' else "DESATIVADA ✅"
+        await query.answer(f"🆘 Bot Suporte manutenção: {status}", show_alert=True)
         await admin_panel(update, context)
     
     # ===== ADMINS =====
