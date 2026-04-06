@@ -244,8 +244,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
     
     balance = get_balance(user.id)
-    welcome_photo = get_config('welcome_photo')
-    
     text = (
         f"𝙎𝙀𝙅𝘼 𝘽𝙀𝙈 𝙑𝙄𝙉𝘿𝙊 𝘼 𝙇𝙆 𝙎𝙏𝙊𝙍𝙀  ⭐️⭐️⭐️⭐️⭐️\n\n"
         f"𝙇𝙀𝙄𝘼 𝘾𝙊𝙈 𝘼𝙏𝙀𝙉𝘾𝘼𝙊  ⚠️\n\n"
@@ -258,16 +256,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"└🥇 Cliente LK Store"
     )
     
-    if welcome_photo:
-        try:
-            await update.message.reply_photo(
-                photo=welcome_photo,
-                caption=text,
-                reply_markup=main_menu_keyboard(user.id)
-            )
-            return
-        except:
-            pass
+    try:
+        await update.message.reply_photo(
+            photo=WELCOME_PHOTO,
+            caption=text,
+            reply_markup=main_menu_keyboard(user.id)
+        )
+        return
+    except:
+        pass
     
     await update.message.reply_text(text, reply_markup=main_menu_keyboard(user.id))
 
@@ -293,7 +290,23 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"├💸 Saldo: R${balance:.2f}\n"
             f"└🥇 Cliente LK Store"
         )
-        await safe_edit(query, text, reply_markup=main_menu_keyboard(user.id))
+        try:
+            await query.message.delete()
+        except:
+            pass
+        try:
+            await context.bot.send_photo(
+                chat_id=query.message.chat_id,
+                photo=WELCOME_PHOTO,
+                caption=text,
+                reply_markup=main_menu_keyboard(user.id)
+            )
+        except:
+            await context.bot.send_message(
+                chat_id=query.message.chat_id,
+                text=text,
+                reply_markup=main_menu_keyboard(user.id)
+            )
 
 # ===== TUTORIAIS =====
 async def tutorial_compra_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -344,6 +357,7 @@ async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
                 pass
             await query.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
 
+WELCOME_PHOTO = "AgACAgEAAxkDAAIBK2nUFASliWqp0cQhSxMOCuKyA1PZAAKXDWsb92KhRmCeNbGi-p2iAQADAgADeAADOwQ"
 BUY_PHOTO = "AgACAgEAAxkDAAIBnWnULNVIWxUfSpQhw4m1CsggEA05AAKpDWsb92KhRqLbkN6-3rvIAQADAgADeQADOwQ"
 TUTORIAL_COMPRA_VIDEO = "BAACAgEAAxkDAAIBU2nUG0xvB1fwk9zBeqahrJ3LCCuUAAILDQAC92KhRiBGnRbyo7FFOwQ"
 TUTORIAL_SUPORTE_VIDEO = "BAACAgEAAxkDAAIBSmnUGdKYgXu_aWnmm7aIBECOIDlpAAIHDQAC92KhRgE5gG4gd-4KOwQ"
