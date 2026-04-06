@@ -1426,12 +1426,11 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     total_users = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()['c']
     total_stock = conn.execute("SELECT COUNT(*) as c FROM products WHERE sold = 0").fetchone()['c']
     maint_vendas = get_config('maintenance') or '0'
+    maint_suporte = get_config('maintenance_suporte') or '0'
     conn.close()
     
-    maint_suporte = get_config('maintenance_suporte') or '0'
-    
     mv_icon = "⛔" if maint_vendas == '1' else "✅"
-    ms_icon = "⛔" if maint_suporte == '1' else ("❓" if maint_suporte == '?' else "✅")
+    ms_icon = "⛔" if maint_suporte == '1' else "✅"
     
     text = (
         f"⚙️ <b>Menu de Administração</b>\n\n"
@@ -1444,13 +1443,13 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📦 Estoque: <b>{total_stock}</b> logins disponíveis"
     )
     
-    mv_btn = f"🛒 Bot Vendas: {'ON ⛔' if maint_vendas == '1' else 'OFF ✅'}"
-    ms_btn = f"🆘 Bot Suporte: {'ON ⛔' if maint_suporte == '1' else 'OFF ✅'}"
+    mv_btn = f"🛒 Vendas: {'Manutenção ⛔' if maint_vendas == '1' else 'Online ✅'}"
+    ms_btn = f"🆘 Suporte: {'Manutenção ⛔' if maint_suporte == '1' else 'Online ✅'}"
     
     buttons = [
         [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_main")],
-        [InlineKeyboardButton(mv_btn, callback_data="adm_maint_vendas"),
-         InlineKeyboardButton(ms_btn, callback_data="adm_maint_suporte")],
+        [InlineKeyboardButton(mv_btn, callback_data="adm_maint_vendas")],
+        [InlineKeyboardButton(ms_btn, callback_data="adm_maint_suporte")],
         [InlineKeyboardButton("👑 Administradores", callback_data="adm_admins")],
         [InlineKeyboardButton("🛒 Configurar vendas", callback_data="adm_vendas"),
          InlineKeyboardButton("💠 Configurar Pix", callback_data="adm_pix")],
@@ -1492,20 +1491,24 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "adm_maint_suporte":
         current = get_config('maintenance_suporte') or '0'
         new_val = '0' if current == '1' else '1'
-        set_config('maintenance_suporte', new_val)
         
-        # Send command to support bot via Telegram API
-        cmd = "/maint_on" if new_val == '1' else "/maint_off"
+        # Toggle via support web API
+        support_api = get_config('support_api_url') or SUPPORT_API_URL
+        action = "on" if new_val == '1' else "off"
         try:
             async with aiohttp.ClientSession() as session:
-                url = f"https://api.telegram.org/bot{SUPPORT_BOT_TOKEN}/sendMessage"
-                await session.post(url, json={
-                    "chat_id": query.from_user.id,
-                    "text": cmd
-                }, timeout=aiohttp.ClientTimeout(total=5))
+                resp = await session.post(
+                    f"{support_api}/api/maintenance",
+                    json={"action": action, "secret": "lkstore2026"},
+                    timeout=aiohttp.ClientTimeout(total=5)
+                )
+                result = await resp.json()
+                is_on = result.get('maintenance', False)
+                new_val = '1' if is_on else '0'
         except:
             pass
         
+        set_config('maintenance_suporte', new_val)
         status = "ATIVADA 🔧" if new_val == '1' else "DESATIVADA ✅"
         await query.answer(f"🆘 Bot Suporte manutenção: {status}", show_alert=True)
         await admin_panel(update, context)
