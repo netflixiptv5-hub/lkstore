@@ -1248,6 +1248,99 @@ async def resgatar_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🛒 Comprar", callback_data="buy"), InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]])
     )
 
+# /importar - import stock from pasted text or file
+async def importar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id):
+        return
+    
+    # Check if replying to a document
+    if update.message.reply_to_message and update.message.reply_to_message.document:
+        doc = update.message.reply_to_message.document
+        file = await doc.get_file()
+        data = await file.download_as_bytearray()
+        text = data.decode('utf-8')
+    elif update.message.reply_to_message and update.message.reply_to_message.text:
+        text = update.message.reply_to_message.text
+    else:
+        # Check if text after command
+        text = update.message.text.replace('/importar', '', 1).strip()
+    
+    if not text:
+        await update.message.reply_text(
+            "📦 <b>IMPORTAR ESTOQUE</b>\n\n"
+            "Modo 1: Cole o estoque e responda com /importar\n"
+            "Modo 2: Envie um arquivo .txt e responda com /importar\n\n"
+            "Formato por linha:\n"
+            "<code>PRODUTO|PREÇO|email senha</code>",
+            parse_mode=ParseMode.HTML
+        )
+        return
+    
+    conn = get_db()
+    added = 0
+    seen = set()
+    
+    for line in text.split('\n'):
+        line = line.strip()
+        if not line:
+            continue
+        
+        parts = line.split('|')
+        if len(parts) < 3:
+            continue
+        
+        name = parts[0].strip()
+        # Normalize
+        if name == 'DISNEY PADRÃO':
+            name = 'DISNEY PADRAO'
+        
+        try:
+            price = float(parts[1].strip())
+        except:
+            continue
+        
+        creds = parts[2].strip()
+        creds = re.sub(r'✉️\s*Email:\s*', '', creds)
+        creds = creds.strip()
+        if not creds:
+            continue
+        
+        # Dedupe by email
+        email_match = re.match(r'[\w\.\+\-]+@[\w\.\-]+', creds.lower())
+        key = email_match.group(0) if email_match else creds.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        
+        # Extract validity and message from remaining parts
+        validity = "30 DIAS"
+        message = "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀"
+        
+        remaining = '|'.join(parts[3:])
+        val_match = re.search(r'(\d+)\s*DIAS?', remaining)
+        if val_match:
+            validity = f"{val_match.group(1)} DIAS"
+        
+        conn.execute(
+            "INSERT INTO products (name, price, credentials, validity, message, added_by) VALUES (?, ?, ?, ?, ?, ?)",
+            (name, price, creds, validity, message, str(update.effective_user.id))
+        )
+        added += 1
+    
+    conn.commit()
+    
+    # Show summary
+    products = conn.execute(
+        "SELECT name, price, COUNT(*) as qty FROM products WHERE sold = 0 GROUP BY name, price ORDER BY name"
+    ).fetchall()
+    conn.close()
+    
+    text = f"✅ <b>{added} logins importados!</b>\n\n📊 Estoque atual:\n"
+    for p in products:
+        text += f"  📦 {p['name']} - R${p['price']:.0f} → {p['qty']} un\n"
+    
+    await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
 # /admin - show admin panel
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update.effective_user.id):
@@ -1344,6 +1437,7 @@ def main():
     app.add_handler(CommandHandler("setwelcome", setwelcome))
     app.add_handler(CommandHandler("setphoto", setphoto))
     app.add_handler(CommandHandler("spam", spam_command))
+    app.add_handler(CommandHandler("importar", importar))
     
     # Callbacks
     app.add_handler(CallbackQueryHandler(buy_callback, pattern="^buy$"))
@@ -1358,7 +1452,7 @@ def main():
     app.add_handler(CallbackQueryHandler(spam_action_callback, pattern="^spam_"))
     
     # Message handlers
-    app.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO, handle_message))
+    app.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO | filters.Document.ALL, handle_message))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
     logger.info("🚀 LK Store Bot started!")
