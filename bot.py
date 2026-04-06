@@ -11,7 +11,10 @@ import random
 import string
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# Fuso horário de Brasília (UTC-3)
+BRT = timezone(timedelta(hours=-3))
 from io import BytesIO
 
 import mercadopago
@@ -29,6 +32,7 @@ MP_ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN", "APP_USR-2507246895625254-10
 SUPPORT_BOT_TOKEN = os.environ.get("SUPPORT_BOT_TOKEN", "8510312690:AAEz8nzI3PU-_MJJ8iHUkMoQnDjR_UYFgdU")
 ADMIN_IDS = [925542353]
 SUPPORT_BOT = "https://t.me/SUPORTESLKLOGINSSTORE77_BOT?start=suporte"
+WHATSAPP_LINK = "https://wa.me/5516996143454"
 SUPPORT_API_URL = os.environ.get("SUPPORT_API_URL", "https://web-production-1bdc2.up.railway.app")
 DB_PATH = os.environ.get("DB_PATH", "lkstore.db")
 
@@ -122,7 +126,7 @@ def init_db():
     # Default config
     defaults = {
         'welcome_text': '🌟 𝗦𝗘𝗝𝗔 𝗕𝗘𝗠 𝗩𝗜𝗡𝗗𝗢 𝗔 𝗟𝗞 𝗦𝗧𝗢𝗥𝗘 ⭐⭐⭐⭐⭐\n\n🔥 Logins Premium com entrega automática!\n💰 Carregue seu saldo via PIX e compre na hora!',
-        'welcome_photo': 'AgACAgEAAxkDAAOXadPssYTB7O1e8iKvwInbn987KvQAAoENaxv3YqFGIWtpZ-ziTU8BAAMCAAN4AAM7BA',
+        'welcome_photo': 'AgACAgEAAxkDAAIBGmnUE2TpscEZAAFU6n1BleF25jz1JAAClg1rG_dioUZRe0KVpD0PJQEAAwIAA3gAAzsE',
     }
     for k, v in defaults.items():
         conn.execute("INSERT OR IGNORE INTO bot_config (key, value) VALUES (?, ?)", (k, v))
@@ -145,9 +149,12 @@ def is_admin(user_id):
     return int(user_id) in ADMIN_IDS
 
 def ensure_user(telegram_id, username=None, first_name=None):
+    """Returns True if new user, False if existing."""
     conn = get_db()
     user = conn.execute("SELECT * FROM users WHERE telegram_id = ?", (str(telegram_id),)).fetchone()
+    is_new = False
     if not user:
+        is_new = True
         bonus = float(get_config('bonus_registro') or '0')
         conn.execute("INSERT INTO users (telegram_id, username, first_name, balance) VALUES (?, ?, ?, ?)",
                      (str(telegram_id), username, first_name, bonus))
@@ -161,6 +168,7 @@ def ensure_user(telegram_id, username=None, first_name=None):
                      (username, first_name, str(telegram_id)))
         conn.commit()
     conn.close()
+    return is_new
 
 def get_balance(telegram_id):
     conn = get_db()
@@ -189,7 +197,9 @@ def main_menu_keyboard(user_id=None):
         [InlineKeyboardButton("🛒 COMPRAR", callback_data="buy"),
          InlineKeyboardButton("💰 SALDO", callback_data="balance")],
         [InlineKeyboardButton("📋 MEUS PEDIDOS", callback_data="orders"),
-         InlineKeyboardButton("🎁 RESGATAR GIFT", callback_data="gift")],
+         InlineKeyboardButton("📞 DONO", url=WHATSAPP_LINK)],
+        [InlineKeyboardButton("❓ COMO COMPRAR", callback_data="tutorial_compra"),
+         InlineKeyboardButton("❓ COMO USAR SUPORTE", callback_data="tutorial_suporte")],
     ]
     # Suporte só aparece se bot de suporte NÃO está em manutenção
     if maint_suporte != '1':
@@ -202,7 +212,7 @@ def main_menu_keyboard(user_id=None):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    ensure_user(user.id, user.username, user.first_name)
+    is_new = ensure_user(user.id, user.username, user.first_name)
     
     if is_banned(user.id):
         await update.message.reply_text("⛔ Você foi bloqueado. Entre em contato com o suporte.")
@@ -219,6 +229,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if force_username == '1' and not user.username and not is_admin(user.id):
         await update.message.reply_text("⚠️ Você precisa definir um @username no Telegram para usar o bot!")
         return
+    
+    # Send tutorial video for first-time users
+    if is_new and not is_admin(user.id):
+        try:
+            await update.message.reply_video(
+                video=TUTORIAL_COMPRA_VIDEO,
+                caption="🎬 <b>BEM-VINDO À LK STORE!</b>\n\nAssista o tutorial rápido de como comprar:",
+                parse_mode=ParseMode.HTML
+            )
+        except:
+            pass
     
     balance = get_balance(user.id)
     welcome_photo = get_config('welcome_photo')
@@ -272,6 +293,37 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         await safe_edit(query, text, reply_markup=main_menu_keyboard(user.id))
 
+# ===== TUTORIAIS =====
+async def tutorial_compra_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    try:
+        await query.message.delete()
+    except:
+        pass
+    await context.bot.send_video(
+        chat_id=query.message.chat_id,
+        video=TUTORIAL_COMPRA_VIDEO,
+        caption="🎬 <b>COMO COMPRAR NA LK STORE</b>\n\n1️⃣ Escolha o produto\n2️⃣ Pague via PIX\n3️⃣ Receba na hora!",
+        parse_mode=ParseMode.HTML,
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar ao Menu", callback_data="main_menu")]])
+    )
+
+async def tutorial_suporte_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    try:
+        await query.message.delete()
+    except:
+        pass
+    await context.bot.send_video(
+        chat_id=query.message.chat_id,
+        video=TUTORIAL_SUPORTE_VIDEO,
+        caption="🎬 <b>COMO USAR O SUPORTE</b>\n\n1️⃣ Clique em Suporte\n2️⃣ Descreva seu problema\n3️⃣ Aguarde atendimento",
+        parse_mode=ParseMode.HTML,
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar ao Menu", callback_data="main_menu")]])
+    )
+
 # ===== COMPRAR =====
 async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
     """Helper to handle editing messages that might be photo captions or text."""
@@ -289,6 +341,10 @@ async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
             except:
                 pass
             await query.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+
+BUY_PHOTO = "AgACAgEAAxkDAAIBLmnUFD7T_xYOdyqMUQxkjnsiOOkgAAKZDWsb92KhRv9gm8bdV7ghAQADAgADeQADOwQ"
+TUTORIAL_COMPRA_VIDEO = "BAACAgEAAxkDAAIBU2nUG0xvB1fwk9zBeqahrJ3LCCuUAAILDQAC92KhRiBGnRbyo7FFOwQ"
+TUTORIAL_SUPORTE_VIDEO = "BAACAgEAAxkDAAIBSmnUGdKYgXu_aWnmm7aIBECOIDlpAAIHDQAC92KhRgE5gG4gd-4KOwQ"
 
 async def buy_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -317,7 +373,17 @@ async def buy_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     buttons.append([InlineKeyboardButton("🔙 Voltar", callback_data="main_menu")])
     
-    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    # Delete old message and send new one with photo
+    try:
+        await query.message.delete()
+    except:
+        pass
+    await query.message.chat.send_photo(
+        photo=BUY_PHOTO,
+        caption=text,
+        reply_markup=InlineKeyboardMarkup(buttons),
+        parse_mode=ParseMode.HTML
+    )
 
 async def product_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -491,6 +557,21 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text += f"\n💰 Saldo restante: R${new_balance:.2f}"
     
     await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]]))
+    
+    # Notificar admin: compra realizada
+    for admin_id in ADMIN_IDS:
+        try:
+            username = query.from_user.username or "sem username"
+            await context.bot.send_message(admin_id,
+                f"🛒 <b>NOVA COMPRA!</b>\n\n"
+                f"👤 Usuário: <code>{query.from_user.id}</code> (@{username})\n"
+                f"📦 Produto: {product_name}\n"
+                f"🔢 Qtd: {qty}\n"
+                f"💵 Total: R${total:.2f}\n"
+                f"💰 Saldo restante: R${new_balance:.2f}",
+                parse_mode=ParseMode.HTML)
+        except:
+            pass
 
 # ===== SALDO =====
 async def balance_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -547,6 +628,7 @@ async def pix_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def generate_pix(update_or_query, context, amount, user_id, is_callback=False):
     """Generate PIX QR code via Mercado Pago"""
+    chat_id = update_or_query.message.chat_id if is_callback else update_or_query.message.chat_id
     try:
         payment_data = {
             "transaction_amount": float(amount),
@@ -574,6 +656,22 @@ async def generate_pix(update_or_query, context, amount, user_id, is_callback=Fa
             conn.commit()
             conn.close()
             
+            # Notificar admin: PIX gerado
+            for admin_id in ADMIN_IDS:
+                try:
+                    await context.bot.send_message(admin_id,
+                        f"🔔 <b>NOVO PIX GERADO</b>\n\n"
+                        f"👤 Usuário: <code>{user_id}</code>\n"
+                        f"💰 Valor: R${amount:.2f}\n"
+                        f"🆔 ID: <code>{mp_id}</code>",
+                        parse_mode=ParseMode.HTML)
+                except:
+                    pass
+            
+            # Count user cancellations
+            cancel_count = context.bot_data.get(f"cancel_{user_id}", 0)
+            max_cancels = 3
+            
             text = (f"💳 <b>PIX - R${amount:.2f}</b>\n\n"
                     f"📱 Escaneie o QR Code ou copie o código abaixo:\n\n"
                     f"━━━━━━━━━━━━━━━━\n"
@@ -582,59 +680,122 @@ async def generate_pix(update_or_query, context, amount, user_id, is_callback=Fa
                     f"⚡ O saldo será creditado automaticamente após o pagamento!\n"
                     f"⏱ Validade: 30 minutos")
             
+            keyboard = [
+                [InlineKeyboardButton("🔄 Verificar Pagamento", callback_data=f"check_{mp_id}")],
+                [InlineKeyboardButton("❌ Cancelar PIX", callback_data=f"cancelpix_{mp_id}")],
+                [InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]
+            ]
+            
             # Send QR code image
             import base64
             qr_bytes = base64.b64decode(pix_qr)
             
-            if is_callback:
-                await update_or_query.message.reply_photo(
-                    photo=BytesIO(qr_bytes),
-                    caption=text,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("🔄 Verificar Pagamento", callback_data=f"check_{mp_id}")],
-                        [InlineKeyboardButton("🔙 Voltar", callback_data="main_menu")]
-                    ])
-                )
-            else:
-                await update_or_query.message.reply_photo(
-                    photo=BytesIO(qr_bytes),
-                    caption=text,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("🔄 Verificar Pagamento", callback_data=f"check_{mp_id}")],
-                        [InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]
-                    ])
-                )
+            await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=BytesIO(qr_bytes),
+                caption=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
             
             # Start auto-check
-            context.job_queue.run_repeating(
-                check_payment_job,
-                interval=5,
-                first=5,
-                data={"mp_id": mp_id, "user_id": str(user_id), "amount": amount, "chat_id": update_or_query.message.chat_id if is_callback else update_or_query.message.chat_id},
-                name=f"payment_{mp_id}",
-                job_kwargs={"misfire_grace_time": 60}
-            )
-            # Auto cancel after 30 min
-            context.job_queue.run_once(
-                cancel_payment_job, 1800,
-                data={"mp_id": mp_id},
-                name=f"cancel_{mp_id}"
-            )
+            if context.job_queue:
+                context.job_queue.run_repeating(
+                    check_payment_job,
+                    interval=5,
+                    first=5,
+                    data={"mp_id": mp_id, "user_id": str(user_id), "amount": amount, "chat_id": chat_id},
+                    name=f"payment_{mp_id}",
+                    job_kwargs={"misfire_grace_time": 60}
+                )
+                # Auto cancel after 30 min
+                context.job_queue.run_once(
+                    cancel_payment_job, 1800,
+                    data={"mp_id": mp_id},
+                    name=f"cancel_{mp_id}"
+                )
         else:
-            msg = "❌ Erro ao gerar PIX. Tente novamente."
-            if is_callback:
-                await update_or_query.message.reply_text(msg)
-            else:
-                await update_or_query.message.reply_text(msg)
+            logger.error(f"PIX status not pending: {payment.get('status')} - {payment}")
+            await context.bot.send_message(chat_id=chat_id, text="❌ Erro ao gerar PIX. Tente novamente.")
     except Exception as e:
         logger.error(f"PIX error: {e}")
-        msg = "❌ Erro ao gerar PIX. Tente novamente mais tarde."
-        if is_callback:
-            await update_or_query.message.reply_text(msg)
-        else:
-            await update_or_query.message.reply_text(msg)
+        await context.bot.send_message(chat_id=chat_id, text="❌ Erro ao gerar PIX. Tente novamente mais tarde.")
+
+async def cancel_pix_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """User cancels a PIX payment"""
+    query = update.callback_query
+    await query.answer()
+    
+    mp_id = query.data.replace("cancelpix_", "")
+    user_id = query.from_user.id
+    
+    # Count cancellations
+    cancel_key = f"cancel_{user_id}"
+    cancel_count = context.bot_data.get(cancel_key, 0) + 1
+    context.bot_data[cancel_key] = cancel_count
+    max_cancels = 3
+    remaining = max_cancels - cancel_count
+    
+    # Cancel MP payment
+    try:
+        sdk.payment().update(mp_id, {"status": "cancelled"})
+    except:
+        pass
+    
+    # Remove auto-check jobs
+    if context.job_queue:
+        for job in context.job_queue.get_jobs_by_name(f"payment_{mp_id}"):
+            job.schedule_removal()
+        for job in context.job_queue.get_jobs_by_name(f"cancel_{mp_id}"):
+            job.schedule_removal()
+    
+    # Get payment amount from DB
+    conn = get_db()
+    p = conn.execute("SELECT amount FROM payments WHERE mp_payment_id = ?", (mp_id,)).fetchone()
+    pix_amount = p['amount'] if p else 0
+    conn.execute("UPDATE payments SET status = 'cancelled' WHERE mp_payment_id = ?", (mp_id,))
+    conn.commit()
+    conn.close()
+    
+    # Notificar admin: PIX cancelado
+    for admin_id in ADMIN_IDS:
+        try:
+            username = query.from_user.username or "sem username"
+            await context.bot.send_message(admin_id,
+                f"🚫 <b>PIX CANCELADO</b>\n\n"
+                f"👤 Usuário: <code>{user_id}</code> (@{username})\n"
+                f"💵 Valor: R${pix_amount:.2f}\n"
+                f"❌ Cancelamentos: {cancel_count}/{max_cancels}",
+                parse_mode=ParseMode.HTML)
+        except:
+            pass
+    
+    if remaining <= 0:
+        text = ("❌ <b>PIX Cancelado</b>\n\n"
+                "⚠️ <b>ATENÇÃO:</b> Você atingiu o limite de cancelamentos!\n"
+                "🚫 Cancelamentos excessivos podem resultar em <b>bloqueio permanente</b> do seu acesso ao bot.\n\n"
+                "Use com responsabilidade.")
+    else:
+        text = (f"❌ <b>PIX Cancelado</b>\n\n"
+                f"⚠️ Você ainda tem <b>{remaining} cancelamento(s)</b> disponível(is).\n"
+                f"🚫 Cancelamentos excessivos podem resultar em <b>bloqueio permanente</b> do seu acesso ao bot.\n\n"
+                f"Use com responsabilidade.")
+    
+    try:
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]])
+        )
+    except:
+        try:
+            await query.edit_message_text(
+                text=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]])
+            )
+        except:
+            await query.message.reply_text(text=text, parse_mode=ParseMode.HTML)
 
 async def check_payment_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -662,6 +823,17 @@ async def check_payment_callback(update: Update, context: ContextTypes.DEFAULT_T
                     parse_mode=ParseMode.HTML,
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🛒 Comprar", callback_data="buy"), InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]])
                 )
+                # Notificar admin: PIX pago
+                for admin_id in ADMIN_IDS:
+                    try:
+                        await context.bot.send_message(admin_id,
+                            f"💰 <b>PIX PAGO!</b>\n\n"
+                            f"👤 Usuário: <code>{p['telegram_id']}</code>\n"
+                            f"💵 Valor: R${p['amount']:.2f}\n"
+                            f"💎 Novo saldo: R${balance:.2f}",
+                            parse_mode=ParseMode.HTML)
+                    except:
+                        pass
                 # Remove job
                 jobs = context.job_queue.get_jobs_by_name(f"payment_{mp_id}")
                 for job in jobs:
@@ -723,6 +895,17 @@ async def check_payment_job(context: ContextTypes.DEFAULT_TYPE):
                     parse_mode=ParseMode.HTML,
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🛒 Comprar", callback_data="buy"), InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]])
                 )
+                # Notificar admin: PIX pago (auto-check)
+                for admin_id in ADMIN_IDS:
+                    try:
+                        await context.bot.send_message(admin_id,
+                            f"💰 <b>PIX PAGO!</b>\n\n"
+                            f"👤 Usuário: <code>{p['telegram_id']}</code>\n"
+                            f"💵 Valor: R${p['amount']:.2f}\n"
+                            f"💎 Novo saldo: R${balance:.2f}",
+                            parse_mode=ParseMode.HTML)
+                    except:
+                        pass
             else:
                 conn.close()
             
@@ -1209,11 +1392,11 @@ async def handle_spam_times(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = context.user_data.get('spam_text')
     
     scheduled = []
-    now = datetime.now()
+    now = datetime.now(BRT)
     
     for t in times:
         hour, minute = map(int, t.split(':'))
-        scheduled_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        scheduled_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0, tzinfo=BRT)
         
         if scheduled_time <= now:
             continue  # Skip past times
@@ -1238,6 +1421,26 @@ async def handle_spam_times(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     else:
         await update.message.reply_text("❌ Todos os horários já passaram! Use horários futuros.")
+
+async def cancel_spam_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Cancel all scheduled spams"""
+    if not is_admin(update.effective_user.id):
+        return
+    
+    if not context.job_queue:
+        await update.message.reply_text("❌ Nenhum spam agendado.")
+        return
+    
+    jobs = [j for j in context.job_queue.jobs() if j.name.startswith("spam_")]
+    
+    if not jobs:
+        await update.message.reply_text("❌ Nenhum spam agendado.")
+        return
+    
+    for job in jobs:
+        job.schedule_removal()
+    
+    await update.message.reply_text(f"✅ {len(jobs)} spam(s) agendado(s) cancelado(s)!")
 
 async def scheduled_spam_job(context: ContextTypes.DEFAULT_TYPE):
     data = context.job.data
@@ -2313,13 +2516,41 @@ async def rankingpix(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ===== GENERIC MESSAGE HANDLER =====
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text:
-        # Check for spam media
+    if not update.message:
+        return
+    
+    msg = update.message
+    user_id = update.effective_user.id if update.effective_user else 0
+    
+    # Admin sends photo/video → auto spam flow
+    if is_admin(user_id) and (msg.photo or msg.video):
+        if msg.photo:
+            context.user_data['spam_media_type'] = 'photo'
+            context.user_data['spam_media_id'] = msg.photo[-1].file_id
+            context.user_data['spam_text'] = msg.caption or ''
+        elif msg.video:
+            context.user_data['spam_media_type'] = 'video'
+            context.user_data['spam_media_id'] = msg.video.file_id
+            context.user_data['spam_text'] = msg.caption or ''
+        
+        context.user_data['spam_step'] = 'schedule'
+        await msg.reply_text(
+            "✅ Conteúdo recebido!\n\nAgora escolha:",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🚀 Enviar Agora", callback_data="spam_now")],
+                [InlineKeyboardButton("⏰ Programar Horários", callback_data="spam_schedule")],
+                [InlineKeyboardButton("❌ Cancelar", callback_data="spam_cancel")]
+            ])
+        )
+        return
+    
+    if not msg.text:
+        # Check for spam media (from /spam command flow)
         if context.user_data.get('spam_step') == 'media':
             await handle_spam_media(update, context)
         return
     
-    text = update.message.text.strip()
+    text = msg.text.strip()
     
     # Check spam steps
     if context.user_data.get('spam_step') == 'media':
@@ -2386,7 +2617,16 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     init_db()
     
-    app = Application.builder().token(TOKEN).build()
+    app = (
+        Application.builder()
+        .token(TOKEN)
+        .connect_timeout(10)
+        .read_timeout(10)
+        .write_timeout(10)
+        .pool_timeout(5)
+        .concurrent_updates(True)
+        .build()
+    )
     
     # Commands
     app.add_handler(CommandHandler("start", start))
@@ -2412,6 +2652,7 @@ def main():
     app.add_handler(CommandHandler("setwelcome", setwelcome))
     app.add_handler(CommandHandler("setphoto", setphoto))
     app.add_handler(CommandHandler("spam", spam_command))
+    app.add_handler(CommandHandler("cancelarspam", cancel_spam_command))
     app.add_handler(CommandHandler("importar", importar))
     app.add_handler(CommandHandler("enviarspam", enviarspam))
     # Pix config commands
@@ -2445,8 +2686,11 @@ def main():
     app.add_handler(CallbackQueryHandler(balance_callback, pattern="^balance$"))
     app.add_handler(CallbackQueryHandler(pix_callback, pattern="^pix_"))
     app.add_handler(CallbackQueryHandler(check_payment_callback, pattern="^check_"))
+    app.add_handler(CallbackQueryHandler(cancel_pix_callback, pattern="^cancelpix_"))
     app.add_handler(CallbackQueryHandler(orders_callback, pattern="^orders$"))
     app.add_handler(CallbackQueryHandler(gift_callback, pattern="^gift$"))
+    app.add_handler(CallbackQueryHandler(tutorial_compra_callback, pattern="^tutorial_compra$"))
+    app.add_handler(CallbackQueryHandler(tutorial_suporte_callback, pattern="^tutorial_suporte$"))
     app.add_handler(CallbackQueryHandler(menu_callback, pattern="^main_menu$"))
     app.add_handler(CallbackQueryHandler(spam_action_callback, pattern="^spam_"))
     
@@ -2455,7 +2699,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
     logger.info("🚀 LK Store Bot started!")
-    app.run_polling(drop_pending_updates=True)
+    app.run_polling(drop_pending_updates=True, poll_interval=0.5, timeout=10)
 
 if __name__ == "__main__":
     main()
