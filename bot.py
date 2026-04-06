@@ -27,7 +27,7 @@ from telegram.constants import ParseMode
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8701402389:AAGAj33V5dgLJp2JbP8QJUd9hXTSL2f0_TY")
 MP_ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN", "APP_USR-2507246895625254-100915-cba2bb9c86daed78244bcf5748f74642-1505061824")
 ADMIN_IDS = [925542353]
-SUPPORT_BOT = "https://t.me/SUPORTESLKLOGINSSTORE77_BOT"
+SUPPORT_BOT = "https://t.me/SUPORTESLKLOGINSSTORE77_BOT?start=suporte"
 DB_PATH = os.environ.get("DB_PATH", "lkstore.db")
 
 logging.basicConfig(level=logging.INFO)
