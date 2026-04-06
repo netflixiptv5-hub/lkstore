@@ -226,17 +226,43 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if is_banned(query.from_user.id):
-        await query.edit_message_text("⛔ Você foi bloqueado.")
+        await safe_edit(query, "⛔ Você foi bloqueado.")
         return
     
     if query.data == "main_menu":
-        welcome_text = get_config('welcome_text')
-        try:
-            await query.edit_message_text(welcome_text, reply_markup=main_menu_keyboard(), parse_mode=ParseMode.HTML)
-        except:
-            await query.message.reply_text(welcome_text, reply_markup=main_menu_keyboard(), parse_mode=ParseMode.HTML)
+        user = query.from_user
+        balance = get_balance(user.id)
+        text = (
+            f"𝙎𝙀𝙅𝘼 𝘽𝙀𝙈 𝙑𝙄𝙉𝘿𝙊 𝘼 𝙇𝙆 𝙎𝙏𝙊𝙍𝙀  ⭐️⭐️⭐️⭐️⭐️\n\n"
+            f"𝙇𝙀𝙄𝘼 𝘾𝙊𝙈 𝘼𝙏𝙀𝙉𝘾𝘼𝙊  ⚠️\n\n"
+            f"☑️ 𝘼𝙣𝙩𝙚𝙨 𝙙𝙚 𝙖𝙙𝙞𝙘𝙞𝙤𝙣𝙖𝙧 𝙨𝙖𝙡𝙙𝙤 𝙫𝙚𝙧𝙞𝙛𝙞𝙦𝙪𝙚 𝙨𝙚 𝙤 𝙦𝙪𝙚 𝙙𝙚𝙨𝙚𝙟𝙖 𝙘𝙤𝙢𝙥𝙧𝙖𝙧 𝙚𝙨𝙩𝙖 𝙙𝙞𝙨𝙥𝙤𝙣𝙞𝙫𝙚𝙡! 𝙉𝙖𝙤 𝙛𝙖𝙯𝙚𝙢𝙤𝙨 𝙧𝙚𝙚𝙢𝙗𝙤𝙡𝙨𝙤.\n"
+            f"☑️ 𝙎𝙚 𝙖 𝙘𝙤𝙣𝙩𝙖 𝙦𝙪𝙚 𝙫𝙤𝙘𝙚 𝙙𝙚𝙨𝙚𝙟𝙖 𝙣𝙖𝙤 𝙚𝙨𝙩𝙞𝙫𝙚𝙧 𝙙𝙞𝙨𝙥𝙤𝙣𝙞𝙫𝙚𝙡 𝙚𝙣𝙩𝙧𝙚 𝙚𝙢 𝙘𝙤𝙣𝙩𝙖𝙩𝙤!\n"
+            f"☑️ Todos Logins tem a garantia e duração de 30 dias!\n\n"
+            f"🧾 Seu perfil:\n"
+            f"├👤 Id: {user.id}\n"
+            f"├💸 Saldo: R${balance:.2f}\n"
+            f"└🥇 Cliente LK Store"
+        )
+        await safe_edit(query, text, reply_markup=main_menu_keyboard())
 
 # ===== COMPRAR =====
+async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
+    """Helper to handle editing messages that might be photo captions or text."""
+    try:
+        # Try editing as text first
+        await query.edit_message_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+    except Exception:
+        try:
+            # If it's a photo message, try editing caption
+            await query.edit_message_caption(caption=text, reply_markup=reply_markup, parse_mode=parse_mode)
+        except Exception:
+            try:
+                # If caption too long or other error, delete and send new
+                await query.message.delete()
+            except:
+                pass
+            await query.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+
 async def buy_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -249,7 +275,7 @@ async def buy_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     
     if not products:
-        await query.edit_message_text(
+        await safe_edit(query,
             "😔 Nenhum produto disponível no momento.\n\nVolte mais tarde!",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="main_menu")]])
         )
@@ -264,10 +290,7 @@ async def buy_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     buttons.append([InlineKeyboardButton("🔙 Voltar", callback_data="main_menu")])
     
-    try:
-        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
-    except:
-        await query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
+    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
 
 async def product_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -299,12 +322,7 @@ async def product_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['awaiting_qty'] = True
     
-    try:
-        await query.edit_message_text(text, parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="buy")]]))
-    except:
-        await query.message.reply_text(text, parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="buy")]]))
+    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="buy")]]))
 
 async def handle_quantity(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.user_data.get('awaiting_qty'):
@@ -390,7 +408,7 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     balance = get_balance(query.from_user.id)
     if balance < total:
-        await query.edit_message_text("❌ Saldo insuficiente! Carregue com /pix")
+        await safe_edit(query, "❌ Saldo insuficiente! Carregue com /pix")
         return
     
     conn = get_db()
@@ -401,7 +419,7 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if len(items) < qty:
         conn.close()
-        await query.edit_message_text("❌ Estoque esgotou! Tente novamente.")
+        await safe_edit(query, "❌ Estoque esgotou! Tente novamente.")
         return
     
     # Mark as sold and debit balance
@@ -445,12 +463,7 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     new_balance = get_balance(query.from_user.id)
     text += f"\n💰 Saldo restante: R${new_balance:.2f}"
     
-    try:
-        await query.edit_message_text(text, parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]]))
-    except:
-        await query.message.reply_text(text, parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]]))
+    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]]))
 
 # ===== SALDO =====
 async def balance_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -465,8 +478,7 @@ async def balance_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"<code>/pix VALOR</code>\n\n"
             f"Exemplo: <code>/pix 50</code>")
     
-    await query.edit_message_text(text, parse_mode=ParseMode.HTML,
-        reply_markup=InlineKeyboardMarkup([
+    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("💰 Carregar R$10", callback_data="pix_10"),
              InlineKeyboardButton("💰 Carregar R$25", callback_data="pix_25")],
             [InlineKeyboardButton("💰 Carregar R$50", callback_data="pix_50"),
@@ -691,7 +703,7 @@ async def orders_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     
     if not orders:
-        await query.edit_message_text(
+        await safe_edit(query,
             "📋 Nenhum pedido ainda.\n\nFaça sua primeira compra! 🛒",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🛒 Comprar", callback_data="buy")],
@@ -706,8 +718,7 @@ async def orders_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += f"   🔑 <code>{o['credentials']}</code>\n"
         text += f"   📅 {o['created_at']}\n\n"
     
-    await query.edit_message_text(text, parse_mode=ParseMode.HTML,
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="main_menu")]]))
+    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="main_menu")]]))
 
 # ===== GIFT =====
 async def gift_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -716,9 +727,8 @@ async def gift_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['awaiting_gift'] = True
     
-    await query.edit_message_text(
+    await safe_edit(query,
         "🎁 <b>RESGATAR GIFT</b>\n\nDigite o código do gift:",
-        parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="main_menu")]])
     )
 
@@ -1108,7 +1118,7 @@ async def spam_action_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.answer()
     
     if query.data == "spam_now":
-        await query.edit_message_text("🚀 Enviando spam...")
+        await safe_edit(query, "🚀 Enviando spam...")
         sent, failed = await send_spam(context, 
             context.user_data.get('spam_media_type'),
             context.user_data.get('spam_media_id'),
@@ -1119,17 +1129,16 @@ async def spam_action_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     
     elif query.data == "spam_schedule":
         context.user_data['spam_step'] = 'times'
-        await query.edit_message_text(
+        await safe_edit(query,
             "⏰ <b>PROGRAMAR SPAM</b>\n\n"
             "Digite os horários separados por espaço:\n"
             "Exemplo: <code>12:30 14:00 18:30 21:00</code>\n\n"
-            "O spam será enviado hoje nesses horários.",
-            parse_mode=ParseMode.HTML
+            "O spam será enviado hoje nesses horários."
         )
     
     elif query.data == "spam_cancel":
         context.user_data['spam_step'] = None
-        await query.edit_message_text("❌ Spam cancelado.")
+        await safe_edit(query, "❌ Spam cancelado.")
 
 async def handle_spam_times(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('spam_step') != 'times':
