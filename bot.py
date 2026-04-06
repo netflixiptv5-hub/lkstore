@@ -2262,6 +2262,16 @@ async def setsuporte(update: Update, context: ContextTypes.DEFAULT_TYPE):
     SUPPORT_BOT = text
     await update.message.reply_text(f"✅ Link de suporte atualizado: {text}")
 
+async def setsuporteapi(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update.effective_user.id): return
+    if not context.args:
+        current = get_config('support_api_url') or 'Não definido'
+        await update.message.reply_text(f"URL atual: {current}\n\nUse: /setsuporteapi URL\nEx: /setsuporteapi https://trocasdolk-production.up.railway.app")
+        return
+    url = context.args[0].rstrip('/')
+    set_config('support_api_url', url)
+    await update.message.reply_text(f"✅ URL da API de suporte: {url}")
+
 async def linkcanal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update.effective_user.id): return
     if not context.args:
@@ -2414,6 +2424,7 @@ def main():
     app.add_handler(CommandHandler("setmsgcompra", setmsgcompra))
     app.add_handler(CommandHandler("setsuporte", setsuporte))
     app.add_handler(CommandHandler("linkcanal", linkcanal))
+    app.add_handler(CommandHandler("setsuporteapi", setsuporteapi))
     
     # Callbacks
     app.add_handler(CallbackQueryHandler(adm_callback, pattern="^adm_"))
