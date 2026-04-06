@@ -126,10 +126,12 @@ def init_db():
     # Default config
     defaults = {
         'welcome_text': '🌟 𝗦𝗘𝗝𝗔 𝗕𝗘𝗠 𝗩𝗜𝗡𝗗𝗢 𝗔 𝗟𝗞 𝗦𝗧𝗢𝗥𝗘 ⭐⭐⭐⭐⭐\n\n🔥 Logins Premium com entrega automática!\n💰 Carregue seu saldo via PIX e compre na hora!',
-        'welcome_photo': 'AgACAgEAAxkDAAIBGmnUE2TpscEZAAFU6n1BleF25jz1JAAClg1rG_dioUZRe0KVpD0PJQEAAwIAA3gAAzsE',
+        'welcome_photo': 'AgACAgEAAxkDAAIBK2nUFASliWqp0cQhSxMOCuKyA1PZAAKXDWsb92KhRmCeNbGi-p2iAQADAgADeAADOwQ',
     }
     for k, v in defaults.items():
-        conn.execute("INSERT OR IGNORE INTO bot_config (key, value) VALUES (?, ?)", (k, v))
+        existing = conn.execute("SELECT value FROM bot_config WHERE key = ?", (k,)).fetchone()
+        if not existing or not existing[0]:
+            conn.execute("INSERT OR REPLACE INTO bot_config (key, value) VALUES (?, ?)", (k, v))
     conn.commit()
     conn.close()
 
