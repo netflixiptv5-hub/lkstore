@@ -1425,30 +1425,25 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn = get_db()
     total_users = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()['c']
     total_stock = conn.execute("SELECT COUNT(*) as c FROM products WHERE sold = 0").fetchone()['c']
-    maint_vendas = get_config('maintenance') or '0'
     maint_suporte = get_config('maintenance_suporte') or '0'
     conn.close()
     
-    mv_icon = "⛔" if maint_vendas == '1' else "✅"
     ms_icon = "⛔" if maint_suporte == '1' else "✅"
     
     text = (
         f"⚙️ <b>Menu de Administração</b>\n\n"
-        f"🔧 Status dos Bots:\n"
+        f"🔧 Status:\n"
         f"· 🏆 Bot VIP 🏆\n"
-        f"· 🛒 Bot Vendas: {'Manutenção' if maint_vendas == '1' else 'Online'} {mv_icon}\n"
-        f"· 🆘 Bot Suporte: {'Manutenção' if maint_suporte == '1' else 'Online'} {ms_icon}\n\n"
+        f"· 🆘 Suporte: {'Manutenção' if maint_suporte == '1' else 'Online'} {ms_icon}\n\n"
         f"👥 Usuários Cadastrados:\n"
         f"- Total: <b>{total_users}</b>\n\n"
         f"📦 Estoque: <b>{total_stock}</b> logins disponíveis"
     )
     
-    mv_btn = f"🛒 Vendas: {'Manutenção ⛔' if maint_vendas == '1' else 'Online ✅'}"
     ms_btn = f"🆘 Suporte: {'Manutenção ⛔' if maint_suporte == '1' else 'Online ✅'}"
     
     buttons = [
         [InlineKeyboardButton("🔄 Atualizar", callback_data="adm_main")],
-        [InlineKeyboardButton(mv_btn, callback_data="adm_maint_vendas")],
         [InlineKeyboardButton(ms_btn, callback_data="adm_maint_suporte")],
         [InlineKeyboardButton("👑 Administradores", callback_data="adm_admins")],
         [InlineKeyboardButton("🛒 Configurar vendas", callback_data="adm_vendas"),
