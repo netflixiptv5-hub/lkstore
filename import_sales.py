@@ -6,15 +6,15 @@ from datetime import datetime
 
 DATA_DIR = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH", ".")
 DB_PATH = os.path.join(DATA_DIR, "lkstore.db")
-SALES_URL = "https://storage.googleapis.com/runable-templates/cli-uploads%2FjyTUNKTaQ3xTfEXENUeaM9y9QcPvbbL0%2FpXecMKnkekzM0Vsp5Ryn2%2FTodos_logins_vendidos_(2)_rmcx0T.txt"
-MARKER = os.path.join(DATA_DIR, ".sales_imported")
+SALES_URL = "https://storage.googleapis.com/runable-templates/cli-uploads%2FjyTUNKTaQ3xTfEXENUeaM9y9QcPvbbL0%2FoqTlFSCX9dJHKn9SeZdVW%2Fvendas_2026.txt"
+MARKER = os.path.join(DATA_DIR, ".sales_imported_2026")
 
 def run():
     if os.path.exists(MARKER):
-        print("Sales already imported, skipping.")
+        print("Sales 2026 already imported, skipping.")
         return
     
-    print("Downloading sales history...")
+    print("Downloading sales 2026...")
     data = urllib.request.urlopen(SALES_URL).read().decode('utf-8', errors='ignore')
     lines = [l.strip() for l in data.split('\n') if l.strip()]
     print(f"Found {len(lines)} lines")
@@ -65,13 +65,12 @@ def run():
                     (telegram_id, product_name, 0, price, credentials)
                 )
             imported += 1
-        except:
+        except Exception as e:
             errors += 1
     
     conn.commit()
     conn.close()
     
-    # Mark as done
     with open(MARKER, 'w') as f:
         f.write(f"Imported {imported} sales, {errors} errors")
     

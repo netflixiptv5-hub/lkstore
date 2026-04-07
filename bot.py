@@ -2780,4 +2780,10 @@ def main():
     app.run_polling(drop_pending_updates=True, poll_interval=0.5, timeout=10)
 
 if __name__ == "__main__":
+    # Import sales history on first run
+    try:
+        import import_sales
+        import_sales.run()
+    except Exception as e:
+        print(f"Sales import error (non-fatal): {e}")
     main()
