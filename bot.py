@@ -2309,9 +2309,22 @@ async def _send_sales_file(query, items, filename, title):
         await query.answer(f"📭 Nenhuma venda encontrada!", show_alert=True)
         return
     
-    content = "PRODUTO|PREÇO|CREDENCIAIS|COMPRADOR|DATA\n"
+    content = ""
     for i in items:
-        content += f"{i['product_name']}|{i['price']}|{i['credentials']}|{i['telegram_id']}({i['username'] or ''})|{i['created_at']}\n"
+        creds = i['credentials']
+        # Split credentials back to email and senha
+        if ':' in creds:
+            email, senha = creds.split(':', 1)
+        else:
+            email, senha = creds, ''
+        # Format date to DD/MM/YYYY - HH:MM
+        date_str = i['created_at'] or ''
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+            date_str = dt.strftime("%d/%m/%Y - %H:%M")
+        except:
+            pass
+        content += f"{i['product_name']}|{int(i['price'])}|{email}|{senha}|{i['telegram_id']}|{date_str}\n"
     
     buf = BytesIO(content.encode('utf-8'))
     buf.name = filename
@@ -2653,9 +2666,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not items:
             await update.message.reply_text(f"📭 Nenhuma venda de '{product_name}'")
         else:
-            content = "PRODUTO|PREÇO|CREDENCIAIS|COMPRADOR|DATA\n"
+            content = ""
             for i in items:
-                content += f"{i['product_name']}|{i['price']}|{i['credentials']}|{i['telegram_id']}({i['username'] or ''})|{i['created_at']}\n"
+                creds = i['credentials']
+                if ':' in creds:
+                    email, senha = creds.split(':', 1)
+                else:
+                    email, senha = creds, ''
+                date_str = i['created_at'] or ''
+                try:
+                    dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+                    date_str = dt.strftime("%d/%m/%Y - %H:%M")
+                except:
+                    pass
+                content += f"{i['product_name']}|{int(i['price'])}|{email}|{senha}|{i['telegram_id']}|{date_str}\n"
             buf = BytesIO(content.encode('utf-8'))
             buf.name = f"vendidos_{product_name}.txt"
             await update.message.reply_document(document=buf, filename=f"vendidos_{product_name}.txt",
