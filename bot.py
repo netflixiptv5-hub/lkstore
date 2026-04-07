@@ -1543,6 +1543,65 @@ async def resgatar_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🛒 Comprar", callback_data="buy"), InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]])
     )
 
+# /importarvendas - import sales history from txt file
+async def importarvendas(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if str(update.effective_user.id) != ADMIN_ID:
+        return
+    msg = update.message
+    # Check if replying to a file
+    target = msg.reply_to_message if msg.reply_to_message else msg
+    if not target.document:
+        await msg.reply_text("Envie um arquivo .txt com o histórico e responda com /importarvendas")
+        return
+    await msg.reply_text("⏳ Importando histórico de vendas...")
+    file = await target.document.get_file()
+    data = await file.download_as_bytearray()
+    text = data.decode('utf-8', errors='ignore')
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+    conn = get_db()
+    imported = 0
+    errors = 0
+    for line in lines:
+        try:
+            parts = line.split('|')
+            if len(parts) < 4:
+                errors += 1
+                continue
+            product_name = parts[0].strip()
+            price = float(parts[1].strip())
+            email = parts[2].strip()
+            senha = parts[3].strip()
+            credentials = f"{email}:{senha}"
+            telegram_id = parts[4].strip() if len(parts) > 4 else "0"
+            date_str = parts[5].strip() if len(parts) > 5 else None
+            # Parse date
+            created_at = None
+            if date_str:
+                # Try different formats
+                for fmt in ["%d/%m/%Y - %H:%M", "%d/%m/%Y"]:
+                    try:
+                        dt = datetime.strptime(date_str.strip(), fmt)
+                        created_at = dt.strftime("%Y-%m-%d %H:%M:%S")
+                        break
+                    except:
+                        pass
+            if created_at:
+                conn.execute(
+                    "INSERT INTO sales (telegram_id, product_name, product_id, price, credentials, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                    (telegram_id, product_name, 0, price, credentials, created_at)
+                )
+            else:
+                conn.execute(
+                    "INSERT INTO sales (telegram_id, product_name, product_id, price, credentials) VALUES (?, ?, ?, ?, ?)",
+                    (telegram_id, product_name, 0, price, credentials)
+                )
+            imported += 1
+        except Exception as e:
+            errors += 1
+    conn.commit()
+    conn.close()
+    await msg.reply_text(f"✅ Importação concluída!\n\n📦 {imported} vendas importadas\n❌ {errors} erros")
+
 # /importar - import stock from pasted text or file
 async def importar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update.effective_user.id):
@@ -2672,6 +2731,7 @@ def main():
     app.add_handler(CommandHandler("spam", spam_command))
     app.add_handler(CommandHandler("cancelarspam", cancel_spam_command))
     app.add_handler(CommandHandler("importar", importar))
+    app.add_handler(CommandHandler("importarvendas", importarvendas))
     app.add_handler(CommandHandler("enviarspam", enviarspam))
     # Pix config commands
     app.add_handler(CommandHandler("recargaminima", recargaminima))
