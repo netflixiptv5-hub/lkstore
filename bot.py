@@ -360,7 +360,7 @@ async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
             await query.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
 
 WELCOME_PHOTO = "AgACAgEAAxkDAAIBzmnUSLG6DETC-kGyHBSaclWyPCYNAAK_DWsb92KhRkSbE_A23vXlAQADAgADeAADOwQ"
-BUY_PHOTO = "AgACAgEAAxkDAAIBzmnUSLG6DETC-kGyHBSaclWyPCYNAAK_DWsb92KhRkSbE_A23vXlAQADAgADeAADOwQ"
+BUY_PHOTO = "AgACAgEAAxkDAAIB1WnUSWgyrXUGiz17YfiRTRfazZDLAALADWsb92KhRui7kAUgZ8OHAQADAgADeAADOwQ"
 TUTORIAL_COMPRA_VIDEO = "BAACAgEAAxkDAAIBU2nUG0xvB1fwk9zBeqahrJ3LCCuUAAILDQAC92KhRiBGnRbyo7FFOwQ"
 TUTORIAL_SUPORTE_VIDEO = "BAACAgEAAxkDAAIBSmnUGdKYgXu_aWnmm7aIBECOIDlpAAIHDQAC92KhRgE5gG4gd-4KOwQ"
 
