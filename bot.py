@@ -1040,6 +1040,126 @@ async def handle_gift_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ===== ADMIN COMMANDS =====
 
+DEFAULT_MSG = '𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀'
+DEFAULT_VALIDITY = '30 DIAS'
+
+# /add — simplified add logins
+async def add_simple(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Admin sends /add then pastes emails/passwords, bot asks which product"""
+    if not is_admin(update.effective_user.id):
+        return
+    
+    text = update.message.text
+    if text.startswith('/add '):
+        text = text[4:].strip()
+    elif text.strip() == '/add':
+        await update.message.reply_text(
+            "📝 <b>ADICIONAR LOGINS (modo fácil)</b>\n\n"
+            "Cole os logins (um por linha):\n"
+            "<code>/add\n"
+            "email1@hotmail.com senha1\n"
+            "email2@hotmail.com senha2\n"
+            "email3@hotmail.com senha3</code>\n\n"
+            "Separador: espaço, : ou |\n"
+            "Validade: 30 DIAS (automático)\n"
+            "Mensagem: padrão (automático)",
+            parse_mode=ParseMode.HTML
+        )
+        return
+    
+    # Parse credentials - one per line
+    lines = [l.strip() for l in text.strip().split('\n') if l.strip()]
+    if not lines:
+        await update.message.reply_text("❌ Nenhum login encontrado. Cole email senha, um por linha.")
+        return
+    
+    # Store credentials temporarily
+    context.user_data['add_logins'] = lines
+    
+    # Get distinct products from DB to show as buttons
+    conn = get_db()
+    products = conn.execute(
+        "SELECT DISTINCT name, price FROM products ORDER BY name"
+    ).fetchall()
+    conn.close()
+    
+    buttons = []
+    for p in products:
+        buttons.append([InlineKeyboardButton(
+            f"{p['name']} — R${p['price']:.0f}",
+            callback_data=f"addto_{p['name']}_{p['price']}"
+        )])
+    # Option to type new product
+    buttons.append([InlineKeyboardButton("➕ Novo Produto (digitar)", callback_data="addto_new")])
+    
+    await update.message.reply_text(
+        f"📦 <b>{len(lines)} login(s) prontos!</b>\n\n"
+        f"Escolha o produto:",
+        parse_mode=ParseMode.HTML,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+async def add_simple_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle product selection for /add"""
+    query = update.callback_query
+    await query.answer()
+    
+    if not is_admin(query.from_user.id):
+        return
+    
+    logins = context.user_data.get('add_logins', [])
+    if not logins:
+        await safe_edit(query, "❌ Nenhum login pendente. Use /add primeiro.")
+        return
+    
+    data = query.data
+    
+    if data == "addto_new":
+        context.user_data['add_awaiting_product'] = True
+        await safe_edit(query, 
+            "✏️ Digite o nome e preço do novo produto:\n\n"
+            "Formato: <code>NOME DO PRODUTO===PREÇO</code>\n"
+            "Exemplo: <code>TELA EXTRA===10</code>",
+            parse_mode=ParseMode.HTML)
+        return
+    
+    # Parse addto_PRODUCT_PRICE
+    parts = data.replace("addto_", "", 1)
+    # Split by last underscore to get price
+    last_underscore = parts.rfind("_")
+    product_name = parts[:last_underscore]
+    price = float(parts[last_underscore+1:])
+    
+    # Insert all logins
+    added = await _insert_logins(logins, product_name, price, str(query.from_user.id))
+    context.user_data.pop('add_logins', None)
+    
+    await safe_edit(query,
+        f"✅ <b>{added} login(s) adicionados!</b>\n\n"
+        f"📦 Produto: {product_name}\n"
+        f"💵 Preço: R${price:.2f}\n"
+        f"⏱ Validade: {DEFAULT_VALIDITY}\n"
+        f"🔢 Total adicionado: {added}")
+
+async def _insert_logins(logins, product_name, price, added_by):
+    """Insert login credentials into products table"""
+    conn = get_db()
+    added = 0
+    for line in logins:
+        line = line.strip()
+        if not line:
+            continue
+        # Normalize separator: support space, :, |, tab
+        cred = line
+        conn.execute(
+            "INSERT INTO products (name, price, credentials, validity, message, added_by) VALUES (?, ?, ?, ?, ?, ?)",
+            (product_name, price, cred, DEFAULT_VALIDITY, DEFAULT_MSG, added_by)
+        )
+        added += 1
+    conn.commit()
+    conn.close()
+    return added
+
 # /addlogin PRODUTO===CATEGORIA===PRECO===email senha===...===VALIDADE===MSG
 async def addlogin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update.effective_user.id):
@@ -2649,6 +2769,34 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     user_id = update.effective_user.id if update.effective_user else 0
     
+    # Admin define novo produto para /add
+    if is_admin(user_id) and context.user_data.get('add_awaiting_product') and msg.text:
+        context.user_data['add_awaiting_product'] = False
+        parts = msg.text.strip().split('===')
+        if len(parts) != 2:
+            await msg.reply_text("❌ Formato: NOME===PREÇO\nExemplo: TELA EXTRA===10")
+            return
+        product_name = parts[0].strip()
+        try:
+            price = float(parts[1].strip())
+        except:
+            await msg.reply_text("❌ Preço inválido!")
+            return
+        logins = context.user_data.get('add_logins', [])
+        if not logins:
+            await msg.reply_text("❌ Nenhum login pendente.")
+            return
+        added = await _insert_logins(logins, product_name, price, str(user_id))
+        context.user_data.pop('add_logins', None)
+        await msg.reply_text(
+            f"✅ <b>{added} login(s) adicionados!</b>\n\n"
+            f"📦 Produto: {product_name}\n"
+            f"💵 Preço: R${price:.2f}\n"
+            f"⏱ Validade: {DEFAULT_VALIDITY}\n"
+            f"🔢 Total: {added}",
+            parse_mode=ParseMode.HTML)
+        return
+    
     # Admin envia mensagem para usuário (botão "Enviar Mensagem")
     if is_admin(user_id) and context.user_data.get('adminmsg_target'):
         target_id = context.user_data.pop('adminmsg_target')
@@ -2796,6 +2944,8 @@ def main():
     # Admin commands
     app.add_handler(CommandHandler("admin", admin_panel))
     app.add_handler(CommandHandler("adm", admin_panel))
+    app.add_handler(CommandHandler("add", add_simple))
+    app.add_handler(CallbackQueryHandler(add_simple_callback, pattern="^addto_"))
     app.add_handler(CommandHandler("addlogin", addlogin))
     app.add_handler(CommandHandler("addlogintelas", addlogin))
     app.add_handler(CommandHandler("estoque", estoque))
