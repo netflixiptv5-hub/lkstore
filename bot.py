@@ -2810,4 +2810,10 @@ if __name__ == "__main__":
         import_sales.run()
     except Exception as e:
         print(f"Sales import error (non-fatal): {e}")
+    # Import users+balances from old bot
+    try:
+        import import_users
+        import_users.run()
+    except Exception as e:
+        print(f"Users import error (non-fatal): {e}")
     main()
