@@ -576,18 +576,38 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]]))
     
-    # Notificar admin: compra realizada
+    # Notificar admin: compra realizada (espelho completo)
     for admin_id in ADMIN_IDS:
         try:
             username = query.from_user.username or "sem username"
-            await context.bot.send_message(admin_id,
+            # Build credentials list (espelho do que o cliente recebeu)
+            creds_text = ""
+            for i, item in enumerate(delivered, 1):
+                creds = item['credentials'].strip()
+                if qty > 1:
+                    creds_text += f"  {i}. <code>{creds}</code>\n"
+                else:
+                    creds_text += f"  <code>{creds}</code>\n"
+            
+            admin_notif = (
                 f"🛒 <b>NOVA COMPRA!</b>\n\n"
                 f"👤 Usuário: <code>{query.from_user.id}</code> (@{username})\n"
                 f"📦 Produto: {product_name}\n"
                 f"🔢 Qtd: {qty}\n"
                 f"💵 Total: R${total:.2f}\n"
-                f"💰 Saldo restante: R${new_balance:.2f}",
-                parse_mode=ParseMode.HTML)
+                f"💰 Saldo restante: R${new_balance:.2f}\n\n"
+                f"━━━━━━━━━━━━━━━━\n"
+                f"🔑 <b>LOGINS ENTREGUES:</b>\n\n"
+                f"{creds_text}"
+                f"━━━━━━━━━━━━━━━━"
+            )
+            
+            keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton("📩 Enviar Mensagem", callback_data=f"adminmsg_{query.from_user.id}")]
+            ])
+            
+            await context.bot.send_message(admin_id, admin_notif,
+                parse_mode=ParseMode.HTML, reply_markup=keyboard)
         except:
             pass
 
@@ -2605,12 +2625,50 @@ async def rankingpix(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode=ParseMode.HTML)
 
 # ===== GENERIC MESSAGE HANDLER =====
+async def adminmsg_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Admin clica em 'Enviar Mensagem' na notificação de compra"""
+    query = update.callback_query
+    await query.answer()
+    
+    if not is_admin(query.from_user.id):
+        return
+    
+    target_user_id = query.data.replace("adminmsg_", "")
+    context.user_data['adminmsg_target'] = target_user_id
+    
+    await query.message.reply_text(
+        f"📩 <b>Enviar mensagem para o usuário <code>{target_user_id}</code></b>\n\n"
+        f"Digite a mensagem que deseja enviar:",
+        parse_mode=ParseMode.HTML
+    )
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
     
     msg = update.message
     user_id = update.effective_user.id if update.effective_user else 0
+    
+    # Admin envia mensagem para usuário (botão "Enviar Mensagem")
+    if is_admin(user_id) and context.user_data.get('adminmsg_target'):
+        target_id = context.user_data.pop('adminmsg_target')
+        try:
+            if msg.text:
+                await context.bot.send_message(target_id,
+                    f"📩 <b>Mensagem do Suporte LK Store:</b>\n\n{msg.text}",
+                    parse_mode=ParseMode.HTML)
+            elif msg.photo:
+                await context.bot.send_photo(target_id, msg.photo[-1].file_id,
+                    caption=f"📩 <b>Mensagem do Suporte LK Store:</b>\n\n{msg.caption or ''}",
+                    parse_mode=ParseMode.HTML)
+            elif msg.video:
+                await context.bot.send_video(target_id, msg.video.file_id,
+                    caption=f"📩 <b>Mensagem do Suporte LK Store:</b>\n\n{msg.caption or ''}",
+                    parse_mode=ParseMode.HTML)
+            await msg.reply_text(f"✅ Mensagem enviada para <code>{target_id}</code>!", parse_mode=ParseMode.HTML)
+        except Exception as e:
+            await msg.reply_text(f"❌ Erro ao enviar: {e}")
+        return
     
     # Admin sends photo/video → auto spam flow
     if is_admin(user_id) and (msg.photo or msg.video):
@@ -2795,6 +2853,7 @@ def main():
     app.add_handler(CallbackQueryHandler(tutorial_suporte_callback, pattern="^tutorial_suporte$"))
     app.add_handler(CallbackQueryHandler(menu_callback, pattern="^main_menu$"))
     app.add_handler(CallbackQueryHandler(spam_action_callback, pattern="^spam_"))
+    app.add_handler(CallbackQueryHandler(adminmsg_callback, pattern="^adminmsg_"))
     
     # Message handlers
     app.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO | filters.Document.ALL, handle_message))
