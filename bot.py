@@ -1131,26 +1131,56 @@ async def add_simple_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     price = float(parts[last_underscore+1:])
     
     # Insert all logins
-    added = await _insert_logins(logins, product_name, price, str(query.from_user.id))
+    added, dupes = await _insert_logins(logins, product_name, price, str(query.from_user.id))
     context.user_data.pop('add_logins', None)
     
+    dupe_text = f"\n🔄 Duplicatas substituídas: {dupes}" if dupes > 0 else ""
     await safe_edit(query,
         f"✅ <b>{added} login(s) adicionados!</b>\n\n"
         f"📦 Produto: {product_name}\n"
         f"💵 Preço: R${price:.2f}\n"
         f"⏱ Validade: {DEFAULT_VALIDITY}\n"
-        f"🔢 Total adicionado: {added}")
+        f"🔢 Total adicionado: {added}{dupe_text}")
+
+def _extract_email(cred):
+    """Extract email from credential string like 'email@hot.com senha123' or 'email@hot.com:senha123'"""
+    cred = cred.strip()
+    # Try to find email pattern
+    match = re.search(r'[\w\.\-\+]+@[\w\.\-]+\.\w+', cred)
+    return match.group(0).lower() if match else None
+
+def _remove_duplicates(conn, product_name, email):
+    """Remove existing unsold entries with same email in same product. Returns count removed."""
+    if not email:
+        return 0
+    # Find duplicates: same product, same email, not sold
+    existing = conn.execute(
+        "SELECT id, credentials FROM products WHERE name = ? AND sold = 0",
+        (product_name,)
+    ).fetchall()
+    removed = 0
+    for row in existing:
+        existing_email = _extract_email(row['credentials'])
+        if existing_email and existing_email == email:
+            conn.execute("DELETE FROM products WHERE id = ?", (row['id'],))
+            removed += 1
+    return removed
 
 async def _insert_logins(logins, product_name, price, added_by):
-    """Insert login credentials into products table"""
+    """Insert login credentials into products table, removing duplicates in same product"""
     conn = get_db()
     added = 0
+    skipped_dupes = 0
     for line in logins:
         line = line.strip()
         if not line:
             continue
-        # Normalize separator: support space, :, |, tab
         cred = line
+        email = _extract_email(cred)
+        # Remove existing duplicate in same product (unsold only)
+        removed = _remove_duplicates(conn, product_name, email)
+        if removed > 0:
+            skipped_dupes += removed
         conn.execute(
             "INSERT INTO products (name, price, credentials, validity, message, added_by) VALUES (?, ?, ?, ?, ?, ?)",
             (product_name, price, cred, DEFAULT_VALIDITY, DEFAULT_MSG, added_by)
@@ -1158,7 +1188,7 @@ async def _insert_logins(logins, product_name, price, added_by):
         added += 1
     conn.commit()
     conn.close()
-    return added
+    return added, skipped_dupes
 
 # /addlogin PRODUTO===CATEGORIA===PRECO===email senha===...===VALIDADE===MSG
 async def addlogin(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1206,6 +1236,8 @@ async def addlogin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cred_parts = cred_parts[:-1]
     
     added = 0
+    dupes = 0
+    conn = get_db()
     for cred in cred_parts:
         cred = cred.strip()
         if not cred:
@@ -1214,21 +1246,76 @@ async def addlogin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cred = re.sub(r'✉️\s*Email:\s*', '', cred)
         cred = cred.strip()
         if cred:
-            conn = get_db()
+            email = _extract_email(cred)
+            removed = _remove_duplicates(conn, product_name, email)
+            dupes += removed
             conn.execute(
                 "INSERT INTO products (name, price, credentials, validity, message, added_by) VALUES (?, ?, ?, ?, ?, ?)",
                 (product_name, price, cred, validity, message, str(update.effective_user.id))
             )
-            conn.commit()
-            conn.close()
             added += 1
+    conn.commit()
+    conn.close()
     
+    dupe_text = f"\n🔄 Duplicatas substituídas: {dupes}" if dupes > 0 else ""
     await update.message.reply_text(
         f"✅ {added} login(s) adicionado(s)!\n\n"
         f"📦 {product_name}\n"
         f"💲 R${price:.0f}\n"
-        f"⏱ {validity}"
+        f"⏱ {validity}{dupe_text}"
     )
+
+async def limpar_duplicatas(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Remove duplicate emails within the same product (keeps newest)"""
+    if not is_admin(update.effective_user.id):
+        return
+    
+    conn = get_db()
+    # Get all unsold products grouped by name
+    products = conn.execute("SELECT DISTINCT name FROM products WHERE sold = 0").fetchall()
+    
+    total_removed = 0
+    details = []
+    
+    for prod in products:
+        pname = prod['name']
+        items = conn.execute(
+            "SELECT id, credentials FROM products WHERE name = ? AND sold = 0 ORDER BY id DESC",
+            (pname,)
+        ).fetchall()
+        
+        seen_emails = {}
+        to_delete = []
+        
+        for item in items:
+            email = _extract_email(item['credentials'])
+            if not email:
+                continue
+            if email in seen_emails:
+                # This is older (lower id since we ordered DESC), delete it
+                to_delete.append(item['id'])
+            else:
+                seen_emails[email] = item['id']
+        
+        if to_delete:
+            for did in to_delete:
+                conn.execute("DELETE FROM products WHERE id = ?", (did,))
+            total_removed += len(to_delete)
+            details.append(f"📦 {pname}: {len(to_delete)} removidas")
+    
+    conn.commit()
+    conn.close()
+    
+    if total_removed == 0:
+        await update.message.reply_text("✅ Nenhuma duplicata encontrada no estoque!")
+    else:
+        detail_text = "\n".join(details)
+        await update.message.reply_text(
+            f"🧹 <b>LIMPEZA DE DUPLICATAS</b>\n\n"
+            f"🗑 Total removidas: {total_removed}\n\n"
+            f"{detail_text}",
+            parse_mode=ParseMode.HTML
+        )
 
 async def estoque(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update.effective_user.id):
@@ -2786,14 +2873,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not logins:
             await msg.reply_text("❌ Nenhum login pendente.")
             return
-        added = await _insert_logins(logins, product_name, price, str(user_id))
+        added, dupes = await _insert_logins(logins, product_name, price, str(user_id))
         context.user_data.pop('add_logins', None)
+        dupe_text = f"\n🔄 Duplicatas substituídas: {dupes}" if dupes > 0 else ""
         await msg.reply_text(
             f"✅ <b>{added} login(s) adicionados!</b>\n\n"
             f"📦 Produto: {product_name}\n"
             f"💵 Preço: R${price:.2f}\n"
             f"⏱ Validade: {DEFAULT_VALIDITY}\n"
-            f"🔢 Total: {added}",
+            f"🔢 Total: {added}{dupe_text}",
             parse_mode=ParseMode.HTML)
         return
     
@@ -2949,6 +3037,7 @@ def main():
     app.add_handler(CommandHandler("addlogin", addlogin))
     app.add_handler(CommandHandler("addlogintelas", addlogin))
     app.add_handler(CommandHandler("estoque", estoque))
+    app.add_handler(CommandHandler("limparduplicatas", limpar_duplicatas))
     app.add_handler(CommandHandler("removelogin", removelogin))
     app.add_handler(CommandHandler("ban", ban_user))
     app.add_handler(CommandHandler("unban", unban_user))
