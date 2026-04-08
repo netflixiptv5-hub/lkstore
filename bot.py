@@ -3095,7 +3095,7 @@ def send_backup_telegram_vendas(backup_data, trigger="auto"):
             f"Content-Type: application/json\r\n\r\n"
         ).encode("utf-8") + json_bytes + f"\r\n--{boundary}--\r\n".encode("utf-8")
 
-        url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
+        url = f"https://api.telegram.org/bot{SUPPORT_BOT_TOKEN}/sendDocument"
         req = urllib.request.Request(url, data=body)
         req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
         urllib.request.urlopen(req, timeout=30)
