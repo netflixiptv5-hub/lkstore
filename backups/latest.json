@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-08T10:49:03.195080-03:00",
+  "backup_date": "2026-04-08T10:50:37.766904-03:00",
   "tables": {
     "products": [
       {
@@ -18259,7 +18259,7 @@
       },
       {
         "key": "maintenance_suporte",
-        "value": "0"
+        "value": "1"
       }
     ],
     "scheduled_spam": []
