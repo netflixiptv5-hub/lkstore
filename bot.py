@@ -3009,8 +3009,28 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ))
 
 # ===== MAIN =====
+import shutil
+import threading
+
+def auto_backup_db():
+    """Faz backup do DB a cada 10 minutos no mesmo volume."""
+    import time
+    while True:
+        try:
+            time.sleep(600)  # 10 minutos
+            backup_path = os.path.join(DATA_DIR, "lkstore_backup.db")
+            shutil.copy2(DB_PATH, backup_path)
+            logger.info(f"✅ Backup automático salvo em {backup_path}")
+        except Exception as e:
+            logger.error(f"Erro no backup automático: {e}")
+
 def main():
     init_db()
+
+    # Inicia backup automático em background
+    t = threading.Thread(target=auto_backup_db, daemon=True)
+    t.start()
+    logger.info("🔄 Backup automático iniciado (a cada 10 min)")
     
     app = (
         Application.builder()
