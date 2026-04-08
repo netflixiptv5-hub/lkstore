@@ -3184,7 +3184,8 @@ def trigger_backup_async(trigger="venda"):
 
 def auto_backup_db():
     """Faz backup completo a cada 30 minutos (Telegram + GitHub)."""
-    time.sleep(20)  # Wait for bot to start
+    # Espera 30 minutos antes do primeiro backup (evita spam em restart/deploy)
+    time.sleep(1800)
     logger.info("[BACKUP] Sistema de backup iniciado - a cada 30 min + instantâneo em venda/add")
     while True:
         try:
