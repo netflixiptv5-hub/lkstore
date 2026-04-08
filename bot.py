@@ -3154,12 +3154,12 @@ def send_backup_github_vendas(backup_data):
 
 
 def do_backup(trigger="auto"):
-    """Run full backup: export DB -> Telegram + GitHub. Thread-safe, skips if too frequent for instant triggers."""
+    """Run full backup: export DB -> Telegram + GitHub. Thread-safe, skips if too frequent."""
     global _last_backup_time
     with _backup_lock:
         now = time.time()
-        # For instant triggers, skip if last backup was less than 60s ago
-        if trigger != "auto" and (now - _last_backup_time) < 60:
+        # Skip if last backup was less than 5 minutes ago (any trigger)
+        if (now - _last_backup_time) < 300:
             logger.info(f"[BACKUP] Skipped ({trigger}) - last backup was {int(now - _last_backup_time)}s ago")
             return
         _last_backup_time = now
