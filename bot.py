@@ -33,7 +33,7 @@ SUPPORT_BOT_TOKEN = os.environ.get("SUPPORT_BOT_TOKEN", "8510312690:AAEz8nzI3PU-
 ADMIN_IDS = [925542353]
 SUPPORT_BOT = "https://t.me/SUPORTESLKLOGINSSTORE77_BOT?start=suporte"
 WHATSAPP_LINK = "https://wa.me/5516996143454"
-SUPPORT_API_URL = os.environ.get("SUPPORT_API_URL", "https://web-production-1bdc2.up.railway.app")
+SUPPORT_API_URL = os.environ.get("SUPPORT_API_URL", "https://web-production-d061f.up.railway.app")
 DATA_DIR = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH", "/app/data") if os.environ.get("RAILWAY_VOLUME_MOUNT_PATH") else "."
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_PATH = os.environ.get("DB_PATH", os.path.join(DATA_DIR, "lkstore.db"))
