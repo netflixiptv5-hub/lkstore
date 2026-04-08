@@ -548,6 +548,9 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
     
+    # Backup instantâneo - venda realizada
+    trigger_backup_async(f"venda: {qty}x {product_name}")
+    
     # Build delivery message
     validity = delivered[0]['validity'] if delivered[0]['validity'] else '30 DIAS'
     custom_msg = delivered[0]['message'] if delivered[0]['message'] else ''
@@ -1188,6 +1191,10 @@ async def _insert_logins(logins, product_name, price, added_by):
         added += 1
     conn.commit()
     conn.close()
+    
+    # Backup instantâneo - logins adicionados
+    trigger_backup_async(f"add: {added}x {product_name}")
+    
     return added, skipped_dupes
 
 # /addlogin PRODUTO===CATEGORIA===PRECO===email senha===...===VALIDADE===MSG
@@ -1256,6 +1263,9 @@ async def addlogin(update: Update, context: ContextTypes.DEFAULT_TYPE):
             added += 1
     conn.commit()
     conn.close()
+    
+    # Backup instantâneo - login adicionado
+    trigger_backup_async(f"addlogin: {added}x {product_name}")
     
     dupe_text = f"\n🔄 Duplicatas substituídas: {dupes}" if dupes > 0 else ""
     await update.message.reply_text(
@@ -1827,6 +1837,10 @@ async def importarvendas(update: Update, context: ContextTypes.DEFAULT_TYPE):
             errors += 1
     conn.commit()
     conn.close()
+    
+    # Backup instantâneo - importação de vendas
+    trigger_backup_async(f"importarvendas: {imported} vendas")
+    
     await msg.reply_text(f"✅ Importação concluída!\n\n📦 {imported} vendas importadas\n❌ {errors} erros")
 
 # /importar - import stock from pasted text or file
@@ -1909,6 +1923,9 @@ async def importar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         added += 1
     
     conn.commit()
+    
+    # Backup instantâneo - importação
+    trigger_backup_async(f"importar: {added} logins")
     
     # Show summary
     products = conn.execute(
@@ -3011,18 +3028,170 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ===== MAIN =====
 import shutil
 import threading
+import base64
+import urllib.request
 
-def auto_backup_db():
-    """Faz backup do DB a cada 10 minutos no mesmo volume."""
-    import time
-    while True:
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+GITHUB_REPO_VENDAS = os.environ.get("GITHUB_REPO", "netflixiptv5-hub/lkstore")
+
+_last_backup_time = 0
+_backup_lock = threading.Lock()
+
+def export_db_json():
+    """Export all tables from SQLite as JSON."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        tables = ["products", "sales", "users", "transactions", "payments", "gifts", "bot_config", "scheduled_spam"]
+        data = {"backup_date": datetime.now(BRT).isoformat(), "tables": {}}
+        for table in tables:
+            try:
+                rows = conn.execute(f"SELECT * FROM {table}").fetchall()
+                data["tables"][table] = [dict(r) for r in rows]
+            except:
+                data["tables"][table] = []
+        conn.close()
+
+        # Stats
+        data["stats"] = {
+            "estoque_disponivel": len([p for p in data["tables"].get("products", []) if not p.get("sold")]),
+            "estoque_vendido": len([p for p in data["tables"].get("products", []) if p.get("sold")]),
+            "total_vendas": len(data["tables"].get("sales", [])),
+            "total_usuarios": len(data["tables"].get("users", [])),
+            "total_transacoes": len(data["tables"].get("transactions", [])),
+        }
+        return data
+    except Exception as e:
+        logger.error(f"[BACKUP] Erro ao exportar DB: {e}")
+        return None
+
+
+def send_backup_telegram_vendas(backup_data, trigger="auto"):
+    """Send backup JSON file to admin via Telegram."""
+    try:
+        now = datetime.now(BRT).strftime("%Y%m%d_%H%M")
+        filename = f"backup_lkstore_{now}.json"
+        json_bytes = json.dumps(backup_data, indent=2, ensure_ascii=False).encode("utf-8")
+
+        stats = backup_data.get("stats", {})
+        caption = (
+            f"💾 BACKUP LKSTORE {'⚡' if trigger != 'auto' else '🔄'}\n"
+            f"📅 {datetime.now(BRT).strftime('%d/%m/%Y %H:%M')}\n"
+            f"🔹 Trigger: {trigger}\n\n"
+            f"📦 Estoque disponível: {stats.get('estoque_disponivel', 0)}\n"
+            f"🛒 Vendidos: {stats.get('estoque_vendido', 0)}\n"
+            f"💰 Total vendas: {stats.get('total_vendas', 0)}\n"
+            f"👥 Usuários: {stats.get('total_usuarios', 0)}"
+        )
+
+        boundary = "----LKBackupBoundary"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="chat_id"\r\n\r\n{ADMIN_IDS[0]}\r\n'
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="caption"\r\n\r\n{caption}\r\n'
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="document"; filename="{filename}"\r\n'
+            f"Content-Type: application/json\r\n\r\n"
+        ).encode("utf-8") + json_bytes + f"\r\n--{boundary}--\r\n".encode("utf-8")
+
+        url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
+        req = urllib.request.Request(url, data=body)
+        req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
+        urllib.request.urlopen(req, timeout=30)
+        logger.info(f"[BACKUP] Telegram OK ({trigger})")
+        return True
+    except Exception as e:
+        logger.error(f"[BACKUP] Telegram erro: {e}")
+        return False
+
+
+def send_backup_github_vendas(backup_data):
+    """Push backup JSON to GitHub repo."""
+    try:
+        now = datetime.now(BRT).strftime("%Y%m%d_%H%M")
+        filename = f"backups/backup_{now}.json"
+        json_str = json.dumps(backup_data, indent=2, ensure_ascii=False)
+        content_b64 = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
+
+        # Check if latest.json exists to get SHA
+        url_latest = f"https://api.github.com/repos/{GITHUB_REPO_VENDAS}/contents/backups/latest.json"
+        sha_latest = None
         try:
-            time.sleep(600)  # 10 minutos
+            req = urllib.request.Request(url_latest)
+            req.add_header("Authorization", f"token {GITHUB_TOKEN}")
+            req.add_header("Accept", "application/vnd.github.v3+json")
+            resp = urllib.request.urlopen(req, timeout=10)
+            existing = json.loads(resp.read())
+            sha_latest = existing.get("sha")
+        except:
+            pass
+
+        # Upload timestamped backup
+        url_file = f"https://api.github.com/repos/{GITHUB_REPO_VENDAS}/contents/{filename}"
+        payload = {"message": f"Backup LKStore {now}", "content": content_b64}
+        req = urllib.request.Request(url_file, data=json.dumps(payload).encode("utf-8"), method="PUT")
+        req.add_header("Authorization", f"token {GITHUB_TOKEN}")
+        req.add_header("Content-Type", "application/json")
+        req.add_header("Accept", "application/vnd.github.v3+json")
+        urllib.request.urlopen(req, timeout=15)
+
+        # Update latest.json
+        payload_latest = {"message": f"Backup latest {now}", "content": content_b64}
+        if sha_latest:
+            payload_latest["sha"] = sha_latest
+        req2 = urllib.request.Request(url_latest, data=json.dumps(payload_latest).encode("utf-8"), method="PUT")
+        req2.add_header("Authorization", f"token {GITHUB_TOKEN}")
+        req2.add_header("Content-Type", "application/json")
+        req2.add_header("Accept", "application/vnd.github.v3+json")
+        urllib.request.urlopen(req2, timeout=15)
+
+        logger.info(f"[BACKUP] GitHub OK -> {filename}")
+        return True
+    except Exception as e:
+        logger.error(f"[BACKUP] GitHub erro: {e}")
+        return False
+
+
+def do_backup(trigger="auto"):
+    """Run full backup: export DB -> Telegram + GitHub. Thread-safe, skips if too frequent for instant triggers."""
+    global _last_backup_time
+    with _backup_lock:
+        now = time.time()
+        # For instant triggers, skip if last backup was less than 60s ago
+        if trigger != "auto" and (now - _last_backup_time) < 60:
+            logger.info(f"[BACKUP] Skipped ({trigger}) - last backup was {int(now - _last_backup_time)}s ago")
+            return
+        _last_backup_time = now
+
+    backup_data = export_db_json()
+    if backup_data:
+        # Also keep local backup
+        try:
             backup_path = os.path.join(DATA_DIR, "lkstore_backup.db")
             shutil.copy2(DB_PATH, backup_path)
-            logger.info(f"✅ Backup automático salvo em {backup_path}")
+        except:
+            pass
+        send_backup_telegram_vendas(backup_data, trigger)
+        send_backup_github_vendas(backup_data)
+
+
+def trigger_backup_async(trigger="venda"):
+    """Trigger backup in background thread (non-blocking)."""
+    t = threading.Thread(target=do_backup, args=(trigger,), daemon=True)
+    t.start()
+
+
+def auto_backup_db():
+    """Faz backup completo a cada 30 minutos (Telegram + GitHub)."""
+    time.sleep(20)  # Wait for bot to start
+    logger.info("[BACKUP] Sistema de backup iniciado - a cada 30 min + instantâneo em venda/add")
+    while True:
+        try:
+            do_backup("auto")
         except Exception as e:
-            logger.error(f"Erro no backup automático: {e}")
+            logger.error(f"[BACKUP] Erro no backup automático: {e}")
+        time.sleep(1800)  # 30 minutos
 
 def main():
     init_db()
