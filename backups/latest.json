@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-08T19:35:59.246493-03:00",
+  "backup_date": "2026-04-08T19:39:19.700553-03:00",
   "tables": {
     "products": [
       {
@@ -1311,9 +1311,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 01:53:16",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "231597325",
+        "sold_at": "2026-04-08 22:39:19"
       },
       {
         "id": 103,
@@ -14872,6 +14872,15 @@
         "price": 10.0,
         "credentials": "/ADD",
         "created_at": "2026-04-08 22:35:59"
+      },
+      {
+        "id": 1422,
+        "telegram_id": "231597325",
+        "product_name": "TELA EXTRA",
+        "product_id": 102,
+        "price": 10.0,
+        "credentials": "joaopedrorocha13121993@hotmail.com:02022014",
+        "created_at": "2026-04-08 22:39:19"
       }
     ],
     "users": [
@@ -18148,6 +18157,22 @@
         "amount": 10.0,
         "description": "Compra: 1x TELA EXTRA",
         "created_at": "2026-04-08 22:35:59"
+      },
+      {
+        "id": 23,
+        "telegram_id": "231597325",
+        "type": "credit",
+        "amount": 10.0,
+        "description": "Gift: LK0BZGNYJP",
+        "created_at": "2026-04-08 22:39:08"
+      },
+      {
+        "id": 24,
+        "telegram_id": "231597325",
+        "type": "debit",
+        "amount": 10.0,
+        "description": "Compra: 1x TELA EXTRA",
+        "created_at": "2026-04-08 22:39:19"
       }
     ],
     "payments": [
@@ -18281,6 +18306,15 @@
         "redeemed_by": "925542353",
         "redeemed_at": "2026-04-07 03:07:54",
         "created_at": "2026-04-07 03:07:51"
+      },
+      {
+        "id": 2,
+        "code": "LK0BZGNYJP",
+        "amount": 10.0,
+        "created_by": "925542353",
+        "redeemed_by": "231597325",
+        "redeemed_at": "2026-04-08 22:39:08",
+        "created_at": "2026-04-08 22:38:55"
       }
     ],
     "bot_config": [
@@ -18300,10 +18334,10 @@
     "scheduled_spam": []
   },
   "stats": {
-    "estoque_disponivel": 81,
-    "estoque_vendido": 79,
-    "total_vendas": 1421,
+    "estoque_disponivel": 80,
+    "estoque_vendido": 80,
+    "total_vendas": 1422,
     "total_usuarios": 344,
-    "total_transacoes": 22
+    "total_transacoes": 24
   }
 }
