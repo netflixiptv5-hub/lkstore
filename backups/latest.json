@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-08T21:56:42.062874-03:00",
+  "backup_date": "2026-04-08T22:00:03.755760-03:00",
   "tables": {
     "products": [
       {
@@ -2104,6 +2104,45 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-09 00:51:29",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 165,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "/ADD",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-09 01:00:03",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 166,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "leonardomoreira16091991@hotmail.com:108080",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-09 01:00:03",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 167,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "gabrielvasconcelos22011983@hotmail.com:108080",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-09 01:00:03",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -18431,7 +18470,7 @@
     "scheduled_spam": []
   },
   "stats": {
-    "estoque_disponivel": 77,
+    "estoque_disponivel": 80,
     "estoque_vendido": 85,
     "total_vendas": 1427,
     "total_usuarios": 344,
