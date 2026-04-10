@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-09T22:10:20.297420-03:00",
+  "backup_date": "2026-04-09T22:41:15.195903-03:00",
   "tables": {
     "products": [
       {
@@ -2195,6 +2195,32 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-10 01:10:20",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 172,
+        "name": "GLOBO + CANAIS E TELECINE",
+        "price": 23.0,
+        "credentials": "/ADD",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-10 01:10:28",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 173,
+        "name": "GLOBO + CANAIS E TELECINE",
+        "price": 23.0,
+        "credentials": "ck100k2+Bx15@gmail.com:02022013@",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-10 01:10:28",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -18592,7 +18618,7 @@
     "scheduled_spam": []
   },
   "stats": {
-    "estoque_disponivel": 82,
+    "estoque_disponivel": 84,
     "estoque_vendido": 87,
     "total_vendas": 1429,
     "total_usuarios": 344,
