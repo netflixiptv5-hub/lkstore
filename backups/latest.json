@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-10T17:29:32.229843-03:00",
+  "backup_date": "2026-04-10T17:58:36.499287-03:00",
   "tables": {
     "products": [
       {
@@ -2325,6 +2325,19 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-10 20:29:32",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 182,
+        "name": "GLOBO + CANAIS E TELECINE",
+        "price": 23.0,
+        "credentials": "/ADD Spcontas777@cinepremiu.com 02022013",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-10 20:58:36",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -18767,7 +18780,7 @@
     "scheduled_spam": []
   },
   "stats": {
-    "estoque_disponivel": 91,
+    "estoque_disponivel": 92,
     "estoque_vendido": 88,
     "total_vendas": 1430,
     "total_usuarios": 344,
