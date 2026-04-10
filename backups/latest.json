@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-10T08:15:22.066224-03:00",
+  "backup_date": "2026-04-10T08:40:42.724204-03:00",
   "tables": {
     "products": [
       {
@@ -2221,6 +2221,32 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-10 01:10:28",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 174,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "/ADD",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-10 11:40:42",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 175,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "lklog22@cinepremiu.com 02022014",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-10 11:40:42",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -18653,7 +18679,7 @@
     "scheduled_spam": []
   },
   "stats": {
-    "estoque_disponivel": 83,
+    "estoque_disponivel": 85,
     "estoque_vendido": 88,
     "total_vendas": 1430,
     "total_usuarios": 344,
