@@ -1646,66 +1646,110 @@ async def handle_spam_times(update: Update, context: ContextTypes.DEFAULT_TYPE):
     media_id = context.user_data.get('spam_media_id')
     text = context.user_data.get('spam_text')
     
-    scheduled = []
     now = datetime.now(BRT)
+    valid_times = []
     
     for t in times:
         hour, minute = map(int, t.split(':'))
-        scheduled_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0, tzinfo=BRT)
-        
+        scheduled_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         if scheduled_time <= now:
-            continue  # Skip past times
-        
-        delay = (scheduled_time - now).total_seconds()
-        
-        context.job_queue.run_once(
-            scheduled_spam_job,
-            delay,
-            data={"media_type": media_type, "media_id": media_id, "text": text},
-            name=f"spam_{t}"
-        )
-        scheduled.append(t)
+            continue
+        valid_times.append(t)
+    
+    if not valid_times:
+        context.user_data['spam_step'] = None
+        await update.message.reply_text("❌ Todos os horários já passaram! Use horários futuros.")
+        return True
+    
+    # Salvar no banco — o checker periódico vai enviar
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO scheduled_spam (media_type, media_file_id, text, scheduled_times, status) VALUES (?, ?, ?, ?, 'active')",
+        (media_type, media_id, text, json.dumps(valid_times))
+    )
+    conn.commit()
+    conn.close()
     
     context.user_data['spam_step'] = None
     
-    if scheduled:
-        await update.message.reply_text(
-            f"⏰ <b>SPAM PROGRAMADO!</b>\n\n"
-            f"📅 Horários:\n" + "\n".join(f"  ▸ {t}" for t in scheduled),
-            parse_mode=ParseMode.HTML
-        )
-    else:
-        await update.message.reply_text("❌ Todos os horários já passaram! Use horários futuros.")
+    await update.message.reply_text(
+        f"⏰ <b>SPAM PROGRAMADO!</b>\n\n"
+        f"📅 Horários:\n" + "\n".join(f"  ▸ {t}" for t in valid_times) +
+        f"\n\n✅ Salvo no banco! Vai enviar mesmo se o bot reiniciar.",
+        parse_mode=ParseMode.HTML
+    )
 
 async def cancel_spam_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Cancel all scheduled spams"""
     if not is_admin(update.effective_user.id):
         return
     
-    if not context.job_queue:
+    conn = get_db()
+    active = conn.execute("SELECT COUNT(*) as cnt FROM scheduled_spam WHERE status = 'active'").fetchone()
+    if active['cnt'] == 0:
+        conn.close()
         await update.message.reply_text("❌ Nenhum spam agendado.")
         return
     
-    jobs = [j for j in context.job_queue.jobs() if j.name.startswith("spam_")]
+    conn.execute("UPDATE scheduled_spam SET status = 'cancelled' WHERE status = 'active'")
+    conn.commit()
+    conn.close()
     
-    if not jobs:
-        await update.message.reply_text("❌ Nenhum spam agendado.")
-        return
-    
-    for job in jobs:
-        job.schedule_removal()
-    
-    await update.message.reply_text(f"✅ {len(jobs)} spam(s) agendado(s) cancelado(s)!")
+    await update.message.reply_text(f"✅ {active['cnt']} spam(s) agendado(s) cancelado(s)!")
 
-async def scheduled_spam_job(context: ContextTypes.DEFAULT_TYPE):
-    data = context.job.data
-    sent, failed = await send_spam(context, data['media_type'], data['media_id'], data['text'])
-    # Notify admin
-    for admin_id in ADMIN_IDS:
-        try:
-            await context.bot.send_message(admin_id, f"⏰ Spam programado enviado!\n📨 {sent} enviados | ❌ {failed} falhas")
-        except:
-            pass
+async def spam_checker_job(context: ContextTypes.DEFAULT_TYPE):
+    """Roda a cada 30s — verifica se tem spam pra enviar agora"""
+    try:
+        conn = get_db()
+        spams = conn.execute("SELECT * FROM scheduled_spam WHERE status = 'active'").fetchall()
+        now = datetime.now(BRT)
+        current_time = now.strftime("%H:%M")
+        
+        for spam in spams:
+            times_list = json.loads(spam['scheduled_times'])
+            remaining_times = []
+            sent_now = False
+            
+            for t in times_list:
+                h, m = map(int, t.split(':'))
+                scheduled = now.replace(hour=h, minute=m, second=0, microsecond=0)
+                diff = (now - scheduled).total_seconds()
+                
+                # Se tá na janela de envio (0 a 59 segundos depois do horário)
+                if 0 <= diff < 60:
+                    if not sent_now:
+                        sent, failed = await send_spam(
+                            context, spam['media_type'], spam['media_file_id'], spam['text']
+                        )
+                        sent_now = True
+                        for admin_id in ADMIN_IDS:
+                            try:
+                                await context.bot.send_message(
+                                    admin_id,
+                                    f"⏰ Spam das {t} enviado!\n📨 {sent} enviados | ❌ {failed} falhas"
+                                )
+                            except:
+                                pass
+                elif diff < 0:
+                    # Ainda não chegou — manter
+                    remaining_times.append(t)
+            
+            # Atualizar banco
+            if remaining_times:
+                conn.execute(
+                    "UPDATE scheduled_spam SET scheduled_times = ? WHERE id = ?",
+                    (json.dumps(remaining_times), spam['id'])
+                )
+            else:
+                conn.execute(
+                    "UPDATE scheduled_spam SET status = 'done' WHERE id = ?",
+                    (spam['id'],)
+                )
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"Spam checker error: {e}")
 
 async def send_spam(context, media_type, media_id, text):
     conn = get_db()
@@ -3287,6 +3331,15 @@ def main():
     # Message handlers
     app.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO | filters.Document.ALL, handle_message))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    
+    # Spam checker — roda a cada 30s, verifica banco e envia nos horários certos
+    app.job_queue.run_repeating(
+        spam_checker_job,
+        interval=30,
+        first=10,
+        name="spam_checker"
+    )
+    logger.info("⏰ Spam checker iniciado (a cada 30s)")
     
     logger.info("🚀 LK Store Bot started!")
     app.run_polling(drop_pending_updates=True, poll_interval=0.5, timeout=10)
