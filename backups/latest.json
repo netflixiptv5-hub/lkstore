@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-11T12:34:52.374849-03:00",
+  "backup_date": "2026-04-11T13:03:34.227239-03:00",
   "tables": {
     "products": [
       {
@@ -2416,6 +2416,19 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-11 02:12:41",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 189,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "antoniocasagrande25021983@hotmail.com 02020214",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-11 16:03:34",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -19037,7 +19050,7 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 89,
+    "estoque_disponivel": 90,
     "estoque_vendido": 97,
     "total_vendas": 1439,
     "total_usuarios": 344,
