@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-11T19:11:27.841141-03:00",
+  "backup_date": "2026-04-11T19:21:20.237252-03:00",
   "tables": {
     "products": [
       {
@@ -1532,9 +1532,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 01:53:16",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "6859060537",
+        "sold_at": "2026-04-11 22:21:20"
       },
       {
         "id": 120,
@@ -15494,6 +15494,15 @@
         "price": 25.0,
         "credentials": "Yuujiy@outlook.com 080808",
         "created_at": "2026-04-11 21:58:56"
+      },
+      {
+        "id": 1442,
+        "telegram_id": "6859060537",
+        "product_name": "TELA EXTRA",
+        "product_id": 119,
+        "price": 10.0,
+        "credentials": "thiagopereira41350@outlook.com:108080",
+        "created_at": "2026-04-11 22:21:20"
       }
     ],
     "users": [
@@ -18906,6 +18915,22 @@
         "amount": 25.0,
         "description": "Compra: 1x AMAZON + PREMIERE E HBO MAX",
         "created_at": "2026-04-11 21:58:56"
+      },
+      {
+        "id": 40,
+        "telegram_id": "6859060537",
+        "type": "credit",
+        "amount": 10.0,
+        "description": "PIX R$10.00",
+        "created_at": "2026-04-11 22:21:07"
+      },
+      {
+        "id": 41,
+        "telegram_id": "6859060537",
+        "type": "debit",
+        "amount": 10.0,
+        "description": "Compra: 1x TELA EXTRA",
+        "created_at": "2026-04-11 22:21:20"
       }
     ],
     "payments": [
@@ -19108,6 +19133,16 @@
         "pix_qr": "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",
         "pix_code": "00020126550014br.gov.bcb.pix0133mercadopagoempresas99@hotmail.com520400005303986540550.005802BR5916LL202310081326106009Sao Paulo62250521mpqrinter1535314510236304A587",
         "created_at": "2026-04-11 12:56:16"
+      },
+      {
+        "id": 21,
+        "telegram_id": "6859060537",
+        "mp_payment_id": "153615944507",
+        "amount": 10.0,
+        "status": "approved",
+        "pix_qr": "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",
+        "pix_code": "00020126550014br.gov.bcb.pix0133mercadopagoempresas99@hotmail.com520400005303986540510.005802BR5916LL202310081326106009Sao Paulo62250521mpqrinter153615944507630409B6",
+        "created_at": "2026-04-11 22:20:45"
       }
     ],
     "gifts": [
@@ -19175,10 +19210,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 95,
-    "estoque_vendido": 99,
-    "total_vendas": 1441,
+    "estoque_disponivel": 94,
+    "estoque_vendido": 100,
+    "total_vendas": 1442,
     "total_usuarios": 344,
-    "total_transacoes": 39
+    "total_transacoes": 41
   }
 }
