@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-11T18:52:36.746004-03:00",
+  "backup_date": "2026-04-11T18:58:30.989373-03:00",
   "tables": {
     "products": [
       {
@@ -947,9 +947,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-07 20:47:15",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-11 21:58:30"
       },
       {
         "id": 75,
@@ -15437,6 +15437,15 @@
         "price": 10.0,
         "credentials": "murilopereira78242@outlook.com:108080",
         "created_at": "2026-04-11 12:57:29"
+      },
+      {
+        "id": 1440,
+        "telegram_id": "925542353",
+        "product_name": "AMAZON + PREMIERE E HBO MAX",
+        "product_id": 74,
+        "price": 25.0,
+        "credentials": "/ADD",
+        "created_at": "2026-04-11 21:58:30"
       }
     ],
     "users": [
@@ -15445,7 +15454,7 @@
         "telegram_id": "925542353",
         "username": "LoginsPremium2015",
         "first_name": "𝕃𝕜 𝕃𝕠𝕘𝕚𝕟𝕤",
-        "balance": 9352.0,
+        "balance": 9327.0,
         "banned": 0,
         "created_at": "2026-04-06 23:52:43"
       },
@@ -18833,6 +18842,14 @@
         "amount": 50.0,
         "description": "Compra: 5x TELA EXTRA",
         "created_at": "2026-04-11 12:57:29"
+      },
+      {
+        "id": 38,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 25.0,
+        "description": "Compra: 1x AMAZON + PREMIERE E HBO MAX",
+        "created_at": "2026-04-11 21:58:30"
       }
     ],
     "payments": [
@@ -19102,10 +19119,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 94,
-    "estoque_vendido": 97,
-    "total_vendas": 1439,
+    "estoque_disponivel": 93,
+    "estoque_vendido": 98,
+    "total_vendas": 1440,
     "total_usuarios": 344,
-    "total_transacoes": 37
+    "total_transacoes": 38
   }
 }
