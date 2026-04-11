@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-10T21:40:36.202625-03:00",
+  "backup_date": "2026-04-10T22:01:15.877444-03:00",
   "tables": {
     "products": [
       {
@@ -11,9 +11,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-07 00:06:27",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-11 01:01:15"
       },
       {
         "id": 3,
@@ -15279,6 +15279,15 @@
         "price": 10.0,
         "credentials": "bernardoalmeida44705@outlook.com:108080",
         "created_at": "2026-04-10 21:35:15"
+      },
+      {
+        "id": 1434,
+        "telegram_id": "925542353",
+        "product_name": "AMAZON + HBO MAX",
+        "product_id": 2,
+        "price": 18.0,
+        "credentials": "henrymoraes11061979@hotmail.com senha: 368147",
+        "created_at": "2026-04-11 01:01:15"
       }
     ],
     "users": [
@@ -15287,7 +15296,7 @@
         "telegram_id": "925542353",
         "username": "LoginsPremium2015",
         "first_name": "𝕃𝕜 𝕃𝕠𝕘𝕚𝕟𝕤",
-        "balance": 9370.0,
+        "balance": 9352.0,
         "banned": 0,
         "created_at": "2026-04-06 23:52:43"
       },
@@ -18651,6 +18660,14 @@
         "amount": 30.0,
         "description": "Compra: 3x TELA EXTRA",
         "created_at": "2026-04-10 21:35:15"
+      },
+      {
+        "id": 35,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 18.0,
+        "description": "Compra: 1x AMAZON + HBO MAX",
+        "created_at": "2026-04-11 01:01:15"
       }
     ],
     "payments": [
@@ -18872,6 +18889,15 @@
         "redeemed_by": "5222307428",
         "redeemed_at": "2026-04-10 21:34:57",
         "created_at": "2026-04-10 21:33:12"
+      },
+      {
+        "id": 4,
+        "code": "LKLPCBR9QH",
+        "amount": 25.0,
+        "created_by": "925542353",
+        "redeemed_by": null,
+        "redeemed_at": null,
+        "created_at": "2026-04-11 00:44:31"
       }
     ],
     "bot_config": [
@@ -18891,10 +18917,10 @@
     "scheduled_spam": []
   },
   "stats": {
-    "estoque_disponivel": 92,
-    "estoque_vendido": 91,
-    "total_vendas": 1433,
+    "estoque_disponivel": 91,
+    "estoque_vendido": 92,
+    "total_vendas": 1434,
     "total_usuarios": 344,
-    "total_transacoes": 34
+    "total_transacoes": 35
   }
 }
