@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-11T11:32:20.739753-03:00",
+  "backup_date": "2026-04-11T12:03:52.735379-03:00",
   "tables": {
     "products": [
       {
@@ -19030,7 +19030,7 @@
         "media_type": "photo",
         "media_file_id": "AgACAgEAAxkBAAIIAWnaN0n9kPHDUb47Js7JMFUVHofXAALMC2sbSb0BR21EMpvtYePLAQADAgADeQADOwQ",
         "text": "1️⃣0️⃣🔥🔥🔥",
-        "scheduled_times": "[\"11:30\", \"12:30\", \"13:30\", \"14:00\", \"18:30\", \"21:00\"]",
+        "scheduled_times": "[\"12:30\", \"13:30\", \"14:00\", \"18:30\", \"21:00\"]",
         "created_at": "2026-04-11 13:37:35",
         "status": "active"
       }
