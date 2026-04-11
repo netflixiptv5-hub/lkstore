@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-11T18:21:44.273805-03:00",
+  "backup_date": "2026-04-11T18:52:36.746004-03:00",
   "tables": {
     "products": [
       {
@@ -19095,7 +19095,7 @@
         "media_type": "photo",
         "media_file_id": "AgACAgEAAxkBAAIIAWnaN0n9kPHDUb47Js7JMFUVHofXAALMC2sbSb0BR21EMpvtYePLAQADAgADeQADOwQ",
         "text": "1️⃣0️⃣🔥🔥🔥",
-        "scheduled_times": "[\"18:30\", \"21:00\"]",
+        "scheduled_times": "[\"21:00\"]",
         "created_at": "2026-04-11 13:37:35",
         "status": "active"
       }
