@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-12T13:12:30.888808-03:00",
+  "backup_date": "2026-04-12T13:25:17.939304-03:00",
   "tables": {
     "products": [
       {
@@ -1623,9 +1623,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 01:53:16",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "5549231956",
+        "sold_at": "2026-04-12 16:25:17"
       },
       {
         "id": 127,
@@ -15601,6 +15601,15 @@
         "price": 10.0,
         "credentials": "tatianadias28480@outlook.com:108080",
         "created_at": "2026-04-12 11:30:16"
+      },
+      {
+        "id": 1451,
+        "telegram_id": "5549231956",
+        "product_name": "TELA EXTRA",
+        "product_id": 126,
+        "price": 10.0,
+        "credentials": "mateusalmeida501@hotmail.com:cr56567880",
+        "created_at": "2026-04-12 16:25:17"
       }
     ],
     "users": [
@@ -17533,9 +17542,9 @@
       {
         "id": 215,
         "telegram_id": "5549231956",
-        "username": null,
-        "first_name": null,
-        "balance": 10.0,
+        "username": "Schyna89",
+        "first_name": "Schynaider",
+        "balance": 0.0,
         "banned": 0,
         "created_at": "2026-04-07 01:22:51"
       },
@@ -19109,6 +19118,14 @@
         "amount": 30.0,
         "description": "Compra: 3x TELA EXTRA",
         "created_at": "2026-04-12 11:30:16"
+      },
+      {
+        "id": 52,
+        "telegram_id": "5549231956",
+        "type": "debit",
+        "amount": 10.0,
+        "description": "Compra: 1x TELA EXTRA",
+        "created_at": "2026-04-12 16:25:17"
       }
     ],
     "payments": [
@@ -19458,10 +19475,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 88,
-    "estoque_vendido": 108,
-    "total_vendas": 1450,
+    "estoque_disponivel": 87,
+    "estoque_vendido": 109,
+    "total_vendas": 1451,
     "total_usuarios": 344,
-    "total_transacoes": 51
+    "total_transacoes": 52
   }
 }
