@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T13:31:10.533548-03:00",
+  "backup_date": "2026-04-13T13:50:47.901064-03:00",
   "tables": {
     "products": [
       {
@@ -1857,9 +1857,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 01:53:16",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-13 16:50:47"
       },
       {
         "id": 145,
@@ -1870,9 +1870,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 01:53:16",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-13 16:50:47"
       },
       {
         "id": 146,
@@ -1883,9 +1883,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 01:53:16",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-13 16:50:47"
       },
       {
         "id": 147,
@@ -1896,9 +1896,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 01:53:16",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-13 16:50:47"
       },
       {
         "id": 148,
@@ -1909,9 +1909,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 02:38:37",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-13 16:50:47"
       },
       {
         "id": 149,
@@ -15803,6 +15803,51 @@
         "price": 10.0,
         "credentials": "samuelcampos98010@outlook.com:108080",
         "created_at": "2026-04-13 15:59:43"
+      },
+      {
+        "id": 1472,
+        "telegram_id": "925542353",
+        "product_name": "TELA EXTRA",
+        "product_id": 144,
+        "price": 10.0,
+        "credentials": "juliabatista17211@outlook.com:108080",
+        "created_at": "2026-04-13 16:50:47"
+      },
+      {
+        "id": 1473,
+        "telegram_id": "925542353",
+        "product_name": "TELA EXTRA",
+        "product_id": 145,
+        "price": 10.0,
+        "credentials": "josesantos556sp@outlook.com:02022014",
+        "created_at": "2026-04-13 16:50:47"
+      },
+      {
+        "id": 1474,
+        "telegram_id": "925542353",
+        "product_name": "TELA EXTRA",
+        "product_id": 146,
+        "price": 10.0,
+        "credentials": "nataliacarvalho5144@outlook.com:108080",
+        "created_at": "2026-04-13 16:50:47"
+      },
+      {
+        "id": 1475,
+        "telegram_id": "925542353",
+        "product_name": "TELA EXTRA",
+        "product_id": 147,
+        "price": 10.0,
+        "credentials": "gustavoferreira87656@outlook.com:108080",
+        "created_at": "2026-04-13 16:50:47"
+      },
+      {
+        "id": 1476,
+        "telegram_id": "925542353",
+        "product_name": "TELA EXTRA",
+        "product_id": 148,
+        "price": 10.0,
+        "credentials": "/ADD",
+        "created_at": "2026-04-13 16:50:47"
       }
     ],
     "users": [
@@ -15811,7 +15856,7 @@
         "telegram_id": "925542353",
         "username": "LoginsPremium2015",
         "first_name": "𝕃𝕜 𝕃𝕠𝕘𝕚𝕟𝕤",
-        "balance": 9133.0,
+        "balance": 9083.0,
         "banned": 0,
         "created_at": "2026-04-06 23:52:43"
       },
@@ -19367,6 +19412,14 @@
         "amount": 10.0,
         "description": "Compra: 1x TELA EXTRA",
         "created_at": "2026-04-13 15:59:43"
+      },
+      {
+        "id": 59,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 50.0,
+        "description": "Compra: 5x TELA EXTRA",
+        "created_at": "2026-04-13 16:50:47"
       }
     ],
     "payments": [
@@ -19736,10 +19789,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 68,
-    "estoque_vendido": 129,
-    "total_vendas": 1471,
+    "estoque_disponivel": 63,
+    "estoque_vendido": 134,
+    "total_vendas": 1476,
     "total_usuarios": 344,
-    "total_transacoes": 58
+    "total_transacoes": 59
   }
 }
