@@ -1071,10 +1071,32 @@ async def add_simple(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     # Parse credentials - one per line
-    lines = [l.strip() for l in text.strip().split('\n') if l.strip()]
+    # Filter out lines that are commands (/add, /ADD), empty, or don't contain @
+    raw_lines = [l.strip() for l in text.strip().split('\n') if l.strip()]
+    lines = []
+    skipped = 0
+    for l in raw_lines:
+        # Skip command lines and lines without @
+        if l.startswith('/') or '@' not in l:
+            skipped += 1
+            continue
+        # Remove any leading /add or /ADD that got stuck
+        import re
+        l = re.sub(r'^/[Aa][Dd][Dd]\s*', '', l).strip()
+        if l and '@' in l:
+            lines.append(l)
+    
     if not lines:
-        await update.message.reply_text("❌ Nenhum login encontrado. Cole email senha, um por linha.")
+        await update.message.reply_text(
+            "❌ Nenhum login válido encontrado.\n\n"
+            "Cada linha precisa ter um email (com @).\n"
+            "Formato: <code>email@xxx.com senha</code>",
+            parse_mode=ParseMode.HTML
+        )
         return
+    
+    if skipped > 0:
+        logger.info(f"[ADD] Skipped {skipped} invalid lines (no @ or command)")
     
     # Store credentials temporarily
     context.user_data['add_logins'] = lines
@@ -2854,6 +2876,70 @@ async def setsuporte(update: Update, context: ContextTypes.DEFAULT_TYPE):
     SUPPORT_BOT = text
     await update.message.reply_text(f"✅ Link de suporte atualizado: {text}")
 
+async def fixadd_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Admin: fix all products/sales with /add in credentials."""
+    if not is_admin(update.effective_user.id):
+        return
+    
+    conn = get_db()
+    
+    # 1) Products with ONLY "/add" or "/ADD" (no email) — DELETE
+    only_add = conn.execute(
+        "SELECT id, name, credentials, sold FROM products WHERE LOWER(TRIM(credentials)) IN ('/add', '/add ')"
+    ).fetchall()
+    
+    # 2) Products with "/ADD email@xxx" — CLEAN the /ADD prefix
+    like_add = conn.execute(
+        "SELECT id, name, credentials, sold FROM products WHERE (credentials LIKE '/add %' OR credentials LIKE '/ADD %') AND credentials LIKE '%@%'"
+    ).fetchall()
+    
+    # 3) Sales with /add in credentials
+    sales_add = conn.execute(
+        "SELECT id, credentials FROM sales WHERE LOWER(TRIM(credentials)) IN ('/add', '/add ') OR credentials LIKE '/add %' OR credentials LIKE '/ADD %'"
+    ).fetchall()
+    
+    report = f"🔧 <b>FIX /ADD</b>\n\n"
+    
+    # Delete products with only /add
+    deleted = 0
+    for p in only_add:
+        conn.execute("DELETE FROM products WHERE id = ?", (p['id'],))
+        deleted += 1
+    report += f"🗑️ Deletados: <b>{deleted}</b> produtos (só /ADD, sem email)\n"
+    
+    # Clean /ADD prefix from products with email
+    cleaned = 0
+    for p in like_add:
+        old_cred = p['credentials']
+        import re
+        new_cred = re.sub(r'^/[Aa][Dd][Dd]\s+', '', old_cred).strip()
+        # Normalize multiple spaces
+        new_cred = re.sub(r'\s+', ' ', new_cred)
+        conn.execute("UPDATE products SET credentials = ? WHERE id = ?", (new_cred, p['id']))
+        cleaned += 1
+    report += f"✏️ Limpos: <b>{cleaned}</b> produtos (removido /ADD, mantido email)\n"
+    
+    # Clean sales
+    sales_cleaned = 0
+    for s in sales_add:
+        old_cred = s['credentials']
+        if old_cred.strip().lower() in ['/add', '/add ']:
+            new_cred = '(credencial não disponível)'
+        else:
+            new_cred = re.sub(r'^/[Aa][Dd][Dd]\s+', '', old_cred).strip()
+            new_cred = re.sub(r'\s+', ' ', new_cred)
+        conn.execute("UPDATE sales SET credentials = ? WHERE id = ?", (new_cred, s['id']))
+        sales_cleaned += 1
+    report += f"📋 Vendas corrigidas: <b>{sales_cleaned}</b>\n"
+    
+    conn.commit()
+    conn.close()
+    
+    report += f"\n✅ Total: {deleted + cleaned + sales_cleaned} registros corrigidos"
+    await update.message.reply_text(report, parse_mode=ParseMode.HTML)
+    trigger_backup_async("fixadd")
+
+
 async def setsuporteapi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update.effective_user.id): return
     if not context.args:
@@ -3310,6 +3396,7 @@ def main():
     app.add_handler(CommandHandler("setsuporte", setsuporte))
     app.add_handler(CommandHandler("linkcanal", linkcanal))
     app.add_handler(CommandHandler("setsuporteapi", setsuporteapi))
+    app.add_handler(CommandHandler("fixadd", fixadd_cmd))
     
     # Callbacks
     app.add_handler(CallbackQueryHandler(adm_callback, pattern="^adm_"))
