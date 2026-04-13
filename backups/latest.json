@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T16:46:47.621016-03:00",
+  "backup_date": "2026-04-13T16:53:42.136531-03:00",
   "tables": {
     "products": [
       {
@@ -887,19 +887,6 @@
         "sold_at": "2026-04-08 01:51:03"
       },
       {
-        "id": 70,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/add",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-07 20:44:22",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-08 01:51:03"
-      },
-      {
         "id": 71,
         "name": "TELA EXTRA",
         "price": 10.0,
@@ -937,19 +924,6 @@
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-08 01:51:03"
-      },
-      {
-        "id": 74,
-        "name": "AMAZON + PREMIERE E HBO MAX",
-        "price": 25.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-07 20:47:15",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-11 21:58:30"
       },
       {
         "id": 75,
@@ -1017,19 +991,6 @@
         "sold_at": null
       },
       {
-        "id": 80,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-07 20:51:15",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-08 01:51:03"
-      },
-      {
         "id": 81,
         "name": "TELA EXTRA",
         "price": 10.0,
@@ -1038,19 +999,6 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-07 20:51:15",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-08 01:51:03"
-      },
-      {
-        "id": 82,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-07 23:50:26",
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-08 01:51:03"
@@ -1238,19 +1186,6 @@
         "sold_at": "2026-04-08 01:51:03"
       },
       {
-        "id": 97,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 01:35:35",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-08 01:51:03"
-      },
-      {
         "id": 98,
         "name": "TELA EXTRA",
         "price": 10.0,
@@ -1288,19 +1223,6 @@
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-08 01:51:03"
-      },
-      {
-        "id": 101,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 01:53:16",
-        "sold": 1,
-        "sold_to": "231597325",
-        "sold_at": "2026-04-08 22:35:59"
       },
       {
         "id": 102,
@@ -1901,19 +1823,6 @@
         "sold_at": "2026-04-13 16:50:47"
       },
       {
-        "id": 148,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 02:38:37",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 16:50:47"
-      },
-      {
         "id": 149,
         "name": "TELA EXTRA",
         "price": 10.0,
@@ -1935,19 +1844,6 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 02:38:37",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 18:09:40"
-      },
-      {
-        "id": 151,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 02:39:31",
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-13 18:09:40"
@@ -1979,19 +1875,6 @@
         "sold_at": "2026-04-13 18:09:40"
       },
       {
-        "id": 154,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 02:39:50",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 18:09:40"
-      },
-      {
         "id": 155,
         "name": "TELA EXTRA",
         "price": 10.0,
@@ -2000,19 +1883,6 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 02:39:50",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 18:09:40"
-      },
-      {
-        "id": 156,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 02:45:37",
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-13 18:09:40"
@@ -2031,19 +1901,6 @@
         "sold_at": "2026-04-13 18:09:40"
       },
       {
-        "id": 158,
-        "name": "GLOBO + CANAIS E TELECINE",
-        "price": 23.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 02:45:47",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 11:59:45"
-      },
-      {
         "id": 159,
         "name": "GLOBO + CANAIS E TELECINE",
         "price": 23.0,
@@ -2055,32 +1912,6 @@
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-13 11:59:45"
-      },
-      {
-        "id": 160,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-08 12:20:36",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 18:09:40"
-      },
-      {
-        "id": 162,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-09 00:51:29",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 18:09:40"
       },
       {
         "id": 163,
@@ -2104,19 +1935,6 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-09 00:51:29",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 18:10:11"
-      },
-      {
-        "id": 165,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-09 01:00:03",
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-13 18:10:11"
@@ -2148,19 +1966,6 @@
         "sold_at": "2026-04-13 18:10:11"
       },
       {
-        "id": 168,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/add",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-10 01:05:43",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 18:10:32"
-      },
-      {
         "id": 169,
         "name": "TELA EXTRA",
         "price": 10.0,
@@ -2172,19 +1977,6 @@
         "sold": 1,
         "sold_to": "925542353",
         "sold_at": "2026-04-13 18:10:45"
-      },
-      {
-        "id": 170,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-10 01:10:20",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
       },
       {
         "id": 171,
@@ -2200,19 +1992,6 @@
         "sold_at": null
       },
       {
-        "id": 172,
-        "name": "GLOBO + CANAIS E TELECINE",
-        "price": 23.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-10 01:10:28",
-        "sold": 1,
-        "sold_to": "925542353",
-        "sold_at": "2026-04-13 19:26:50"
-      },
-      {
         "id": 173,
         "name": "GLOBO + CANAIS E TELECINE",
         "price": 23.0,
@@ -2226,19 +2005,6 @@
         "sold_at": "2026-04-13 19:27:02"
       },
       {
-        "id": 174,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-10 11:40:42",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
-      },
-      {
         "id": 175,
         "name": "TELA EXTRA",
         "price": 10.0,
@@ -2247,19 +2013,6 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-10 11:40:42",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
-      },
-      {
-        "id": 176,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-10 20:29:32",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -2333,7 +2086,7 @@
         "id": 182,
         "name": "GLOBO + CANAIS E TELECINE",
         "price": 23.0,
-        "credentials": "/ADD Spcontas777@cinepremiu.com 02022013",
+        "credentials": "Spcontas777@cinepremiu.com 02022013",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2346,7 +2099,7 @@
         "id": 183,
         "name": "TELA EXTRA",
         "price": 10.0,
-        "credentials": "/ADD anavitoriamoraes24062007@hotmail.com 020202",
+        "credentials": "anavitoriamoraes24062007@hotmail.com 020202",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2359,7 +2112,7 @@
         "id": 184,
         "name": "TELA EXTRA",
         "price": 10.0,
-        "credentials": "/ADD evelynmacedo10052000@hotmail.com 108080",
+        "credentials": "evelynmacedo10052000@hotmail.com 108080",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2385,7 +2138,7 @@
         "id": 186,
         "name": "TELA EXTRA",
         "price": 10.0,
-        "credentials": "/ADD  luizgustavoandrade13122000@hotmail.com     020202",
+        "credentials": "luizgustavoandrade13122000@hotmail.com 020202",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2398,7 +2151,7 @@
         "id": 187,
         "name": "TELA EXTRA",
         "price": 10.0,
-        "credentials": "/ADD ox21112s+22SS@gmail.com 02022013",
+        "credentials": "ox21112s+22SS@gmail.com 02022013",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2411,7 +2164,7 @@
         "id": 188,
         "name": "GLOBO + CANAIS E TELECINE",
         "price": 23.0,
-        "credentials": "/ADD LKLOG2@CINEPREMIU.COM 02022013",
+        "credentials": "LKLOG2@CINEPREMIU.COM 02022013",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2429,19 +2182,6 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-11 16:03:34",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
-      },
-      {
-        "id": 190,
-        "name": "TELA EXTRA",
-        "price": 10.0,
-        "credentials": "/ADD",
-        "validity": "30 DIAS",
-        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
-        "added_by": "925542353",
-        "added_at": "2026-04-11 19:38:27",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -2476,7 +2216,7 @@
         "id": 193,
         "name": "GLOBO + CANAIS E TELECINE",
         "price": 23.0,
-        "credentials": "/ADD ck100k2+0192@gmail.com 02022013",
+        "credentials": "ck100k2+0192@gmail.com 02022013",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2489,7 +2229,7 @@
         "id": 194,
         "name": "TELA EXTRA",
         "price": 10.0,
-        "credentials": "/ADD annalizsales13081988@hotmail.com 103030",
+        "credentials": "annalizsales13081988@hotmail.com 103030",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2528,7 +2268,7 @@
         "id": 197,
         "name": "GLOBO + CANAIS E TELECINE",
         "price": 23.0,
-        "credentials": "/ADD ck100k2+8542544@gmail.com 02022015",
+        "credentials": "ck100k2+8542544@gmail.com 02022015",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2541,7 +2281,7 @@
         "id": 198,
         "name": "TELA EXTRA",
         "price": 10.0,
-        "credentials": "/ADD alexiamoura31032003@hotmail.com 02022014",
+        "credentials": "alexiamoura31032003@hotmail.com 02022014",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2554,7 +2294,7 @@
         "id": 199,
         "name": "GLOBO+CANAIS+TELECINE+ PREMIERE",
         "price": 30.0,
-        "credentials": "/ADD br4144i@cinepremiu.COM    103030",
+        "credentials": "br4144i@cinepremiu.COM 103030",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -2567,7 +2307,7 @@
         "id": 200,
         "name": "TELA EXTRA",
         "price": 10.0,
-        "credentials": "/ADD isadorafreitas10071989@hotmail.com 103030",
+        "credentials": "isadorafreitas10071989@hotmail.com 103030",
         "validity": "30 DIAS",
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
@@ -15139,7 +14879,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 70,
         "price": 10.0,
-        "credentials": "/add",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-08 01:51:03"
       },
       {
@@ -15175,7 +14915,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 80,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-08 01:51:03"
       },
       {
@@ -15193,7 +14933,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 82,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-08 01:51:03"
       },
       {
@@ -15328,7 +15068,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 97,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-08 01:51:03"
       },
       {
@@ -15364,7 +15104,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 101,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-08 22:35:59"
       },
       {
@@ -15535,7 +15275,7 @@
         "product_name": "AMAZON + PREMIERE E HBO MAX",
         "product_id": 74,
         "price": 25.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-11 21:58:30"
       },
       {
@@ -15706,7 +15446,7 @@
         "product_name": "GLOBO + CANAIS E TELECINE",
         "product_id": 158,
         "price": 23.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 11:59:45"
       },
       {
@@ -15859,7 +15599,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 148,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 16:50:47"
       },
       {
@@ -15886,7 +15626,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 151,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 18:09:40"
       },
       {
@@ -15913,7 +15653,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 154,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 18:09:40"
       },
       {
@@ -15931,7 +15671,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 156,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 18:09:40"
       },
       {
@@ -15949,7 +15689,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 160,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 18:09:40"
       },
       {
@@ -15958,7 +15698,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 162,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 18:09:40"
       },
       {
@@ -15985,7 +15725,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 165,
         "price": 10.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 18:10:11"
       },
       {
@@ -16012,7 +15752,7 @@
         "product_name": "TELA EXTRA",
         "product_id": 168,
         "price": 10.0,
-        "credentials": "/add",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 18:10:32"
       },
       {
@@ -16030,7 +15770,7 @@
         "product_name": "GLOBO + CANAIS E TELECINE",
         "product_id": 172,
         "price": 23.0,
-        "credentials": "/ADD",
+        "credentials": "(credencial não disponível)",
         "created_at": "2026-04-13 19:26:50"
       },
       {
@@ -20038,8 +19778,8 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 44,
-    "estoque_vendido": 154,
+    "estoque_disponivel": 40,
+    "estoque_vendido": 138,
     "total_vendas": 1496,
     "total_usuarios": 344,
     "total_transacoes": 66
