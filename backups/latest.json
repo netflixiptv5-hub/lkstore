@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T08:59:45.184235-03:00",
+  "backup_date": "2026-04-13T09:02:45.310989-03:00",
   "tables": {
     "products": [
       {
@@ -2546,6 +2546,19 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-11 22:26:21",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 199,
+        "name": "GLOBO+CANAIS+TELECINE+ PREMIERE",
+        "price": 30.0,
+        "credentials": "/ADD br4144i@cinepremiu.COM    103030",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-13 12:02:45",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -19590,7 +19603,7 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 78,
+    "estoque_disponivel": 79,
     "estoque_vendido": 118,
     "total_vendas": 1460,
     "total_usuarios": 344,
