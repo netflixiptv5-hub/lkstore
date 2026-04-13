@@ -3227,16 +3227,16 @@ def trigger_backup_async(trigger="venda"):
 
 
 def auto_backup_db():
-    """Faz backup completo a cada 30 minutos (Telegram + GitHub)."""
-    # Espera 30 minutos antes do primeiro backup (evita spam em restart/deploy)
-    time.sleep(1800)
-    logger.info("[BACKUP] Sistema de backup iniciado - a cada 30 min + instantâneo em venda/add")
+    """Faz backup completo 1x por dia (24h) + instantâneo em venda/add."""
+    # Espera 5 minutos antes do primeiro backup (evita spam em restart/deploy)
+    time.sleep(300)
+    logger.info("[BACKUP] Sistema de backup iniciado - 1x por dia (24h) + instantâneo em venda/add")
     while True:
         try:
             do_backup("auto")
         except Exception as e:
             logger.error(f"[BACKUP] Erro no backup automático: {e}")
-        time.sleep(1800)  # 30 minutos
+        time.sleep(86400)  # 24 horas
 
 def main():
     init_db()
