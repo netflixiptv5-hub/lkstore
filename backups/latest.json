@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T20:25:53.279378-03:00",
+  "backup_date": "2026-04-13T20:31:48.975439-03:00",
   "tables": {
     "products": [
       {
@@ -19890,6 +19890,15 @@
         "redeemed_by": null,
         "redeemed_at": null,
         "created_at": "2026-04-11 00:44:31"
+      },
+      {
+        "id": 5,
+        "code": "LKZLI3BTRS",
+        "amount": 10.0,
+        "created_by": "925542353",
+        "redeemed_by": null,
+        "redeemed_at": null,
+        "created_at": "2026-04-13 23:31:20"
       }
     ],
     "bot_config": [
