@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T16:21:15.252474-03:00",
+  "backup_date": "2026-04-13T16:26:50.476623-03:00",
   "tables": {
     "products": [
       {
@@ -2208,9 +2208,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-10 01:10:28",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-13 19:26:50"
       },
       {
         "id": 173,
@@ -16023,6 +16023,15 @@
         "price": 10.0,
         "credentials": "heloisaferreira01091991@outlook.com  103030",
         "created_at": "2026-04-13 18:10:45"
+      },
+      {
+        "id": 1495,
+        "telegram_id": "925542353",
+        "product_name": "GLOBO + CANAIS E TELECINE",
+        "product_id": 172,
+        "price": 23.0,
+        "credentials": "/ADD",
+        "created_at": "2026-04-13 19:26:50"
       }
     ],
     "users": [
@@ -16031,7 +16040,7 @@
         "telegram_id": "925542353",
         "username": "LoginsPremium2015",
         "first_name": "𝕃𝕜 𝕃𝕠𝕘𝕚𝕟𝕤",
-        "balance": 8903.0,
+        "balance": 8880.0,
         "banned": 0,
         "created_at": "2026-04-06 23:52:43"
       },
@@ -16371,8 +16380,8 @@
       {
         "id": 39,
         "telegram_id": "1715190517",
-        "username": null,
-        "first_name": null,
+        "username": "Edy_Esportenet",
+        "first_name": "Lobo",
         "balance": 2.0,
         "banned": 0,
         "created_at": "2026-04-07 01:22:51"
@@ -19635,6 +19644,14 @@
         "amount": 10.0,
         "description": "Compra: 1x TELA EXTRA",
         "created_at": "2026-04-13 18:10:45"
+      },
+      {
+        "id": 65,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 23.0,
+        "description": "Compra: 1x GLOBO + CANAIS E TELECINE",
+        "created_at": "2026-04-13 19:26:50"
       }
     ],
     "payments": [
@@ -20004,10 +20021,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 46,
-    "estoque_vendido": 152,
-    "total_vendas": 1494,
+    "estoque_disponivel": 45,
+    "estoque_vendido": 153,
+    "total_vendas": 1495,
     "total_usuarios": 344,
-    "total_transacoes": 64
+    "total_transacoes": 65
   }
 }
