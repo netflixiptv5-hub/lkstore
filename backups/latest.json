@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T20:31:48.975439-03:00",
+  "backup_date": "2026-04-13T20:37:46.896538-03:00",
   "tables": {
     "products": [
       {
@@ -2039,9 +2039,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-10 20:29:32",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "5222307428",
+        "sold_at": "2026-04-13 23:32:27"
       },
       {
         "id": 179,
@@ -15860,6 +15860,15 @@
         "price": 10.0,
         "credentials": "thiagocardoso44982@outlook.com 108080",
         "created_at": "2026-04-13 20:42:43"
+      },
+      {
+        "id": 1500,
+        "telegram_id": "5222307428",
+        "product_name": "TELA EXTRA",
+        "product_id": 178,
+        "price": 10.0,
+        "credentials": "priscilamoreira47244@outlook.com 108080",
+        "created_at": "2026-04-13 23:32:27"
       }
     ],
     "users": [
@@ -19520,6 +19529,22 @@
         "amount": 20.0,
         "description": "Compra: 2x TELA EXTRA",
         "created_at": "2026-04-13 20:42:43"
+      },
+      {
+        "id": 71,
+        "telegram_id": "5222307428",
+        "type": "credit",
+        "amount": 10.0,
+        "description": "Gift: LKZLI3BTRS",
+        "created_at": "2026-04-13 23:32:14"
+      },
+      {
+        "id": 72,
+        "telegram_id": "5222307428",
+        "type": "debit",
+        "amount": 10.0,
+        "description": "Compra: 1x TELA EXTRA",
+        "created_at": "2026-04-13 23:32:27"
       }
     ],
     "payments": [
@@ -19896,8 +19921,8 @@
         "code": "LKZLI3BTRS",
         "amount": 10.0,
         "created_by": "925542353",
-        "redeemed_by": null,
-        "redeemed_at": null,
+        "redeemed_by": "5222307428",
+        "redeemed_at": "2026-04-13 23:32:14",
         "created_at": "2026-04-13 23:31:20"
       }
     ],
@@ -19928,10 +19953,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 41,
-    "estoque_vendido": 141,
-    "total_vendas": 1499,
+    "estoque_disponivel": 40,
+    "estoque_vendido": 142,
+    "total_vendas": 1500,
     "total_usuarios": 344,
-    "total_transacoes": 70
+    "total_transacoes": 72
   }
 }
