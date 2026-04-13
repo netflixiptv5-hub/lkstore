@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T18:17:13.896091-03:00",
+  "backup_date": "2026-04-13T18:28:13.236296-03:00",
   "tables": {
     "products": [
       {
@@ -2325,6 +2325,19 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-13 21:17:13",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 203,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "GabrielLima34d@outlook.com 108080",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-13 21:17:25",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -19880,7 +19893,7 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 38,
+    "estoque_disponivel": 39,
     "estoque_vendido": 141,
     "total_vendas": 1499,
     "total_usuarios": 344,
