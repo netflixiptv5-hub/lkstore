@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-13T13:50:47.901064-03:00",
+  "backup_date": "2026-04-13T14:22:42.496291-03:00",
   "tables": {
     "products": [
       {
@@ -1922,9 +1922,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-08 02:38:37",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-13 16:51:10"
       },
       {
         "id": 150,
@@ -15848,6 +15848,15 @@
         "price": 10.0,
         "credentials": "/ADD",
         "created_at": "2026-04-13 16:50:47"
+      },
+      {
+        "id": 1477,
+        "telegram_id": "925542353",
+        "product_name": "TELA EXTRA",
+        "product_id": 149,
+        "price": 10.0,
+        "credentials": "rodrigoaparecida06061997@hotmail.com  108080",
+        "created_at": "2026-04-13 16:51:10"
       }
     ],
     "users": [
@@ -15856,7 +15865,7 @@
         "telegram_id": "925542353",
         "username": "LoginsPremium2015",
         "first_name": "𝕃𝕜 𝕃𝕠𝕘𝕚𝕟𝕤",
-        "balance": 9083.0,
+        "balance": 9073.0,
         "banned": 0,
         "created_at": "2026-04-06 23:52:43"
       },
@@ -19420,6 +19429,14 @@
         "amount": 50.0,
         "description": "Compra: 5x TELA EXTRA",
         "created_at": "2026-04-13 16:50:47"
+      },
+      {
+        "id": 60,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 10.0,
+        "description": "Compra: 1x TELA EXTRA",
+        "created_at": "2026-04-13 16:51:10"
       }
     ],
     "payments": [
@@ -19789,10 +19806,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 63,
-    "estoque_vendido": 134,
-    "total_vendas": 1476,
+    "estoque_disponivel": 62,
+    "estoque_vendido": 135,
+    "total_vendas": 1477,
     "total_usuarios": 344,
-    "total_transacoes": 59
+    "total_transacoes": 60
   }
 }
