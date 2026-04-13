@@ -549,7 +549,7 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     
     # Backup instantâneo - venda realizada
-    trigger_backup_async(f"venda: {qty}x {product_name}")
+#        trigger_backup_async(f"venda: {qty}x {product_name}")  # REMOVED - backup only every 1h
     
     # Build delivery message
     validity = delivered[0]['validity'] if delivered[0]['validity'] else '30 DIAS'
@@ -1215,7 +1215,7 @@ async def _insert_logins(logins, product_name, price, added_by):
     conn.close()
     
     # Backup instantâneo - logins adicionados
-    trigger_backup_async(f"add: {added}x {product_name}")
+#        trigger_backup_async(f"add: {added}x {product_name}")  # REMOVED - backup only every 1h
     
     return added, skipped_dupes
 
@@ -1287,7 +1287,7 @@ async def addlogin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     
     # Backup instantâneo - login adicionado
-    trigger_backup_async(f"addlogin: {added}x {product_name}")
+#        trigger_backup_async(f"addlogin: {added}x {product_name}")  # REMOVED - backup only every 1h
     
     dupe_text = f"\n🔄 Duplicatas substituídas: {dupes}" if dupes > 0 else ""
     await update.message.reply_text(
@@ -1905,7 +1905,7 @@ async def importarvendas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     
     # Backup instantâneo - importação de vendas
-    trigger_backup_async(f"importarvendas: {imported} vendas")
+#        trigger_backup_async(f"importarvendas: {imported} vendas")  # REMOVED - backup only every 1h
     
     await msg.reply_text(f"✅ Importação concluída!\n\n📦 {imported} vendas importadas\n❌ {errors} erros")
 
@@ -1991,7 +1991,7 @@ async def importar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     
     # Backup instantâneo - importação
-    trigger_backup_async(f"importar: {added} logins")
+#        trigger_backup_async(f"importar: {added} logins")  # REMOVED - backup only every 1h
     
     # Show summary
     products = conn.execute(
@@ -2937,7 +2937,7 @@ async def fixadd_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     report += f"\n✅ Total: {deleted + cleaned + sales_cleaned} registros corrigidos"
     await update.message.reply_text(report, parse_mode=ParseMode.HTML)
-    trigger_backup_async("fixadd")
+#        trigger_backup_async("fixadd")  # REMOVED - backup only every 1h
 
 
 async def setsuporteapi(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3313,10 +3313,9 @@ def trigger_backup_async(trigger="venda"):
 
 
 def auto_backup_db():
-    """Faz backup completo 1x por dia (24h) + instantâneo em venda/add."""
-    # Espera 10 minutos antes do primeiro backup (evita spam em restart/deploy)
-    time.sleep(600)
-    logger.info("[BACKUP] Sistema de backup iniciado - 1x por dia (24h) + instantâneo em venda/add")
+    """Faz backup automático a cada 24h."""
+    time.sleep(300)  # 5 min after start
+    logger.info("[BACKUP] Sistema de backup iniciado - a cada 24h")
     while True:
         try:
             do_backup("auto")
@@ -3330,7 +3329,7 @@ def main():
     # Inicia backup automático em background
     t = threading.Thread(target=auto_backup_db, daemon=True)
     t.start()
-    logger.info("🔄 Backup automático iniciado (a cada 10 min)")
+    logger.info("🔄 Backup automático iniciado (a cada 24h)")
     
     app = (
         Application.builder()
