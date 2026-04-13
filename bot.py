@@ -3288,8 +3288,8 @@ def do_backup(trigger="auto"):
     global _last_backup_time
     with _backup_lock:
         now = time.time()
-        # Skip if last backup was less than 5 minutes ago (any trigger)
-        if (now - _last_backup_time) < 300:
+        # Skip if last backup was less than 1 hour ago (any trigger)
+        if (now - _last_backup_time) < 3600:
             logger.info(f"[BACKUP] Skipped ({trigger}) - last backup was {int(now - _last_backup_time)}s ago")
             return
         _last_backup_time = now
@@ -3314,8 +3314,8 @@ def trigger_backup_async(trigger="venda"):
 
 def auto_backup_db():
     """Faz backup completo 1x por dia (24h) + instantâneo em venda/add."""
-    # Espera 5 minutos antes do primeiro backup (evita spam em restart/deploy)
-    time.sleep(300)
+    # Espera 10 minutos antes do primeiro backup (evita spam em restart/deploy)
+    time.sleep(600)
     logger.info("[BACKUP] Sistema de backup iniciado - 1x por dia (24h) + instantâneo em venda/add")
     while True:
         try:
