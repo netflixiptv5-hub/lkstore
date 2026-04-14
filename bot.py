@@ -3164,8 +3164,26 @@ import urllib.request
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 GITHUB_REPO_VENDAS = os.environ.get("GITHUB_REPO", "netflixiptv5-hub/lkstore")
 
-_last_backup_time = 0
+_BACKUP_TS_FILE = os.path.join(DATA_DIR, ".last_backup_ts")
 _backup_lock = threading.Lock()
+
+def _load_last_backup_time():
+    """Load last backup timestamp from disk (survives restarts)."""
+    try:
+        with open(_BACKUP_TS_FILE, "r") as f:
+            return float(f.read().strip())
+    except:
+        return 0
+
+def _save_last_backup_time(ts):
+    """Save last backup timestamp to disk."""
+    try:
+        with open(_BACKUP_TS_FILE, "w") as f:
+            f.write(str(ts))
+    except:
+        pass
+
+_last_backup_time = _load_last_backup_time()
 
 def export_db_json():
     """Export all tables from SQLite as JSON."""
@@ -3284,15 +3302,16 @@ def send_backup_github_vendas(backup_data):
 
 
 def do_backup(trigger="auto"):
-    """Run full backup: export DB -> Telegram + GitHub. Thread-safe, skips if too frequent."""
+    """Run full backup: export DB -> Telegram + GitHub. Thread-safe, skips if < 24h since last."""
     global _last_backup_time
     with _backup_lock:
         now = time.time()
-        # Skip if last backup was less than 1 hour ago (any trigger)
-        if (now - _last_backup_time) < 3600:
-            logger.info(f"[BACKUP] Skipped ({trigger}) - last backup was {int(now - _last_backup_time)}s ago")
+        # Skip if last backup was less than 24h ago (survives restarts via file)
+        if (now - _last_backup_time) < 86400:
+            logger.info(f"[BACKUP] Skipped ({trigger}) - last backup was {int((now - _last_backup_time)/60)}min ago (need 24h)")
             return
         _last_backup_time = now
+        _save_last_backup_time(now)
 
     backup_data = export_db_json()
     if backup_data:
