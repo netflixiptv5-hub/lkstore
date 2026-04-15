@@ -2005,6 +2005,44 @@ async def importar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(text, parse_mode=ParseMode.HTML)
 
+LKLOGINS_URL = "https://lklogins-production.up.railway.app"
+
+async def _monitor_lklogins_restart(context, chat_id, message_id):
+    """Background task: polls lklogins every 10s, edits message when back online or after 5min timeout."""
+    # Wait 15s before first check (give Railway time to start redeploying)
+    await asyncio.sleep(15)
+    max_attempts = 30  # 30 x 10s = 5 min max
+    for attempt in range(1, max_attempts + 1):
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(LKLOGINS_URL, timeout=aiohttp.ClientTimeout(total=8)) as resp:
+                    if resp.status == 200:
+                        elapsed = 15 + (attempt * 10)
+                        await context.bot.edit_message_text(
+                            chat_id=chat_id,
+                            message_id=message_id,
+                            text=f"✅ <b>LKLogins voltou online!</b>\n\n⏱ Tempo: {elapsed}s",
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=InlineKeyboardMarkup([
+                                [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
+                            ])
+                        )
+                        return
+        except Exception:
+            pass
+        await asyncio.sleep(10)
+    # Timeout
+    await context.bot.edit_message_text(
+        chat_id=chat_id,
+        message_id=message_id,
+        text="⚠️ <b>LKLogins não respondeu em 5 minutos.</b>\n\nPode estar com problema no deploy.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔄 Tentar novamente", callback_data="adm_restart_lklogins")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
+        ])
+    )
+
 # ===== FULL ADMIN PANEL WITH INLINE MENUS =====
 
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2363,9 +2401,9 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ) as resp:
                     result = await resp.json()
                     if resp.status == 200 and "errors" not in result:
-                        await safe_edit(query, "✅ <b>LKLogins reiniciado com sucesso!</b>\n\nO serviço vai reiniciar em alguns segundos.", reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
-                        ]))
+                        await safe_edit(query, "🔄 <b>LKLogins reiniciando...</b>\n\n⏳ Monitorando — te aviso quando voltar online.", reply_markup=None)
+                        # Monitor in background
+                        asyncio.create_task(_monitor_lklogins_restart(context, query.message.chat_id, query.message.message_id))
                     else:
                         err = json.dumps(result.get("errors", "unknown"), ensure_ascii=False)[:200]
                         await safe_edit(query, f"❌ <b>Erro ao reiniciar:</b>\n<code>{err}</code>", reply_markup=InlineKeyboardMarkup([
