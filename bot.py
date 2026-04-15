@@ -2386,33 +2386,22 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "adm_restart_lklogins":
         await safe_edit(query, "🔄 <b>Reiniciando LKLogins...</b>\n\nAguarde...", reply_markup=None)
         try:
-            railway_token = os.getenv("RAILWAY_API_TOKEN", "3d03ff81-8a11-4e84-9544-c7578c0e42aa")
-            service_id = "7cdd6a92-5407-4c16-9189-5343e4c7b8df"
-            env_id = "87983013-cd57-45dc-84db-b1ca13309982"
-            gql = f'{{"query":"mutation {{ serviceInstanceRedeploy(serviceId: \\"{service_id}\\", environmentId: \\"{env_id}\\") }}"}}'
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    "https://backboard.railway.app/graphql/v2",
-                    headers={
-                        "Authorization": f"Bearer {railway_token}",
-                        "Content-Type": "application/json"
-                    },
-                    data=gql,
-                    timeout=aiohttp.ClientTimeout(total=15)
+                    "https://lklogins-production.up.railway.app/api/self-restart",
+                    headers={"X-Restart-Secret": "lk3401restart", "Content-Type": "application/json"},
+                    timeout=aiohttp.ClientTimeout(total=10)
                 ) as resp:
-                    result = await resp.json()
-                    if resp.status == 200 and "errors" not in result:
+                    if resp.status == 200:
                         await safe_edit(query, "🔄 <b>LKLogins reiniciando...</b>\n\n⏳ Monitorando — te aviso quando voltar online.", reply_markup=None)
-                        # Monitor in background
                         asyncio.create_task(_monitor_lklogins_restart(context, query.message.chat_id, query.message.message_id))
                     else:
-                        err = json.dumps(result.get("errors", "unknown"), ensure_ascii=False)[:200]
-                        await safe_edit(query, f"❌ <b>Erro ao reiniciar:</b>\n<code>{err}</code>", reply_markup=InlineKeyboardMarkup([
+                        await safe_edit(query, f"❌ <b>Erro ao reiniciar:</b> HTTP {resp.status}", reply_markup=InlineKeyboardMarkup([
                             [InlineKeyboardButton("🔄 Tentar novamente", callback_data="adm_restart_lklogins")],
                             [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
                         ]))
         except Exception as e:
-            logger.error(f"Railway restart error: {e}")
+            logger.error(f"LKLogins restart error: {e}")
             await safe_edit(query, f"❌ <b>Erro de conexão:</b>\n<code>{str(e)[:200]}</code>", reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔄 Tentar novamente", callback_data="adm_restart_lklogins")],
                 [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
@@ -2421,33 +2410,24 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "adm_restart_suporte":
         await safe_edit(query, "🔄 <b>Reiniciando Bot de Suporte...</b>\n\nAguarde...", reply_markup=None)
         try:
-            railway_token = os.getenv("RAILWAY_API_TOKEN", "3d03ff81-8a11-4e84-9544-c7578c0e42aa")
-            service_id = "9e2afaf3-45c2-4377-bb2f-eff8402ed9e4"
-            env_id = "5afa5c64-828e-45ba-8205-94c1e254f56a"
-            gql = f'{{"query":"mutation {{ serviceInstanceRedeploy(serviceId: \\"{service_id}\\", environmentId: \\"{env_id}\\") }}"}}'
             async with aiohttp.ClientSession() as session:
+                # Restart the web (Flask) — triggers Railway auto-restart
                 async with session.post(
-                    "https://backboard.railway.app/graphql/v2",
-                    headers={
-                        "Authorization": f"Bearer {railway_token}",
-                        "Content-Type": "application/json"
-                    },
-                    data=gql,
-                    timeout=aiohttp.ClientTimeout(total=15)
+                    "https://web-production-d061f.up.railway.app/api/self-restart",
+                    headers={"X-Restart-Secret": "lk3401restart", "Content-Type": "application/json"},
+                    timeout=aiohttp.ClientTimeout(total=10)
                 ) as resp:
-                    result = await resp.json()
-                    if resp.status == 200 and "errors" not in result:
+                    if resp.status == 200:
                         await safe_edit(query, "✅ <b>Bot de Suporte reiniciado!</b>\n\nVai voltar em ~1 minuto.", reply_markup=InlineKeyboardMarkup([
                             [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
                         ]))
                     else:
-                        err = json.dumps(result.get("errors", "unknown"), ensure_ascii=False)[:200]
-                        await safe_edit(query, f"❌ <b>Erro ao reiniciar:</b>\n<code>{err}</code>", reply_markup=InlineKeyboardMarkup([
+                        await safe_edit(query, f"❌ <b>Erro ao reiniciar:</b> HTTP {resp.status}", reply_markup=InlineKeyboardMarkup([
                             [InlineKeyboardButton("🔄 Tentar novamente", callback_data="adm_restart_suporte")],
                             [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
                         ]))
         except Exception as e:
-            logger.error(f"Railway restart suporte error: {e}")
+            logger.error(f"Suporte restart error: {e}")
             await safe_edit(query, f"❌ <b>Erro de conexão:</b>\n<code>{str(e)[:200]}</code>", reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔄 Tentar novamente", callback_data="adm_restart_suporte")],
                 [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
