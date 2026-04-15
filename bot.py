@@ -2336,12 +2336,48 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton("💬 Alterar textos/fotos", callback_data="adm_textos")],
             [InlineKeyboardButton("🗑 Limpar cache do bot", callback_data="adm_limpar_cache")],
             [InlineKeyboardButton("📊 Estatísticas", callback_data="adm_stats")],
+            [InlineKeyboardButton("🔄 Reiniciar LKLogins", callback_data="adm_restart_lklogins")],
             [InlineKeyboardButton("🔙 Voltar", callback_data="adm_main")]
         ]
         await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
     
     elif data == "adm_testar":
         await query.message.reply_text("🤖 Bot está funcionando normalmente! ✅")
+    
+    elif data == "adm_restart_lklogins":
+        await safe_edit(query, "🔄 <b>Reiniciando LKLogins...</b>\n\nAguarde...", reply_markup=None)
+        try:
+            railway_token = "372b1be1-5334-4b62-890e-9cb4ec5d7f77"
+            service_id = "7cdd6a92-5407-4c16-9189-5343e4c7b8df"
+            env_id = "87983013-cd57-45dc-84db-b1ca13309982"
+            gql = f'{{"query":"mutation {{ serviceInstanceRedeploy(serviceId: \\"{service_id}\\", environmentId: \\"{env_id}\\") }}"}}'
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://backboard.railway.app/graphql/v2",
+                    headers={
+                        "Authorization": f"Bearer {railway_token}",
+                        "Content-Type": "application/json"
+                    },
+                    data=gql,
+                    timeout=aiohttp.ClientTimeout(total=15)
+                ) as resp:
+                    result = await resp.json()
+                    if resp.status == 200 and "errors" not in result:
+                        await safe_edit(query, "✅ <b>LKLogins reiniciado com sucesso!</b>\n\nO serviço vai reiniciar em alguns segundos.", reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
+                        ]))
+                    else:
+                        err = json.dumps(result.get("errors", "unknown"), ensure_ascii=False)[:200]
+                        await safe_edit(query, f"❌ <b>Erro ao reiniciar:</b>\n<code>{err}</code>", reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton("🔄 Tentar novamente", callback_data="adm_restart_lklogins")],
+                            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
+                        ]))
+        except Exception as e:
+            logger.error(f"Railway restart error: {e}")
+            await safe_edit(query, f"❌ <b>Erro de conexão:</b>\n<code>{str(e)[:200]}</code>", reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Tentar novamente", callback_data="adm_restart_lklogins")],
+                [InlineKeyboardButton("🔙 Voltar", callback_data="adm_mais")]
+            ]))
     
     elif data == "adm_limpar_cache":
         await query.answer("✅ Cache limpo!", show_alert=True)
