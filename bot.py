@@ -19,7 +19,7 @@ from io import BytesIO
 
 import mercadopago
 import aiohttp
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, InputMediaVideo
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, InputMediaVideo, LinkPreviewOptions
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
     MessageHandler, ConversationHandler, filters, ContextTypes
@@ -342,11 +342,12 @@ async def tutorial_suporte_callback(update: Update, context: ContextTypes.DEFAUL
     )
 
 # ===== COMPRAR =====
-async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
+async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML, disable_web_page_preview=False):
     """Helper to handle editing messages that might be photo captions or text."""
+    link_preview = LinkPreviewOptions(is_disabled=True) if disable_web_page_preview else None
     try:
         # Try editing as text first
-        await query.edit_message_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+        await query.edit_message_text(text, reply_markup=reply_markup, parse_mode=parse_mode, link_preview_options=link_preview)
     except Exception:
         try:
             # If it's a photo message, try editing caption
@@ -357,7 +358,7 @@ async def safe_edit(query, text, reply_markup=None, parse_mode=ParseMode.HTML):
                 await query.message.delete()
             except:
                 pass
-            await query.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+            await query.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode, link_preview_options=link_preview)
 
 WELCOME_PHOTO = "AgACAgEAAxkDAAIBzmnUSLG6DETC-kGyHBSaclWyPCYNAAK_DWsb92KhRkSbE_A23vXlAQADAgADeAADOwQ"
 BUY_PHOTO = "AgACAgEAAxkDAAIB1WnUSWgyrXUGiz17YfiRTRfazZDLAALADWsb92KhRui7kAUgZ8OHAQADAgADeAADOwQ"
@@ -577,7 +578,17 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     new_balance = get_balance(query.from_user.id)
     text += f"\n💰 Saldo restante: R${new_balance:.2f}"
     
-    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]]))
+    # Mensagem pós-venda — dica de redefinição de senha
+    text += f"\n\n━━━━━━━━━━━━━━━━"
+    text += f"\n🔐 <b>SENHA INCORRETA?</b>"
+    text += f"\n"
+    text += f"\n🔄 Redefina você mesmo no nosso site!"
+    text += f"\n👉 <a href='https://lklogins-production.up.railway.app'>Clique aqui para redefinir</a>"
+    text += f"\n"
+    text += f"\n⚡ Rápido, fácil e automático!"
+    text += f"\n━━━━━━━━━━━━━━━━"
+    
+    await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Menu", callback_data="main_menu")]]), disable_web_page_preview=True)
     
     # Notificar admin: compra realizada (espelho completo)
     for admin_id in ADMIN_IDS:
