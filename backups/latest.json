@@ -1,5 +1,5 @@
 {
-  "backup_date": "2026-04-20T11:17:42.078831-03:00",
+  "backup_date": "2026-04-21T11:24:02.408688-03:00",
   "tables": {
     "products": [
       {
@@ -50,9 +50,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-07 00:06:27",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "1961574770",
+        "sold_at": "2026-04-21 00:12:30"
       },
       {
         "id": 6,
@@ -141,9 +141,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-07 00:06:27",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-20 20:35:31"
       },
       {
         "id": 13,
@@ -414,9 +414,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-07 00:06:27",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-20 22:49:07"
       },
       {
         "id": 34,
@@ -2091,9 +2091,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-10 20:58:36",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "925542353",
+        "sold_at": "2026-04-21 12:38:59"
       },
       {
         "id": 183,
@@ -3755,9 +3755,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-18 14:02:58",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "1539114757",
+        "sold_at": "2026-04-20 21:21:43"
       },
       {
         "id": 313,
@@ -3768,9 +3768,9 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-18 14:02:58",
-        "sold": 0,
-        "sold_to": null,
-        "sold_at": null
+        "sold": 1,
+        "sold_to": "1832536213",
+        "sold_at": "2026-04-20 23:04:15"
       },
       {
         "id": 314,
@@ -4561,6 +4561,71 @@
         "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
         "added_by": "925542353",
         "added_at": "2026-04-19 00:49:20",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 375,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "aylasouza28091978@hotmail.com 881515",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-21 00:37:19",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 376,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "Rio2635k@hotmail.com 114949",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-21 00:37:19",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 377,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "julianamoura32459@outlook.com 108080",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-21 00:37:19",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 378,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "erickviana12012008@hotmail.com   02022013",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-21 00:37:19",
+        "sold": 0,
+        "sold_to": null,
+        "sold_at": null
+      },
+      {
+        "id": 379,
+        "name": "TELA EXTRA",
+        "price": 10.0,
+        "credentials": "isisfarias08041977@hotmail.com 02022013",
+        "validity": "30 DIAS",
+        "message": "𝑁𝐴̃𝑂 𝑆𝐸 𝑃𝑅𝐸𝑂𝐶𝑈𝑃𝐸,𝐴𝑂 𝑉𝐸𝑁𝐶𝐸𝑅 𝑁𝑂𝑇𝐼𝐹𝐼𝐶𝐴𝑅𝐸𝑀𝑂𝑆 𝑉𝑂𝐶𝐸̂!😃🚀",
+        "added_by": "925542353",
+        "added_at": "2026-04-21 00:37:19",
         "sold": 0,
         "sold_to": null,
         "sold_at": null
@@ -19245,6 +19310,60 @@
         "price": 10.0,
         "credentials": "larissalima46486@outlook.com :02022014",
         "created_at": "2026-04-20 11:16:59"
+      },
+      {
+        "id": 1632,
+        "telegram_id": "925542353",
+        "product_name": "AMAZON + HBO + PREMIERE",
+        "product_id": 12,
+        "price": 25.0,
+        "credentials": "crosspro3301@cinepremiu.com  080808",
+        "created_at": "2026-04-20 20:35:31"
+      },
+      {
+        "id": 1633,
+        "telegram_id": "1539114757",
+        "product_name": "TELA EXTRA",
+        "product_id": 312,
+        "price": 10.0,
+        "credentials": "anasophiaviana07041998@hotmail.com 02022014",
+        "created_at": "2026-04-20 21:21:43"
+      },
+      {
+        "id": 1634,
+        "telegram_id": "925542353",
+        "product_name": "AMAZON + HBO + PREMIERE",
+        "product_id": 33,
+        "price": 25.0,
+        "credentials": "sanmopcx3488@outlook.com: 080808",
+        "created_at": "2026-04-20 22:49:07"
+      },
+      {
+        "id": 1635,
+        "telegram_id": "1832536213",
+        "product_name": "TELA EXTRA",
+        "product_id": 313,
+        "price": 10.0,
+        "credentials": "luizgustavofonseca07071982@hotmail.com",
+        "created_at": "2026-04-20 23:04:15"
+      },
+      {
+        "id": 1636,
+        "telegram_id": "1961574770",
+        "product_name": "NETFLIX COMPLETA",
+        "product_id": 5,
+        "price": 40.0,
+        "credentials": "isaacmarques05112004@hotmail.com:02022017",
+        "created_at": "2026-04-21 00:12:30"
+      },
+      {
+        "id": 1637,
+        "telegram_id": "925542353",
+        "product_name": "GLOBO + CANAIS E TELECINE",
+        "product_id": 182,
+        "price": 23.0,
+        "credentials": "Spcontas777@cinepremiu.com 02022013",
+        "created_at": "2026-04-21 12:38:59"
       }
     ],
     "users": [
@@ -19253,7 +19372,7 @@
         "telegram_id": "925542353",
         "username": "LoginsPremium2015",
         "first_name": "𝕃𝕜 𝕃𝕠𝕘𝕚𝕟𝕤",
-        "balance": 8155.0,
+        "balance": 8082.0,
         "banned": 0,
         "created_at": "2026-04-06 23:52:43"
       },
@@ -19467,9 +19586,9 @@
       {
         "id": 25,
         "telegram_id": "1961574770",
-        "username": null,
-        "first_name": null,
-        "balance": 0.800000000000001,
+        "username": "Frkstayin20",
+        "first_name": "F",
+        "balance": 0.8000000000000043,
         "banned": 0,
         "created_at": "2026-04-07 01:22:51"
       },
@@ -21942,8 +22061,8 @@
       {
         "id": 300,
         "telegram_id": "7497611482",
-        "username": null,
-        "first_name": null,
+        "username": "Mkdigital1020",
+        "first_name": "MK+DIGITAL PREMIUM",
         "balance": 0.0,
         "banned": 0,
         "created_at": "2026-04-07 01:22:51"
@@ -22068,8 +22187,8 @@
       {
         "id": 314,
         "telegram_id": "8203439151",
-        "username": null,
-        "first_name": null,
+        "username": "Lunastreaming1",
+        "first_name": "Luna Apps E Streamings",
         "balance": 0.0,
         "banned": 0,
         "created_at": "2026-04-07 01:22:51"
@@ -23609,6 +23728,78 @@
         "amount": 50.0,
         "description": "Compra: 5x TELA EXTRA",
         "created_at": "2026-04-20 11:16:59"
+      },
+      {
+        "id": 159,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 25.0,
+        "description": "Compra: 1x AMAZON + HBO + PREMIERE",
+        "created_at": "2026-04-20 20:35:31"
+      },
+      {
+        "id": 160,
+        "telegram_id": "1539114757",
+        "type": "credit",
+        "amount": 10.0,
+        "description": "PIX R$10.00",
+        "created_at": "2026-04-20 21:21:10"
+      },
+      {
+        "id": 161,
+        "telegram_id": "1539114757",
+        "type": "debit",
+        "amount": 10.0,
+        "description": "Compra: 1x TELA EXTRA",
+        "created_at": "2026-04-20 21:21:43"
+      },
+      {
+        "id": 162,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 25.0,
+        "description": "Compra: 1x AMAZON + HBO + PREMIERE",
+        "created_at": "2026-04-20 22:49:07"
+      },
+      {
+        "id": 163,
+        "telegram_id": "1832536213",
+        "type": "credit",
+        "amount": 10.0,
+        "description": "PIX R$10.00",
+        "created_at": "2026-04-20 23:03:09"
+      },
+      {
+        "id": 164,
+        "telegram_id": "1832536213",
+        "type": "debit",
+        "amount": 10.0,
+        "description": "Compra: 1x TELA EXTRA",
+        "created_at": "2026-04-20 23:04:15"
+      },
+      {
+        "id": 165,
+        "telegram_id": "1961574770",
+        "type": "credit",
+        "amount": 40.0,
+        "description": "PIX R$40.00",
+        "created_at": "2026-04-21 00:11:43"
+      },
+      {
+        "id": 166,
+        "telegram_id": "1961574770",
+        "type": "debit",
+        "amount": 40.0,
+        "description": "Compra: 1x NETFLIX COMPLETA",
+        "created_at": "2026-04-21 00:12:30"
+      },
+      {
+        "id": 167,
+        "telegram_id": "925542353",
+        "type": "debit",
+        "amount": 23.0,
+        "description": "Compra: 1x GLOBO + CANAIS E TELECINE",
+        "created_at": "2026-04-21 12:38:59"
       }
     ],
     "payments": [
@@ -24341,6 +24532,36 @@
         "pix_qr": "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",
         "pix_code": "00020126550014br.gov.bcb.pix0133mercadopagoempresas99@hotmail.com520400005303986540550.005802BR5916LL202310081326106009Sao Paulo62250521mpqrinter15559120373063048A41",
         "created_at": "2026-04-20 11:16:08"
+      },
+      {
+        "id": 74,
+        "telegram_id": "1539114757",
+        "mp_payment_id": "155683104278",
+        "amount": 10.0,
+        "status": "approved",
+        "pix_qr": "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",
+        "pix_code": "00020126550014br.gov.bcb.pix0133mercadopagoempresas99@hotmail.com520400005303986540510.005802BR5916LL202310081326106009Sao Paulo62250521mpqrinter155683104278630489A0",
+        "created_at": "2026-04-20 21:20:28"
+      },
+      {
+        "id": 75,
+        "telegram_id": "1832536213",
+        "mp_payment_id": "154944344337",
+        "amount": 10.0,
+        "status": "approved",
+        "pix_qr": "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",
+        "pix_code": "00020126550014br.gov.bcb.pix0133mercadopagoempresas99@hotmail.com520400005303986540510.005802BR5916LL202310081326106009Sao Paulo62250521mpqrinter1549443443376304950E",
+        "created_at": "2026-04-20 23:02:42"
+      },
+      {
+        "id": 76,
+        "telegram_id": "1961574770",
+        "mp_payment_id": "155709412212",
+        "amount": 40.0,
+        "status": "approved",
+        "pix_qr": "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",
+        "pix_code": "00020126550014br.gov.bcb.pix0133mercadopagoempresas99@hotmail.com520400005303986540540.005802BR5916LL202310081326106009Sao Paulo62250521mpqrinter155709412212630442F0",
+        "created_at": "2026-04-21 00:10:46"
       }
     ],
     "gifts": [
@@ -24415,6 +24636,15 @@
         "redeemed_by": null,
         "redeemed_at": null,
         "created_at": "2026-04-19 21:03:50"
+      },
+      {
+        "id": 9,
+        "code": "LKJM4QHCNJ",
+        "amount": 27.0,
+        "created_by": "925542353",
+        "redeemed_by": null,
+        "redeemed_at": null,
+        "created_at": "2026-04-20 20:37:26"
       }
     ],
     "bot_config": [
@@ -24444,10 +24674,10 @@
     ]
   },
   "stats": {
-    "estoque_disponivel": 78,
-    "estoque_vendido": 273,
-    "total_vendas": 1631,
+    "estoque_disponivel": 77,
+    "estoque_vendido": 279,
+    "total_vendas": 1637,
     "total_usuarios": 344,
-    "total_transacoes": 158
+    "total_transacoes": 167
   }
 }
