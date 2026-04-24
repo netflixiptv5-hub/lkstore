@@ -3543,8 +3543,8 @@ def send_backup_github_vendas(backup_data):
         json_str = json.dumps(backup_data, indent=2, ensure_ascii=False)
         content_b64 = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
 
-        # Check if latest.json exists to get SHA
-        url_latest = f"https://api.github.com/repos/{GITHUB_REPO_VENDAS}/contents/backups/latest.json"
+        # Check if latest.json exists to get SHA (on backups branch)
+        url_latest = f"https://api.github.com/repos/{GITHUB_REPO_VENDAS}/contents/backups/latest.json?ref=backups"
         sha_latest = None
         try:
             req = urllib.request.Request(url_latest)
@@ -3558,7 +3558,7 @@ def send_backup_github_vendas(backup_data):
 
         # Upload timestamped backup
         url_file = f"https://api.github.com/repos/{GITHUB_REPO_VENDAS}/contents/{filename}"
-        payload = {"message": f"Backup LKStore {now}", "content": content_b64}
+        payload = {"message": f"Backup LKStore {now}", "content": content_b64, "branch": "backups"}
         req = urllib.request.Request(url_file, data=json.dumps(payload).encode("utf-8"), method="PUT")
         req.add_header("Authorization", f"token {GITHUB_TOKEN}")
         req.add_header("Content-Type", "application/json")
@@ -3566,7 +3566,7 @@ def send_backup_github_vendas(backup_data):
         urllib.request.urlopen(req, timeout=15)
 
         # Update latest.json
-        payload_latest = {"message": f"Backup latest {now}", "content": content_b64}
+        payload_latest = {"message": f"Backup latest {now}", "content": content_b64, "branch": "backups"}
         if sha_latest:
             payload_latest["sha"] = sha_latest
         req2 = urllib.request.Request(url_latest, data=json.dumps(payload_latest).encode("utf-8"), method="PUT")

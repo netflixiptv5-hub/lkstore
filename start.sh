@@ -10,12 +10,4 @@ else
     echo "[start.sh] lkstore.db already exists, skipping seed."
 fi
 
-# FORÇAR cleanup v2 removendo todos markers antigos
-rm -f "$DATA_DIR/.cleanup_sales_done"
-rm -f "$DATA_DIR/.cleanup_v2_done"
-
-# Limpeza v2: reimporta só vendas reais
-python cleanup_sales.py 2>&1
-echo "[start.sh] cleanup exit code: $?"
-
 exec python bot.py
