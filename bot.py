@@ -2192,10 +2192,7 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("💰 Alterar preços", callback_data="adm_alterar_precos")],
             [InlineKeyboardButton("😀 Alterar nome dos logins", callback_data="adm_alterar_nomes")],
             [InlineKeyboardButton("💚 Baixar todos logins no estoque", callback_data="adm_baixar_estoque")],
-            [InlineKeyboardButton("💚 Baixar logins vendidos hoje", callback_data="adm_baixar_vendidos_hoje")],
-            [InlineKeyboardButton("💚 Baixar logins vendidos ontem", callback_data="adm_baixar_vendidos_ontem")],
-            [InlineKeyboardButton("💚 Baixar logins vendidos essa semana", callback_data="adm_baixar_vendidos_semana")],
-            [InlineKeyboardButton("💚 Baixar todos logins vendidos no total", callback_data="adm_baixar_vendidos_total")],
+            [InlineKeyboardButton("📅 Baixar vendas por data", callback_data="adm_baixar_vendas_menu")],
             [InlineKeyboardButton("💚 Baixar logins vendidos por nome", callback_data="adm_baixar_vendidos_nome")],
             [InlineKeyboardButton("🗑 Deletar todos logins do estoque", callback_data="adm_deletar_estoque")],
             [InlineKeyboardButton("🗑 Deletar login específico", callback_data="adm_deletar_login")],
@@ -2621,13 +2618,45 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_document(document=buf, filename="estoque_completo.txt",
             caption=f"📦 {len(items)} logins no estoque")
     
+    elif data == "adm_baixar_vendas_menu":
+        # Menu principal de download de vendas
+        conn = get_db()
+        total = conn.execute("SELECT count(*) FROM sales").fetchone()[0]
+        hoje = conn.execute("SELECT count(*) FROM sales WHERE date(created_at) = date('now','localtime')").fetchone()[0]
+        semana = conn.execute("SELECT count(*) FROM sales WHERE date(created_at) >= date('now','localtime','-7 days')").fetchone()[0]
+        mes = conn.execute("SELECT count(*) FROM sales WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now','localtime')").fetchone()[0]
+        conn.close()
+        
+        text = (
+            f"📅 <b>BAIXAR VENDAS</b>\n\n"
+            f"📊 Hoje: <b>{hoje}</b> vendas\n"
+            f"📊 Semana: <b>{semana}</b> vendas\n"
+            f"📊 Mês: <b>{mes}</b> vendas\n"
+            f"📊 Total: <b>{total}</b> vendas\n\n"
+            f"Escolha o período:"
+        )
+        buttons = [
+            [InlineKeyboardButton("📅 Hoje", callback_data="adm_baixar_vendidos_hoje"),
+             InlineKeyboardButton("📅 Ontem", callback_data="adm_baixar_vendidos_ontem")],
+            [InlineKeyboardButton("📅 Últimos 7 dias", callback_data="adm_baixar_vendidos_semana"),
+             InlineKeyboardButton("📅 Últimos 15 dias", callback_data="adm_baixar_vendidos_15d")],
+            [InlineKeyboardButton("📅 Este mês", callback_data="adm_baixar_vendidos_mes"),
+             InlineKeyboardButton("📅 Mês passado", callback_data="adm_baixar_vendidos_mes_passado")],
+            [InlineKeyboardButton("📅 Escolher dia específico", callback_data="adm_baixar_vendidos_dia")],
+            [InlineKeyboardButton("📅 Escolher período (de/até)", callback_data="adm_baixar_vendidos_periodo")],
+            [InlineKeyboardButton("📥 Baixar TUDO", callback_data="adm_baixar_vendidos_total")],
+            [InlineKeyboardButton("🔙 Voltar", callback_data="adm_vendas")]
+        ]
+        await safe_edit(query, text, reply_markup=InlineKeyboardMarkup(buttons))
+    
     elif data == "adm_baixar_vendidos_hoje":
         conn = get_db()
         items = conn.execute(
             "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) = date('now','localtime') ORDER BY s.created_at DESC"
         ).fetchall()
         conn.close()
-        await _send_sales_file(query, items, "vendidos_hoje.txt", "Vendidos Hoje")
+        today_str = datetime.now(BRT).strftime("%d-%m-%Y")
+        await _send_sales_file(query, items, f"vendas_{today_str}.txt", f"Vendas de Hoje ({today_str})")
     
     elif data == "adm_baixar_vendidos_ontem":
         conn = get_db()
@@ -2635,7 +2664,8 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) = date('now','localtime','-1 day') ORDER BY s.created_at DESC"
         ).fetchall()
         conn.close()
-        await _send_sales_file(query, items, "vendidos_ontem.txt", "Vendidos Ontem")
+        yesterday_str = (datetime.now(BRT) - timedelta(days=1)).strftime("%d-%m-%Y")
+        await _send_sales_file(query, items, f"vendas_{yesterday_str}.txt", f"Vendas de Ontem ({yesterday_str})")
     
     elif data == "adm_baixar_vendidos_semana":
         conn = get_db()
@@ -2643,7 +2673,84 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) >= date('now','localtime','-7 days') ORDER BY s.created_at DESC"
         ).fetchall()
         conn.close()
-        await _send_sales_file(query, items, "vendidos_semana.txt", "Vendidos Semana")
+        await _send_sales_file(query, items, "vendas_ultimos_7_dias.txt", "Vendas Últimos 7 Dias")
+    
+    elif data == "adm_baixar_vendidos_15d":
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) >= date('now','localtime','-15 days') ORDER BY s.created_at DESC"
+        ).fetchall()
+        conn.close()
+        await _send_sales_file(query, items, "vendas_ultimos_15_dias.txt", "Vendas Últimos 15 Dias")
+    
+    elif data == "adm_baixar_vendidos_mes":
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE strftime('%Y-%m', s.created_at) = strftime('%Y-%m', 'now','localtime') ORDER BY s.created_at DESC"
+        ).fetchall()
+        conn.close()
+        mes_str = datetime.now(BRT).strftime("%m-%Y")
+        await _send_sales_file(query, items, f"vendas_mes_{mes_str}.txt", f"Vendas do Mês ({mes_str})")
+    
+    elif data == "adm_baixar_vendidos_mes_passado":
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE strftime('%Y-%m', s.created_at) = strftime('%Y-%m', 'now','localtime','-1 month') ORDER BY s.created_at DESC"
+        ).fetchall()
+        conn.close()
+        mes_passado = (datetime.now(BRT).replace(day=1) - timedelta(days=1))
+        mes_str = mes_passado.strftime("%m-%Y")
+        await _send_sales_file(query, items, f"vendas_mes_{mes_str}.txt", f"Vendas do Mês Passado ({mes_str})")
+    
+    elif data == "adm_baixar_vendidos_dia":
+        # Mostra últimos 14 dias como botões pra escolher
+        buttons = []
+        now = datetime.now(BRT)
+        for i in range(14):
+            d = now - timedelta(days=i)
+            label = d.strftime("%d/%m/%Y")
+            if i == 0:
+                label += " (hoje)"
+            elif i == 1:
+                label += " (ontem)"
+            cb = f"adm_baixar_dia_{d.strftime('%Y-%m-%d')}"
+            buttons.append([InlineKeyboardButton(f"📅 {label}", callback_data=cb)])
+        buttons.append([InlineKeyboardButton("📝 Digitar data específica", callback_data="adm_baixar_dia_manual")])
+        buttons.append([InlineKeyboardButton("🔙 Voltar", callback_data="adm_baixar_vendas_menu")])
+        await safe_edit(query, "📅 <b>Escolha o dia:</b>", reply_markup=InlineKeyboardMarkup(buttons))
+    
+    elif data.startswith("adm_baixar_dia_") and data != "adm_baixar_dia_manual":
+        target_date = data.replace("adm_baixar_dia_", "")  # YYYY-MM-DD
+        conn = get_db()
+        items = conn.execute(
+            "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id WHERE date(s.created_at) = ? ORDER BY s.created_at DESC",
+            (target_date,)
+        ).fetchall()
+        conn.close()
+        try:
+            dt = datetime.strptime(target_date, "%Y-%m-%d")
+            label = dt.strftime("%d-%m-%Y")
+        except:
+            label = target_date
+        await _send_sales_file(query, items, f"vendas_{label}.txt", f"Vendas de {label}")
+    
+    elif data == "adm_baixar_dia_manual":
+        context.user_data['adm_step'] = 'baixar_por_data'
+        await safe_edit(query,
+            "📅 <b>Digite a data no formato DD/MM/AAAA</b>\n\n"
+            "Exemplo: <code>15/04/2026</code>\n\n"
+            "Ou digite um período: <code>10/04/2026-20/04/2026</code>",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="adm_baixar_vendas_menu")]])
+        )
+    
+    elif data == "adm_baixar_vendidos_periodo":
+        context.user_data['adm_step'] = 'baixar_por_periodo'
+        await safe_edit(query,
+            "📅 <b>Digite o período no formato:</b>\n\n"
+            "<code>DD/MM/AAAA-DD/MM/AAAA</code>\n\n"
+            "Exemplo: <code>01/04/2026-15/04/2026</code>",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Voltar", callback_data="adm_baixar_vendas_menu")]])
+        )
     
     elif data == "adm_baixar_vendidos_total":
         conn = get_db()
@@ -2651,7 +2758,7 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id ORDER BY s.created_at DESC"
         ).fetchall()
         conn.close()
-        await _send_sales_file(query, items, "vendidos_total.txt", "Vendidos Total")
+        await _send_sales_file(query, items, "vendas_total.txt", "Todas as Vendas")
     
     elif data == "adm_baixar_vendidos_nome":
         context.user_data['adm_step'] = 'baixar_por_nome'
@@ -2714,13 +2821,19 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]))
 
 
-async def _send_sales_file(query, items, filename, title):
-    """Helper to send sales as file"""
+async def _send_sales_file(query, items, filename, title, message=None):
+    """Helper to send sales as file. Accepts query (callback) or message (text handler)."""
+    reply_target = message or (query.message if query else None)
+    
     if not items:
-        await query.answer(f"📭 Nenhuma venda encontrada!", show_alert=True)
+        if query:
+            await query.answer(f"📭 Nenhuma venda encontrada!", show_alert=True)
+        elif reply_target:
+            await reply_target.reply_text("📭 Nenhuma venda encontrada!")
         return
     
     content = ""
+    total_valor = 0
     for i in items:
         creds = i['credentials']
         # Split credentials back to email and senha
@@ -2736,11 +2849,12 @@ async def _send_sales_file(query, items, filename, title):
         except:
             pass
         content += f"{i['product_name']}|{int(i['price'])}|{email}|{senha}|{i['telegram_id']}|{date_str}\n"
+        total_valor += i['price']
     
     buf = BytesIO(content.encode('utf-8'))
     buf.name = filename
-    await query.message.reply_document(document=buf, filename=filename,
-        caption=f"📊 {title}: {len(items)} vendas")
+    caption = f"📊 {title}: {len(items)} vendas | R${total_valor:,.0f}"
+    await reply_target.reply_document(document=buf, filename=filename, caption=caption)
 
 
 # ===== NEW ADMIN COMMANDS FOR PIX/SALDO CONFIGS =====
@@ -3226,6 +3340,75 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             buf.name = f"vendidos_{product_name}.txt"
             await update.message.reply_document(document=buf, filename=f"vendidos_{product_name}.txt",
                 caption=f"📊 {len(items)} vendas de {product_name}")
+        return
+    
+    # Admin step: baixar vendas por data específica
+    if context.user_data.get('adm_step') in ('baixar_por_data', 'baixar_por_periodo') and is_admin(update.effective_user.id):
+        context.user_data['adm_step'] = None
+        raw = text.strip()
+        
+        if '-' in raw and '/' in raw:
+            # Período: DD/MM/AAAA-DD/MM/AAAA
+            parts = raw.split('-')
+            # Reagrupar (DD/MM/AAAA pode ter / mas - separa início e fim)
+            # Formato esperado: DD/MM/AAAA-DD/MM/AAAA
+            try:
+                if len(parts) == 2:
+                    dt_from = datetime.strptime(parts[0].strip(), "%d/%m/%Y")
+                    dt_to = datetime.strptime(parts[1].strip(), "%d/%m/%Y")
+                elif len(parts) == 3:
+                    # 10/04/2026-20/04/2026 splits into ['10/04/2026', '20/04/2026'] if using single -
+                    # But dates have / not - so this shouldn't happen with clean input
+                    dt_from = datetime.strptime(parts[0].strip(), "%d/%m/%Y")
+                    dt_to = datetime.strptime(parts[1].strip(), "%d/%m/%Y")
+                else:
+                    # Try splitting by space, comma etc
+                    raise ValueError("formato inválido")
+                
+                date_from = dt_from.strftime("%Y-%m-%d")
+                date_to = dt_to.strftime("%Y-%m-%d")
+                conn = get_db()
+                items = conn.execute(
+                    "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id "
+                    "WHERE date(s.created_at) >= ? AND date(s.created_at) <= ? ORDER BY s.created_at DESC",
+                    (date_from, date_to)
+                ).fetchall()
+                conn.close()
+                label_from = dt_from.strftime("%d-%m-%Y")
+                label_to = dt_to.strftime("%d-%m-%Y")
+                await _send_sales_file(query=None, items=items,
+                    filename=f"vendas_{label_from}_a_{label_to}.txt",
+                    title=f"Vendas de {label_from} a {label_to}",
+                    message=update.message)
+            except ValueError:
+                await update.message.reply_text(
+                    "❌ Formato inválido!\n\n"
+                    "Use: <code>DD/MM/AAAA-DD/MM/AAAA</code>\n"
+                    "Exemplo: <code>01/04/2026-15/04/2026</code>",
+                    parse_mode=ParseMode.HTML)
+        else:
+            # Data única: DD/MM/AAAA
+            try:
+                dt = datetime.strptime(raw, "%d/%m/%Y")
+                target_date = dt.strftime("%Y-%m-%d")
+                conn = get_db()
+                items = conn.execute(
+                    "SELECT s.*, u.username FROM sales s LEFT JOIN users u ON s.telegram_id = u.telegram_id "
+                    "WHERE date(s.created_at) = ? ORDER BY s.created_at DESC",
+                    (target_date,)
+                ).fetchall()
+                conn.close()
+                label = dt.strftime("%d-%m-%Y")
+                await _send_sales_file(query=None, items=items,
+                    filename=f"vendas_{label}.txt",
+                    title=f"Vendas de {label}",
+                    message=update.message)
+            except ValueError:
+                await update.message.reply_text(
+                    "❌ Formato inválido!\n\n"
+                    "Use: <code>DD/MM/AAAA</code>\n"
+                    "Exemplo: <code>15/04/2026</code>",
+                    parse_mode=ParseMode.HTML)
         return
     
     # Admin step: deletar login por nome
