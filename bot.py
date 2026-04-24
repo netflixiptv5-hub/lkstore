@@ -124,6 +124,15 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime')),
             status TEXT DEFAULT 'active'
         );
+        CREATE TABLE IF NOT EXISTS reminders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            admin_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            next_date TEXT NOT NULL,
+            interval_days INTEGER DEFAULT 30,
+            status TEXT DEFAULT 'pending',
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        );
     """)
     # Default config
     defaults = {
@@ -3684,6 +3693,206 @@ async def limparvendas_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# ===== LEMBRETES / REMINDERS =====
+
+async def lembrete_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Comando /lembrete — cria lembrete recorrente. Uso: /lembrete DD/MM TITULO"""
+    if update.effective_user.id not in ADMIN_IDS:
+        return
+    
+    args = (update.message.text or "").split(None, 2)
+    if len(args) < 3:
+        await update.message.reply_text(
+            "⚠️ <b>Uso:</b> <code>/lembrete DD/MM Título do lembrete</code>\n\n"
+            "📌 Exemplo: <code>/lembrete 20/05 MARCAR VENDAS</code>\n"
+            "O lembrete vai repetir todo mês automaticamente.",
+            parse_mode=ParseMode.HTML
+        )
+        return
+    
+    date_str = args[1]
+    title = args[2]
+    
+    try:
+        day, month = date_str.split("/")
+        day, month = int(day), int(month)
+        now = datetime.now(BRT)
+        year = now.year
+        next_date = datetime(year, month, day)
+        # Se a data já passou, agenda pro próximo mês
+        if next_date.date() < now.date():
+            month += 1
+            if month > 12:
+                month = 1
+                year += 1
+            next_date = datetime(year, month, day)
+        next_date_str = next_date.strftime("%Y-%m-%d")
+    except:
+        await update.message.reply_text("❌ Data inválida. Use DD/MM (ex: 20/05)")
+        return
+    
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO reminders (admin_id, title, next_date, interval_days, status) VALUES (?, ?, ?, 30, 'pending')",
+        (str(update.effective_user.id), title, next_date_str)
+    )
+    conn.commit()
+    conn.close()
+    
+    await update.message.reply_text(
+        f"✅ <b>Lembrete criado!</b>\n\n"
+        f"📌 <b>{title}</b>\n"
+        f"📅 Próximo aviso: <b>{next_date.strftime('%d/%m/%Y')}</b>\n"
+        f"🔄 Repete a cada 30 dias\n\n"
+        f"Quando aparecer o aviso, clique em <b>✅ Feito</b> e ele agenda pro mês seguinte automaticamente.",
+        parse_mode=ParseMode.HTML
+    )
+
+
+async def lembretes_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Comando /lembretes — lista todos os lembretes ativos."""
+    if update.effective_user.id not in ADMIN_IDS:
+        return
+    
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM reminders WHERE status != 'deleted' ORDER BY next_date").fetchall()
+    conn.close()
+    
+    if not rows:
+        await update.message.reply_text("📭 Nenhum lembrete ativo.\n\nCrie com: <code>/lembrete DD/MM TITULO</code>", parse_mode=ParseMode.HTML)
+        return
+    
+    text = "📋 <b>SEUS LEMBRETES:</b>\n\n"
+    buttons = []
+    for r in rows:
+        status_icon = "⏳" if r["status"] == "pending" else "✅"
+        try:
+            dt = datetime.strptime(r["next_date"], "%Y-%m-%d")
+            date_fmt = dt.strftime("%d/%m/%Y")
+        except:
+            date_fmt = r["next_date"]
+        text += f"{status_icon} <b>{r['title']}</b>\n   📅 Próximo: {date_fmt} | ID: {r['id']}\n\n"
+        buttons.append([InlineKeyboardButton(f"🗑 Excluir #{r['id']} - {r['title']}", callback_data=f"reminder_del_{r['id']}")])
+    
+    await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(buttons) if buttons else None)
+
+
+async def reminder_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Callbacks dos lembretes: marcar feito ou deletar."""
+    query = update.callback_query
+    await query.answer()
+    
+    if query.from_user.id not in ADMIN_IDS:
+        return
+    
+    data = query.data
+    
+    if data.startswith("reminder_done_"):
+        reminder_id = int(data.replace("reminder_done_", ""))
+        conn = get_db()
+        row = conn.execute("SELECT * FROM reminders WHERE id = ?", (reminder_id,)).fetchone()
+        if row:
+            # Calcula próxima data (+30 dias)
+            try:
+                current = datetime.strptime(row["next_date"], "%Y-%m-%d")
+            except:
+                current = datetime.now(BRT)
+            
+            next_date = current + timedelta(days=30)
+            next_date_str = next_date.strftime("%Y-%m-%d")
+            
+            conn.execute("UPDATE reminders SET next_date = ?, status = 'pending' WHERE id = ?", (next_date_str, reminder_id))
+            conn.commit()
+            
+            await query.edit_message_text(
+                f"✅ <b>Marcado como feito!</b>\n\n"
+                f"📌 <b>{row['title']}</b>\n"
+                f"📅 Próximo lembrete: <b>{next_date.strftime('%d/%m/%Y')}</b>",
+                parse_mode=ParseMode.HTML
+            )
+        conn.close()
+    
+    elif data.startswith("reminder_snooze_"):
+        reminder_id = int(data.replace("reminder_snooze_", ""))
+        conn = get_db()
+        row = conn.execute("SELECT * FROM reminders WHERE id = ?", (reminder_id,)).fetchone()
+        if row:
+            # Adia 1 dia
+            try:
+                current = datetime.strptime(row["next_date"], "%Y-%m-%d")
+            except:
+                current = datetime.now(BRT)
+            
+            next_date = current + timedelta(days=1)
+            next_date_str = next_date.strftime("%Y-%m-%d")
+            
+            conn.execute("UPDATE reminders SET next_date = ?, status = 'pending' WHERE id = ?", (next_date_str, reminder_id))
+            conn.commit()
+            
+            await query.edit_message_text(
+                f"⏰ <b>Adiado pra amanhã!</b>\n\n"
+                f"📌 <b>{row['title']}</b>\n"
+                f"📅 Novo aviso: <b>{next_date.strftime('%d/%m/%Y')}</b>",
+                parse_mode=ParseMode.HTML
+            )
+        conn.close()
+    
+    elif data.startswith("reminder_del_"):
+        reminder_id = int(data.replace("reminder_del_", ""))
+        conn = get_db()
+        row = conn.execute("SELECT title FROM reminders WHERE id = ?", (reminder_id,)).fetchone()
+        conn.execute("UPDATE reminders SET status = 'deleted' WHERE id = ?", (reminder_id,))
+        conn.commit()
+        conn.close()
+        
+        title = row["title"] if row else "?"
+        await query.edit_message_text(f"🗑 Lembrete <b>#{reminder_id} - {title}</b> excluído.", parse_mode=ParseMode.HTML)
+
+
+async def reminder_checker_job(context: ContextTypes.DEFAULT_TYPE):
+    """Job que roda a cada 60s — checa se tem lembrete pra disparar hoje."""
+    try:
+        now = datetime.now(BRT)
+        today_str = now.strftime("%Y-%m-%d")
+        
+        conn = get_db()
+        rows = conn.execute(
+            "SELECT * FROM reminders WHERE status = 'pending' AND next_date <= ?",
+            (today_str,)
+        ).fetchall()
+        
+        for r in rows:
+            # Manda o aviso
+            buttons = InlineKeyboardMarkup([
+                [InlineKeyboardButton("✅ Feito — Agendar +30 dias", callback_data=f"reminder_done_{r['id']}")],
+                [InlineKeyboardButton("⏰ Adiar 1 dia", callback_data=f"reminder_snooze_{r['id']}")],
+            ])
+            
+            await context.bot.send_message(
+                chat_id=int(r["admin_id"]),
+                text=(
+                    f"⚠️⚠️⚠️ <b>LEMBRETE!</b> ⚠️⚠️⚠️\n\n"
+                    f"📌 <b>{r['title']}</b>\n"
+                    f"📅 Data: <b>{now.strftime('%d/%m/%Y')}</b>\n\n"
+                    f"Clique abaixo quando terminar:"
+                ),
+                parse_mode=ParseMode.HTML,
+                reply_markup=buttons
+            )
+            
+            # Marca como 'notified' pra não mandar de novo no mesmo minuto
+            conn.execute("UPDATE reminders SET status = 'notified' WHERE id = ?", (r["id"],))
+        
+        # Reseta 'notified' pra 'pending' a cada 6h (caso não clique em nada, manda de novo)
+        if now.hour in [8, 14, 20] and now.minute == 0:
+            conn.execute("UPDATE reminders SET status = 'pending' WHERE status = 'notified'")
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[REMINDER] Erro: {e}")
+
+
 def main():
     init_db()
 
@@ -3758,8 +3967,11 @@ def main():
     app.add_handler(CommandHandler("setsuporteapi", setsuporteapi))
     app.add_handler(CommandHandler("fixadd", fixadd_cmd))
     app.add_handler(CommandHandler("limparvendas", limparvendas_cmd))
+    app.add_handler(CommandHandler("lembrete", lembrete_cmd))
+    app.add_handler(CommandHandler("lembretes", lembretes_cmd))
     
     # Callbacks
+    app.add_handler(CallbackQueryHandler(reminder_callback, pattern="^reminder_"))
     app.add_handler(CallbackQueryHandler(adm_callback, pattern="^adm_"))
     app.add_handler(CallbackQueryHandler(buy_callback, pattern="^buy$"))
     app.add_handler(CallbackQueryHandler(product_callback, pattern="^product_"))
@@ -3788,6 +4000,15 @@ def main():
         name="spam_checker"
     )
     logger.info("⏰ Spam checker iniciado (a cada 30s)")
+    
+    # Reminder checker — roda a cada 60s, checa lembretes do dia
+    app.job_queue.run_repeating(
+        reminder_checker_job,
+        interval=60,
+        first=15,
+        name="reminder_checker"
+    )
+    logger.info("📌 Reminder checker iniciado (a cada 60s)")
     
     logger.info("🚀 LK Store Bot started!")
     app.run_polling(drop_pending_updates=True, poll_interval=0.5, timeout=10)
