@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formatador LK Logins</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --surface3: #262626;
+    --border: #2a2a2a;
+    --text: #e4e4e4;
+    --text-dim: #888;
+    --accent: #e53935;
+    --accent-hover: #ff5252;
+    --green: #00e676;
+    --green-dim: #00c853;
+    --blue: #42a5f5;
+    --yellow: #ffd600;
+    --purple: #bb86fc;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--accent), #ff6f00);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 20px rgba(229, 57, 53, 0.3);
+  }
+
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-ver { background: var(--surface3); color: var(--text-dim); }
+  .badge-status { background: rgba(0, 230, 118, 0.1); color: var(--green); }
+
+  /* Main */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .stat-card:hover {
+    border-color: var(--surface3);
+    transform: translateY(-1px);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+  }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.blue { color: var(--blue); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.purple { color: var(--purple); }
+
+  /* Sections */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title .icon {
+    font-size: 16px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 16px 20px;
+    background: var(--bg);
+    color: var(--text);
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    resize: vertical;
+    outline: none;
+  }
+
+  textarea::placeholder {
+    color: #444;
+  }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    padding: 0;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #c62828);
+    color: white;
+    box-shadow: 0 4px 20px rgba(229, 57, 53, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--accent-hover), var(--accent));
+    box-shadow: 0 6px 30px rgba(229, 57, 53, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--surface3);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .btn-success {
+    background: rgba(0, 230, 118, 0.1);
+    color: var(--green);
+    border: 1px solid rgba(0, 230, 118, 0.2);
+  }
+
+  .btn-success:hover {
+    background: rgba(0, 230, 118, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Output table */
+  .output-area {
+    width: 100%;
+    min-height: 200px;
+    padding: 16px 20px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+    border: none;
+    outline: none;
+    resize: vertical;
+  }
+
+  /* Table view */
+  .table-wrap {
+    overflow-x: auto;
+    display: none;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+  }
+
+  tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  tbody tr:hover { background: var(--surface2); }
+
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+
+  .td-produto { color: var(--blue); font-weight: 500; }
+  .td-email { color: var(--text); }
+  .td-valor { color: var(--green); font-weight: 600; }
+  .td-revenda { color: var(--purple); }
+  .td-data { color: var(--yellow); }
+
+  /* View toggle */
+  .view-toggle {
+    display: flex;
+    background: var(--surface3);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .view-toggle button {
+    padding: 6px 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .view-toggle button.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 20px;
+    background: var(--green);
+    color: #000;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 999;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .header { padding: 16px; }
+    .main { padding: 16px; }
+    .actions-bar { flex-direction: column; gap: 10px; align-items: stretch; }
+    .btn-row { flex-wrap: wrap; }
+  }
+
+  /* Search */
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+  }
+
+  .search-box input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    outline: none;
+    width: 180px;
+  }
+
+  .search-box input::placeholder { color: #555; }
+
+  /* Revenda summary */
+  .revenda-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+    padding: 16px 20px;
+  }
+
+  .revenda-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .revenda-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--purple);
+  }
+
+  .revenda-stats {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .revenda-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .revenda-total {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">LK</div>
+    <h1>Formatador <span>LK Logins</span></h1>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-ver">v2.0 Web</span>
+    <span class="badge badge-status">● Online</span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <span class="stat-label">Total Vendas</span>
+      <span class="stat-value green" id="stat-total">R$ 0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Linhas Processadas</span>
+      <span class="stat-value blue" id="stat-linhas">0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Revendas Ativas</span>
+      <span class="stat-value purple" id="stat-revendas">0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Produtos Distintos</span>
+      <span class="stat-value yellow" id="stat-produtos">0</span>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title"><span class="icon">📋</span> Entrada — Cole sua lista aqui</span>
+      <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;" onclick="document.getElementById('input').value='';document.getElementById('input').focus();">Limpar</button>
+    </div>
+    <textarea id="input" placeholder="Cole aqui as linhas de venda...&#10;&#10;Exemplos:&#10;5 NETFLIX COMPLETA|100|a@b.com | c@d.com | e@f.com||648...|14/12/2025 - 13:12&#10;TELA EXTRA|10|email@ex.com 103030||5528868447|02/12/2025 - 00:16"></textarea>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions-bar">
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="processar()">⚡ Formatar</button>
+      <button class="btn btn-secondary" onclick="copiarResultado()">📋 Copiar Texto</button>
+      <button class="btn btn-success" onclick="downloadTxt()">💾 Salvar .txt</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="search-box">
+        <span style="color:#555;">🔍</span>
+        <input type="text" id="search" placeholder="Buscar revenda..." oninput="filtrarTabela()">
+      </div>
+      <div class="view-toggle">
+        <button class="active" id="btn-texto" onclick="setView('texto')">Texto</button>
+        <button id="btn-tabela" onclick="setView('tabela')">Tabela</button>
+        <button id="btn-resumo" onclick="setView('resumo')">Resumo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output Text -->
+  <div class="section" id="sec-texto">
+    <div class="section-header">
+      <span class="section-title"><span class="icon">📄</span> Resultado Formatado</span>
+    </div>
+    <pre class="output-area" id="output"></pre>
+  </div>
+
+  <!-- Output Table -->
+  <div class="section hidden" id="sec-tabela">
+    <div class="section-header">
+      <span class="section-title"><span class="icon">📊</span> Visualização em Tabela</span>
+    </div>
+    <div class="table-wrap" style="display:block; max-height: 500px; overflow-y: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Produto</th>
+            <th>Valor</th>
+            <th>Revenda</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Resumo por revenda -->
+  <div class="section hidden" id="sec-resumo">
+    <div class="section-header">
+      <span class="section-title"><span class="icon">📈</span> Resumo por Revenda</span>
+    </div>
+    <div class="revenda-grid" id="revenda-grid"></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ DADOS ============
+const REVENDAS = {
+  "513778508": "Menor FL Revenda",
+  "588311186": "Paciencia Revenda",
+  "834867744": "AF PLAY",
+  "848967479": "Emanuel",
+  "1139286796": "Ana Revenda",
+  "1186966940": "Daniel Marques",
+  "1192927053": "Jhonny Revenda",
+  "1478772605": "Alex Torres Revenda",
+  "1505962861": "Kelly Revenda Netflix",
+  "1539114757": "Aalyson Marcos Revenda",
+  "1572013443": "Matheus Martins",
+  "1643905061": "Dii Revendedor Netflix",
+  "1649472056": "Del Medeiros Revenda",
+  "1715190517": "Lobo Alfa",
+  "1757604333": "Juarez Netflix",
+  "1832536213": "Vany Net",
+  "1906215423": "Romario Revenda Ribeiro",
+  "1920285394": "Lydiane Revenda",
+  "5022113421": "Daiane Revenda",
+  "5114647544": "Leonara Funcionaria Faz Tela",
+  "5124852169": "Gabriel Revenda",
+  "5222307428": "IMPERADOR DIGITAL",
+  "5430557282": "+55 92 9376 3871",
+  "5466635320": "Gregório Revenda Netflix",
+  "5528366163": "+55 87 8158 6170",
+  "5528868447": "On Stone",
+  "5605875344": "Marlon Revenda",
+  "5638829924": "T2 Revenda",
+  "5749779958": "She Revenda",
+  "5961609214": "Grot Revenda",
+  "6308490042": "ALINE REVENDA",
+  "6412754906": "Lydiane Revenda",
+  "6519271648": "Soull Allien",
+  "6709567278": "Pedroza Streamings",
+  "6902070335": "Flex Revenda",
+  "7083023883": "Pedroza Streamings",
+  "7102481055": "Diogo Revenda",
+  "7174255819": "Trem bolona",
+  "7558927002": "Erivaldo Revenda Netflix",
+  "8045833890": "Jhonantas Revenda Gomes",
+  "925866285": "Nato Revenda Telegram",
+  "7497611482": "Mk Digital",
+  "1391198635": "Sg Contas",
+  "8202240704": "Geiziane Rodrigues",
+  "6907543580": "+55 71 9321 6744",
+  "1073229244": "+55 92 9443 7505",
+  "1237672801": "Ramon revenda Netflix",
+  "1561491871": "+55 81 9454 7624",
+  "1579700311": "Leandro Revenda Netflix",
+  "2129796106": "Rocket Revenda",
+  "231597325": "Sillasb Revenda",
+  "6247405103": "+55 17 98182 1605",
+  "6487850588": "+55 81 9969 9746",
+  "6505419669": "Cândida Revenda",
+  "686528301": "Izaah",
+  "7170851369": "+55 96 8140 0399",
+  "7228793693": "Juninkk Revenda",
+  "7920398695": "VEON Revenda",
+  "8203439151": "+55 81 9180 0666",
+  "8418409566": "Grot Revenda",
+  "7995929153": "User Nam",
+  "8688176898": "Rita Cassia Soares",
+  "5671129614": "Alves Alves",
+  "7694225141": "Jhon Revenda",
+  "8579181295": "Gabriel Revenda",
+  "1961574770": "Hugt Revenda",
+  "898323121": "Arthur Teixeira",
+  "7981352968": "Flash Tv",
+  "6035626945": "Patrick Revenda",
+  "5549231956": "+55 31 8784-4437",
+  "6859060537": "Alaffy Revenda"
+};
+
+const EXCLUIR_IDS = new Set(["925542353"]);
+
+// ============ HELPERS ============
+const EMAIL_RE = /([A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,})/i;
+const EMAIL_RE_G = /([A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,})/gi;
+
+function extractEmail(text) {
+  if (!text) return "";
+  const m = text.match(EMAIL_RE);
+  return m ? m[1].trim() : "";
+}
+
+function extractAllEmails(text) {
+  if (!text) return [];
+  const matches = text.match(EMAIL_RE_G);
+  return matches ? matches.map(e => e.trim()) : [];
+}
+
+function extractDDMMYYYY(text) {
+  const m = text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (!m) return null;
+  return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+}
+
+function mapRevenda(rid) {
+  rid = (rid || "").trim();
+  return REVENDAS[rid] || rid;
+}
+
+function fmtMoney(x) {
+  let s = x.toFixed(2);
+  if (s.endsWith(".00")) return s.slice(0, -3);
+  if (s.endsWith("0")) return s.slice(0, -1);
+  return s;
+}
+
+function splitAccounts(raw) {
+  return (raw || "").split(/\s*\|\s*/).map(s => s.trim()).filter(Boolean);
+}
+
+function alignRows(rows) {
+  if (!rows.length) return "";
+  const cols = rows[0].length;
+  const widths = Array(cols).fill(0);
+  rows.forEach(r => r.forEach((v, i) => widths[i] = Math.max(widths[i], v.length)));
+  return rows.map(r => r.map((v, i) => v.padEnd(widths[i])).join(" | ")).join("\n");
+}
+
+// ============ PARSERS ============
+
+/**
+ * Parser universal: lida com TODOS os formatos
+ * 
+ * Formato A (||): 5 NETFLIX COMPLETA|100|a@b.com | c@d.com||ID|data
+ * Formato B (||): PRODUTO|10|email blob||ID|data
+ * Formato C (sem ||): 5 NETFLIX COMPLETA|100|email1:senha email2:senha|ID|data
+ * Formato D (sem ||): PRODUTO|valor|email blob|ID|data
+ * Formato E (limpo): PRODUTO|email|valor|revenda|data
+ */
+
+function parseLine(line) {
+  // Tenta com || primeiro (formatos originais)
+  if (line.includes("||")) {
+    const r = parseDirtyDoublePipe(line);
+    if (r !== null) return r;
+  }
+  
+  // Tenta formato com pipe simples (pack ou single)
+  const r2 = parseSinglePipe(line);
+  if (r2 !== null) return r2;
+  
+  // Tenta formato limpo
+  return parseCleanLine(line);
+}
+
+function parseDirtyDoublePipe(line) {
+  const [left, right] = line.split("||", 2);
+  const lparts = left.trim().split("|", 3);
+  if (lparts.length < 3) return null;
+
+  const rparts = right.trim().split("|").map(s => s.trim()).filter(Boolean);
+  if (rparts.length < 2) return null;
+
+  const revId = rparts[0];
+  if (EXCLUIR_IDS.has(revId)) return [];
+
+  const dt = extractDDMMYYYY(rparts.slice(1).join(" "));
+  if (!dt) return null;
+
+  const [d, mo, y] = dt;
+  const newDate = `${String(d).padStart(2,"0")}/${String(mo).padStart(2,"0")}/${y}`;
+  const revName = mapRevenda(revId);
+
+  // Checa se é pack (começa com numero + produto)
+  const qtdProd = lparts[0].trim();
+  const mPack = qtdProd.match(/^\s*(\d+)\s+(.*)$/);
+
+  if (mPack) {
+    // PACK: 5 NETFLIX COMPLETA|100|emails...
+    const qtd = parseInt(mPack[1]);
+    const produto = mPack[2].trim();
+    const totalRaw = lparts[1].trim().replace(",", ".");
+    const total = parseFloat(totalRaw) || 0;
+    const unit = qtd ? total / qtd : 0;
+    const unitS = fmtMoney(unit);
+    const accountsRaw = lparts[2].trim();
+
+    // Extrair emails: por | ou por espaco
+    const emails = extractAllEmails(accountsRaw);
+    const rows = [];
+    for (const email of emails) {
+      rows.push([email, produto, unitS, revName, newDate]);
+    }
+    return rows.length ? rows : null;
+  } else {
+    // SINGLE: PRODUTO|10|email blob
+    const produto = lparts[0].trim();
+    const valorRaw = lparts[1].trim().replace(",", ".");
+    const blob = lparts[2].trim();
+    const email = extractEmail(blob);
+    if (!email) return null;
+
+    const valor = parseFloat(valorRaw) || 0;
+    return [[email, produto, fmtMoney(valor), revName, newDate]];
+  }
+}
+
+function parseSinglePipe(line) {
+  // Formato: 5 NETFLIX COMPLETA|100|emails:senha emails:senha|ID|dd/mm/yyyy - hh:mm
+  // Ou:      PRODUTO|valor|email blob|ID|dd/mm/yyyy - hh:mm
+  const parts = line.split("|");
+  if (parts.length < 4) return null;
+
+  // Procurar a data (dd/mm/yyyy) nos parts de tras pra frente
+  let dateIdx = -1;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    if (extractDDMMYYYY(parts[i]) !== null) {
+      dateIdx = i;
+      break;
+    }
+  }
+  if (dateIdx < 0 || dateIdx < 3) return null;
+
+  // O ID da revenda esta logo antes da data
+  const revId = parts[dateIdx - 1].trim();
+  if (EXCLUIR_IDS.has(revId)) return [];
+
+  // Verifica se revId parece um ID numerico ou nome de revenda
+  // (precisa ser numerico ou estar no dicionario)
+  if (!/^\d+$/.test(revId) && !REVENDAS[revId]) return null;
+
+  const dt = extractDDMMYYYY(parts[dateIdx]);
+  if (!dt) return null;
+
+  const [d, mo, y] = dt;
+  const newDate = `${String(d).padStart(2,"0")}/${String(mo).padStart(2,"0")}/${y}`;
+  const revName = mapRevenda(revId);
+
+  // Primeiros campos: qtdProd | valor | blob de emails
+  const firstPart = parts[0].trim();
+  const mPack = firstPart.match(/^\s*(\d+)\s+(.*)$/);
+
+  // O blob de emails sao todos os parts entre index 2 e (dateIdx - 2) inclusive
+  const emailBlob = parts.slice(2, dateIdx - 1).join("|").trim();
+
+  if (mPack) {
+    // PACK
+    const qtd = parseInt(mPack[1]);
+    const produto = mPack[2].trim();
+    const totalRaw = parts[1].trim().replace(",", ".");
+    const total = parseFloat(totalRaw) || 0;
+    const unit = qtd ? total / qtd : 0;
+    const unitS = fmtMoney(unit);
+
+    const emails = extractAllEmails(emailBlob);
+    const rows = [];
+    for (const email of emails) {
+      rows.push([email, produto, unitS, revName, newDate]);
+    }
+    return rows.length ? rows : null;
+  } else {
+    // SINGLE
+    const produto = firstPart;
+    const valorRaw = parts[1].trim().replace(",", ".");
+    const valor = parseFloat(valorRaw) || 0;
+    const email = extractEmail(emailBlob);
+    if (!email) return null;
+    return [[email, produto, fmtMoney(valor), revName, newDate]];
+  }
+}
+
+function parseCleanLine(line) {
+  if (line.includes("||")) return null;
+  const parts = line.split("|").map(s => s.trim()).filter(Boolean);
+  if (parts.length < 5) return null;
+
+  const produto = parts[0];
+  const email = extractEmail(parts[1]) || extractEmail(line);
+  if (!email) return null;
+
+  const valor = parts[2];
+  const revId = parts[parts.length - 2].trim();
+  const data = parts[parts.length - 1].trim();
+
+  if (EXCLUIR_IDS.has(revId)) return [];
+
+  const rev = mapRevenda(revId);
+  return [[email, produto, valor, rev, data]];
+}
+
+// ============ GLOBAL STATE ============
+let allRows = [];
+
+// ============ MAIN ============
+function processar() {
+  const texto = document.getElementById("input").value;
+  if (!texto.trim()) {
+    showToast("⚠️ Cole a lista antes de formatar!", "#ffd600");
+    return;
+  }
+
+  const linhas = texto.split("\n").map(s => s.trim()).filter(Boolean);
+  allRows = [];
+  let totalValor = 0;
+
+  for (const linha of linhas) {
+    let rows = parseLine(linha);
+    if (rows === null || rows.length === 0) continue;
+
+    for (const r of rows) {
+      allRows.push(r);
+      const v = parseFloat(r[2].replace(",", ".")) || 0;
+      totalValor += v;
+    }
+  }
+
+  // Output text
+  const resultado = alignRows(allRows);
+  document.getElementById("output").textContent = resultado;
+
+  // Table
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
+  allRows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="color:#555;font-size:11px;">${i + 1}</td>
+      <td class="td-email">${esc(r[0])}</td>
+      <td class="td-produto">${esc(r[1])}</td>
+      <td class="td-valor">R$ ${esc(r[2])}</td>
+      <td class="td-revenda">${esc(r[3])}</td>
+      <td class="td-data">${esc(r[4])}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Resumo
+  buildResumo();
+
+  // Stats
+  const revendasSet = new Set(allRows.map(r => r[3]));
+  const produtosSet = new Set(allRows.map(r => r[1]));
+  document.getElementById("stat-total").textContent = `R$ ${fmtMoney(totalValor)}`;
+  document.getElementById("stat-linhas").textContent = allRows.length;
+  document.getElementById("stat-revendas").textContent = revendasSet.size;
+  document.getElementById("stat-produtos").textContent = produtosSet.size;
+
+  showToast(`✅ ${allRows.length} linhas formatadas!`, "var(--green)");
+}
+
+function buildResumo() {
+  const map = {};
+  for (const r of allRows) {
+    const rev = r[3];
+    if (!map[rev]) map[rev] = { count: 0, total: 0 };
+    map[rev].count++;
+    map[rev].total += parseFloat(r[2].replace(",", ".")) || 0;
+  }
+
+  const sorted = Object.entries(map).sort((a, b) => b[1].total - a[1].total);
+  const grid = document.getElementById("revenda-grid");
+  grid.innerHTML = "";
+
+  for (const [nome, data] of sorted) {
+    const card = document.createElement("div");
+    card.className = "revenda-card";
+    card.innerHTML = `
+      <span class="revenda-name">${esc(nome)}</span>
+      <div class="revenda-stats">
+        <span class="revenda-count">${data.count} venda${data.count > 1 ? "s" : ""}</span>
+        <span class="revenda-total">R$ ${fmtMoney(data.total)}</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ============ VIEWS ============
+function setView(view) {
+  document.getElementById("sec-texto").classList.toggle("hidden", view !== "texto");
+  document.getElementById("sec-tabela").classList.toggle("hidden", view !== "tabela");
+  document.getElementById("sec-resumo").classList.toggle("hidden", view !== "resumo");
+  document.getElementById("btn-texto").classList.toggle("active", view === "texto");
+  document.getElementById("btn-tabela").classList.toggle("active", view === "tabela");
+  document.getElementById("btn-resumo").classList.toggle("active", view === "resumo");
+}
+
+// ============ SEARCH ============
+function filtrarTabela() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const rows = document.getElementById("table-body").querySelectorAll("tr");
+  rows.forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    tr.style.display = text.includes(q) ? "" : "none";
+  });
+}
+
+// ============ ACTIONS ============
+function copiarResultado() {
+  const text = document.getElementById("output").textContent;
+  if (!text) { showToast("⚠️ Nada para copiar!", "#ffd600"); return; }
+  navigator.clipboard.writeText(text).then(() => {
+    showToast("📋 Copiado para a área de transferência!", "var(--green)");
+  });
+}
+
+function downloadTxt() {
+  const text = document.getElementById("output").textContent;
+  if (!text) { showToast("⚠️ Nada para salvar!", "#ffd600"); return; }
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "saida_formatada.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("💾 Arquivo salvo!", "var(--green)");
+}
+
+// ============ TOAST ============
+function showToast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.background = color || "var(--green)";
+  t.style.color = (color === "#ffd600" || color === "var(--green)") ? "#000" : "#fff";
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ============ KEYBOARD SHORTCUT ============
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") processar();
+});
+</script>
+
+</body>
+</html>

@@ -1,5 +1,4 @@
 #!/bin/bash
-# Restore seed DB to volume if not already present
 DATA_DIR="${RAILWAY_VOLUME_MOUNT_PATH:-/app/data}"
 mkdir -p "$DATA_DIR"
 
@@ -11,7 +10,10 @@ else
     echo "[start.sh] lkstore.db already exists, skipping seed."
 fi
 
-# One-time cleanup v2: reimporta só vendas reais do bot novo
+# Remover marker antigo pra não conflitar
+rm -f "$DATA_DIR/.cleanup_sales_done"
+
+# Limpeza v2: reimporta só vendas reais
 python cleanup_sales.py || true
 
 exec python bot.py
