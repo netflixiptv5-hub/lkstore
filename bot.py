@@ -3623,6 +3623,67 @@ def auto_backup_db():
             logger.error(f"[BACKUP] Erro no backup automático: {e}")
         time.sleep(86400)  # 24 horas
 
+async def limparvendas_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Admin command: limpa vendas antigas e reimporta só as reais do bot novo."""
+    if not is_admin(update.effective_user.id):
+        return
+    
+    await update.message.reply_text("⏳ Limpando vendas antigas e reimportando reais...")
+    
+    import os
+    vendas_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendas_bot_novo_completo.txt")
+    
+    if not os.path.exists(vendas_file):
+        await update.message.reply_text(f"❌ Arquivo não encontrado: {vendas_file}")
+        return
+    
+    with open(vendas_file, "r", encoding="utf-8") as f:
+        lines = [l.strip() for l in f if l.strip()]
+    
+    conn = get_db()
+    old_count = conn.execute("SELECT COUNT(*) FROM sales").fetchone()[0]
+    
+    conn.execute("DELETE FROM sales")
+    conn.execute("DELETE FROM sqlite_sequence WHERE name='sales'")
+    
+    imported = 0
+    for line in lines:
+        parts = line.split("|")
+        if len(parts) < 6:
+            continue
+        product_name = parts[0]
+        try:
+            price = float(parts[1])
+        except:
+            continue
+        credentials = parts[2]
+        telegram_id = parts[4]
+        date_str = parts[5].strip()
+        
+        try:
+            dt = datetime.strptime(date_str, "%d/%m/%Y - %H:%M")
+            created_at = dt.strftime("%Y-%m-%d %H:%M:%S")
+        except:
+            created_at = date_str
+        
+        conn.execute(
+            "INSERT INTO sales (telegram_id, product_name, product_id, price, credentials, created_at) VALUES (?, ?, 0, ?, ?, ?)",
+            (telegram_id, product_name, price, credentials, created_at)
+        )
+        imported += 1
+    
+    conn.commit()
+    new_count = conn.execute("SELECT COUNT(*) FROM sales").fetchone()[0]
+    conn.close()
+    
+    await update.message.reply_text(
+        f"✅ Limpeza concluída!\n\n"
+        f"📊 Antes: {old_count} vendas\n"
+        f"📥 Importadas: {imported} vendas reais\n"
+        f"📊 Depois: {new_count} vendas"
+    )
+
+
 def main():
     init_db()
 
@@ -3696,6 +3757,7 @@ def main():
     app.add_handler(CommandHandler("linkcanal", linkcanal))
     app.add_handler(CommandHandler("setsuporteapi", setsuporteapi))
     app.add_handler(CommandHandler("fixadd", fixadd_cmd))
+    app.add_handler(CommandHandler("limparvendas", limparvendas_cmd))
     
     # Callbacks
     app.add_handler(CallbackQueryHandler(adm_callback, pattern="^adm_"))
