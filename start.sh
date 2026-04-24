@@ -11,7 +11,7 @@ else
     echo "[start.sh] lkstore.db already exists, skipping seed."
 fi
 
-# One-time cleanup: remove mass-imported sales with wrong dates
+# One-time cleanup v2: reimporta só vendas reais do bot novo
 python cleanup_sales.py || true
 
 exec python bot.py

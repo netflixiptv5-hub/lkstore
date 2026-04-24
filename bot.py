@@ -539,8 +539,9 @@ async def confirm_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for item in items:
         conn.execute("UPDATE products SET sold = 1, sold_to = ?, sold_at = datetime('now','localtime') WHERE id = ?",
                      (user_id, item['id']))
-        conn.execute("INSERT INTO sales (telegram_id, product_name, product_id, price, credentials) VALUES (?, ?, ?, ?, ?)",
-                     (user_id, product_name, item['id'], price, item['credentials']))
+        now_brt = datetime.now(BRT).strftime("%Y-%m-%d %H:%M:%S")
+        conn.execute("INSERT INTO sales (telegram_id, product_name, product_id, price, credentials, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                     (user_id, product_name, item['id'], price, item['credentials'], now_brt))
         delivered.append(item)
     
     conn.execute("UPDATE users SET balance = balance - ? WHERE telegram_id = ?", (total, user_id))
@@ -1905,9 +1906,10 @@ async def importarvendas(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     (telegram_id, product_name, 0, price, credentials, created_at)
                 )
             else:
+                now_brt = datetime.now(BRT).strftime("%Y-%m-%d %H:%M:%S")
                 conn.execute(
-                    "INSERT INTO sales (telegram_id, product_name, product_id, price, credentials) VALUES (?, ?, ?, ?, ?)",
-                    (telegram_id, product_name, 0, price, credentials)
+                    "INSERT INTO sales (telegram_id, product_name, product_id, price, credentials, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                    (telegram_id, product_name, 0, price, credentials, now_brt)
                 )
             imported += 1
         except Exception as e:
@@ -2835,12 +2837,7 @@ async def _send_sales_file(query, items, filename, title, message=None):
     content = ""
     total_valor = 0
     for i in items:
-        creds = i['credentials']
-        # Split credentials back to email and senha
-        if ':' in creds:
-            email, senha = creds.split(':', 1)
-        else:
-            email, senha = creds, ''
+        creds = i['credentials'].rstrip(':')
         # Format date to DD/MM/YYYY - HH:MM
         date_str = i['created_at'] or ''
         try:
@@ -2848,7 +2845,7 @@ async def _send_sales_file(query, items, filename, title, message=None):
             date_str = dt.strftime("%d/%m/%Y - %H:%M")
         except:
             pass
-        content += f"{i['product_name']}|{int(i['price'])}|{email}|{senha}|{i['telegram_id']}|{date_str}\n"
+        content += f"{i['product_name']}|{int(i['price'])}|{creds}||{i['telegram_id']}|{date_str}\n"
         total_valor += i['price']
     
     buf = BytesIO(content.encode('utf-8'))
