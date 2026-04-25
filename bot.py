@@ -2803,16 +2803,54 @@ async def adm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         conn = get_db()
         conn.execute("UPDATE users SET banned = 1 WHERE telegram_id = ?", (uid,))
         conn.commit()
+        # Refresh userinfo after ban
+        user = conn.execute("SELECT * FROM users WHERE telegram_id = ?", (uid,)).fetchone()
+        sales_count = conn.execute("SELECT COUNT(*) as c FROM sales WHERE telegram_id = ?", (uid,)).fetchone()['c']
+        total_spent = conn.execute("SELECT COALESCE(SUM(price), 0) as s FROM sales WHERE telegram_id = ?", (uid,)).fetchone()['s']
         conn.close()
         await query.answer(f"⛔ Usuário {uid} banido!", show_alert=True)
+        if user:
+            text = (
+                f"👤 <b>Info do Usuário</b>\n\n"
+                f"🆔 ID: <code>{user['telegram_id']}</code>\n"
+                f"👤 Nome: {user['first_name'] or 'N/A'}\n"
+                f"📛 Username: @{user['username'] or 'N/A'}\n"
+                f"💰 Saldo: R${user['balance']:.2f}\n"
+                f"🛒 Compras: {sales_count}\n"
+                f"💸 Total gasto: R${total_spent:.2f}\n"
+                f"📅 Cadastro: {user['created_at']}\n"
+                f"🔒 Status: ⛔ BANIDO"
+            )
+            await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("✅ Desbanir", callback_data=f"adm_unban_{uid}")]
+            ]))
     
     elif data.startswith("adm_unban_"):
         uid = data.replace("adm_unban_", "")
         conn = get_db()
         conn.execute("UPDATE users SET banned = 0 WHERE telegram_id = ?", (uid,))
         conn.commit()
+        # Refresh userinfo after unban
+        user = conn.execute("SELECT * FROM users WHERE telegram_id = ?", (uid,)).fetchone()
+        sales_count = conn.execute("SELECT COUNT(*) as c FROM sales WHERE telegram_id = ?", (uid,)).fetchone()['c']
+        total_spent = conn.execute("SELECT COALESCE(SUM(price), 0) as s FROM sales WHERE telegram_id = ?", (uid,)).fetchone()['s']
         conn.close()
         await query.answer(f"✅ Usuário {uid} desbanido!", show_alert=True)
+        if user:
+            text = (
+                f"👤 <b>Info do Usuário</b>\n\n"
+                f"🆔 ID: <code>{user['telegram_id']}</code>\n"
+                f"👤 Nome: {user['first_name'] or 'N/A'}\n"
+                f"📛 Username: @{user['username'] or 'N/A'}\n"
+                f"💰 Saldo: R${user['balance']:.2f}\n"
+                f"🛒 Compras: {sales_count}\n"
+                f"💸 Total gasto: R${total_spent:.2f}\n"
+                f"📅 Cadastro: {user['created_at']}\n"
+                f"🔒 Status: ✅ Normal"
+            )
+            await safe_edit(query, text, reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("⛔ Banir", callback_data=f"adm_ban_{uid}")]
+            ]))
     
     elif data == "adm_deletar_login":
         context.user_data['adm_step'] = 'deletar_login'
