@@ -9,171 +9,179 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
---bg:#050508;--bg2:#0a0a10;--bg3:#111118;--bg4:#1a1a24;
+--bg:#08080e;--bg2:#0e0e16;--bg3:#14141e;--bg4:#1c1c2a;
 --red:#E50914;--red2:#FF1A26;--red3:#ff3344;
 --gold:#FFD700;--gold2:#FFA500;
 --green:#00E676;--green2:#00C853;
 --blue:#4FC3F7;
---text:#EAEAEA;--text2:#999;--text3:#555;
+--text:#F0F0F0;--text2:#999;--text3:#555;
 --glass:rgba(255,255,255,0.03);
 --glass2:rgba(255,255,255,0.06);
---glow:0 0 30px rgba(229,9,20,0.3);
 --radius:16px;--radius2:12px;
 }
 html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;top:0;left:0;right:0;height:600px;background:radial-gradient(ellipse at 50% -200px,rgba(229,9,20,0.08) 0%,transparent 70%);pointer-events:none;z-index:0}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 
-/* Animations */
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(229,9,20,0.2)}50%{box-shadow:0 0 40px rgba(229,9,20,0.4)}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes scrollX{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-.animate-in{animation:fadeIn .5s ease both}
-.animate-in:nth-child(2){animation-delay:.1s}
-.animate-in:nth-child(3){animation-delay:.2s}
-.animate-in:nth-child(4){animation-delay:.3s}
-
-/* Layout */
-.container{max-width:480px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
-.screen{display:none;min-height:100vh;padding-bottom:100px}
+.container{max-width:520px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
+.screen{display:none;min-height:100vh;padding-bottom:120px}
 .screen.active{display:block}
 
-/* Header */
-.header{padding:20px 0;text-align:center;position:relative}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:6px;color:var(--red);text-shadow:0 0 30px rgba(229,9,20,0.4);cursor:pointer}
-.logo span{color:var(--text);font-size:18px;letter-spacing:3px;display:block;margin-top:-4px;opacity:.5}
-.user-pill{display:inline-flex;align-items:center;gap:8px;background:var(--glass2);border:1px solid rgba(255,255,255,0.06);border-radius:100px;padding:6px 16px 6px 10px;margin-top:12px;font-size:13px;color:var(--text2);transition:all .3s}
-.user-pill:hover{border-color:rgba(229,9,20,0.3)}
-.user-pill .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red3));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
-.user-pill .balance{color:var(--green);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px}
+/* HERO BANNER */
+.hero{position:relative;width:100%;border-radius:0 0 20px 20px;overflow:hidden;margin-bottom:20px}
+.hero img{width:100%;display:block;height:auto}
+.hero-overlay{position:absolute;bottom:0;left:0;right:0;padding:24px 20px 18px;background:linear-gradient(transparent,rgba(8,8,14,.95));text-align:center}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:6px;color:#fff;text-shadow:0 0 40px rgba(229,9,20,.5)}
+.hero-sub{font-size:13px;color:var(--text2);margin-top:2px}
 
-/* Nav */
-.nav{display:flex;gap:4px;padding:8px;background:var(--bg2);border-radius:14px;margin:16px 0;border:1px solid rgba(255,255,255,0.04)}
-.nav-btn{flex:1;padding:10px 4px;border:none;background:transparent;color:var(--text3);font-size:11px;font-weight:600;border-radius:10px;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter',sans-serif}
-.nav-btn.active{background:var(--red);color:#fff;box-shadow:0 4px 15px rgba(229,9,20,0.3)}
+/* Streaming logos carousel */
+.logos-strip{overflow:hidden;padding:10px 0;margin-bottom:8px}
+.logos-track{display:flex;gap:28px;animation:scrollX 12s linear infinite;width:max-content}
+.logos-track img{height:28px;opacity:.6;filter:grayscale(.3);transition:all .3s}
+.logos-track img:hover{opacity:1;filter:none}
+
+/* USER BAR */
+.user-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg2);border:1px solid rgba(255,255,255,.05);border-radius:14px;margin-bottom:16px}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red3));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.user-name{font-size:13px;font-weight:600}
+.user-balance-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.user-bal{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--green)}
+.user-actions{display:flex;gap:6px}
+.ua-btn{padding:8px 14px;border:1px solid rgba(255,255,255,.08);background:var(--bg3);color:var(--text2);border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+.ua-btn:hover{border-color:var(--red);color:var(--text)}
+.ua-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+
+/* NAV */
+.nav{display:flex;gap:4px;padding:6px;background:var(--bg2);border-radius:12px;margin-bottom:20px;border:1px solid rgba(255,255,255,.04)}
+.nav-btn{flex:1;padding:10px 4px;border:none;background:transparent;color:var(--text3);font-size:11px;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter',sans-serif}
+.nav-btn.active{background:var(--red);color:#fff;box-shadow:0 4px 15px rgba(229,9,20,.3)}
 .nav-btn:hover:not(.active){color:var(--text2);background:var(--glass2)}
 
-/* Cards */
-.card{background:var(--bg2);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:20px;margin-bottom:12px;transition:all .3s;position:relative;overflow:hidden}
-.card:hover{border-color:rgba(229,9,20,0.15);transform:translateY(-2px)}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(229,9,20,0.2),transparent)}
-.card-glass{background:linear-gradient(135deg,var(--glass),var(--glass2));backdrop-filter:blur(20px)}
+/* PRODUCT GRID */
+.products-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.product-card{background:var(--bg2);border:1px solid rgba(255,255,255,.05);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .3s;animation:fadeIn .5s ease both;position:relative}
+.product-card:hover{border-color:rgba(229,9,20,.2);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.product-img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.product-body{padding:12px}
+.product-name{font-size:12px;font-weight:700;margin-bottom:6px;line-height:1.3;min-height:32px}
+.product-price-row{display:flex;align-items:baseline;gap:4px}
+.product-price{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;color:var(--red2)}
+.product-price-label{font-size:10px;color:var(--text3)}
+.product-pix{font-size:10px;color:var(--green);margin-top:2px;font-weight:500}
+.product-stock{font-size:10px;color:var(--text3);margin-top:4px}
+.product-badge{position:absolute;top:8px;right:8px;background:var(--green);color:#000;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px}
+.product-badge.low{background:var(--gold)}
+.product-badge.out{background:var(--red)}
+.product-btn{width:100%;padding:10px;border:none;background:linear-gradient(135deg,var(--red),#b5070f);color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter',sans-serif}
+.product-btn:hover{background:linear-gradient(135deg,var(--red2),var(--red))}
 
-/* Product Card */
-.product-card{cursor:pointer;position:relative}
-.product-card .badge{position:absolute;top:12px;right:12px;background:var(--green);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
-.product-card .badge.low{background:var(--gold)}
-.product-card .badge.out{background:var(--red)}
-.product-name{font-size:15px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.product-name .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.product-price{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--red2);margin:8px 0 4px}
-.product-price small{font-size:12px;color:var(--text3);font-weight:400}
-.product-stock{font-size:12px;color:var(--text3)}
+/* SECTION */
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:20px 0 12px;padding-left:4px}
 
-/* Buttons */
-.btn{width:100%;padding:14px;border:none;border-radius:var(--radius2);font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:1px;font-family:'Inter',sans-serif;position:relative;overflow:hidden}
-.btn-red{background:linear-gradient(135deg,var(--red),#c2070f);color:#fff;box-shadow:0 4px 20px rgba(229,9,20,0.25)}
-.btn-red:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(229,9,20,0.35)}
-.btn-red:active{transform:translateY(0)}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid rgba(255,255,255,.05);border-radius:var(--radius);padding:20px;margin-bottom:12px;transition:all .3s;position:relative;overflow:hidden}
+.card:hover{border-color:rgba(229,9,20,.12)}
+
+/* BUTTONS */
+.btn{width:100%;padding:14px;border:none;border-radius:var(--radius2);font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:1px;font-family:'Inter',sans-serif}
+.btn-red{background:linear-gradient(135deg,var(--red),#b5070f);color:#fff;box-shadow:0 4px 20px rgba(229,9,20,.25)}
+.btn-red:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(229,9,20,.35)}
 .btn-red:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text2)}
-.btn-outline:hover{border-color:rgba(229,9,20,0.3);color:var(--text)}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--text2)}
+.btn-outline:hover{border-color:rgba(229,9,20,.3);color:var(--text)}
 .btn-green{background:linear-gradient(135deg,var(--green2),#009624);color:#000}
 .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000}
 .btn-sm{padding:10px 16px;font-size:12px;width:auto;border-radius:8px}
 
-/* Inputs */
+/* INPUTS */
 .input-group{margin-bottom:16px}
-.input-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
-.input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius2);color:var(--text);font-size:14px;outline:none;transition:all .25s;font-family:'Inter',sans-serif}
-.input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,9,20,0.1)}
+.input-group label{display:block;font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius2);color:var(--text);font-size:14px;outline:none;transition:all .25s;font-family:'Inter',sans-serif}
+.input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,9,20,.1)}
 .input::placeholder{color:var(--text3)}
+select.input{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 
-/* Modal */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:100;display:none;align-items:flex-end;justify-content:center;padding:16px}
+/* MODAL */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:100;display:none;align-items:flex-end;justify-content:center;padding:16px}
 .modal-overlay.active{display:flex}
-.modal{background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:20px 20px 16px 16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease;padding:24px}
+.modal{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 16px 16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease;padding:24px}
 .modal-title{font-size:18px;font-weight:800;text-align:center;margin-bottom:20px}
 
-/* QR Code */
-.qr-container{text-align:center;padding:20px;background:white;border-radius:12px;margin:16px 0}
+/* QR / PIX */
+.qr-container{text-align:center;padding:20px;background:#fff;border-radius:12px;margin:16px 0}
 .qr-container img{max-width:200px;width:100%}
-
-/* PIX Code */
-.pix-code{background:var(--bg);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;word-break:break-all;color:var(--text2);cursor:pointer;transition:all .2s;position:relative}
+.pix-code{background:var(--bg);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;word-break:break-all;color:var(--text2);cursor:pointer;transition:all .2s;position:relative}
 .pix-code:hover{border-color:var(--red)}
-.pix-code::after{content:'COPIAR';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:var(--red);background:var(--bg);padding:2px 6px;border-radius:4px;font-family:'Inter',sans-serif}
+.pix-code::after{content:'COPIAR';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:var(--red);background:var(--bg);padding:2px 6px;border-radius:4px}
 .pix-code.copied{border-color:var(--green)}
 .pix-code.copied::after{content:'COPIADO ✓';color:var(--green)}
 
-/* Order card */
-.order-card{padding:16px}
-.order-card .cred{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg);padding:8px 12px;border-radius:8px;margin-top:8px;cursor:pointer;transition:all .2s;border:1px solid transparent;color:var(--blue)}
-.order-card .cred:hover{border-color:var(--blue)}
-.order-date{font-size:11px;color:var(--text3)}
-
-/* Empty state */
-.empty{text-align:center;padding:60px 20px;color:var(--text3)}
-.empty .icon{font-size:48px;margin-bottom:12px;opacity:.3}
-.empty p{font-size:14px}
-
-/* Loading */
-.spinner{width:24px;height:24px;border:3px solid var(--bg4);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:20px auto}
-
-/* Toast */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--bg3);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:500;z-index:200;transition:transform .3s ease;max-width:90%;text-align:center}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.success{border-color:rgba(0,230,118,0.3);color:var(--green)}
-.toast.error{border-color:rgba(229,9,20,0.3);color:var(--red2)}
-
-/* Qty selector */
-.qty-row{display:flex;align-items:center;gap:12px;margin:16px 0}
-.qty-btn{width:44px;height:44px;border:1px solid rgba(255,255,255,0.1);background:var(--bg);color:var(--text);border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+/* QTY */
+.qty-row{display:flex;align-items:center;gap:12px;margin:16px 0;justify-content:center}
+.qty-btn{width:44px;height:44px;border:1px solid rgba(255,255,255,.1);background:var(--bg);color:var(--text);border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .qty-btn:hover{border-color:var(--red);color:var(--red)}
 .qty-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;min-width:40px;text-align:center}
 
-/* Divider */
-.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);margin:16px 0}
-
-/* Pix amounts */
+/* PIX AMOUNTS */
 .pix-amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
-.pix-amount{padding:14px 8px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-align:center;cursor:pointer;transition:all .25s;background:var(--bg)}
-.pix-amount:hover{border-color:var(--red);background:rgba(229,9,20,0.05)}
-.pix-amount.selected{border-color:var(--red);background:rgba(229,9,20,0.1);color:var(--red2)}
+.pix-amount{padding:14px 8px;border:1px solid rgba(255,255,255,.08);border-radius:10px;text-align:center;cursor:pointer;transition:all .25s;background:var(--bg)}
+.pix-amount:hover{border-color:var(--red);background:rgba(229,9,20,.05)}
+.pix-amount.selected{border-color:var(--red);background:rgba(229,9,20,.1);color:var(--red2)}
 .pix-amount .val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
-.pix-amount .label{font-size:10px;color:var(--text3);margin-top:2px}
 
-/* Status badge */
+/* ORDER CARD */
+.order-card{padding:16px}
+.order-card .cred{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg);padding:8px 12px;border-radius:8px;margin-top:8px;cursor:pointer;transition:all .2s;border:1px solid transparent;color:var(--blue)}
+.order-card .cred:hover{border-color:var(--blue)}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty .icon{font-size:48px;margin-bottom:12px;opacity:.3}
+
+/* SPINNER */
+.spinner{width:24px;height:24px;border:3px solid var(--bg4);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:20px auto}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:500;z-index:200;transition:transform .3s ease;max-width:90%;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(0,230,118,.3);color:var(--green)}
+.toast.error{border-color:rgba(229,9,20,.3);color:var(--red2)}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);margin:16px 0}
+
+/* LOGIN */
+.login-hero{text-align:center;padding:40px 0 30px}
+.login-card{background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:28px 22px}
+.login-tabs{display:flex;gap:4px;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:20px}
+.login-tab{flex:1;padding:10px;border:none;background:transparent;color:var(--text3);font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.login-tab.active{background:var(--red);color:#fff}
+
+/* WHATSAPP FLOAT */
+.whatsapp-float{position:fixed;bottom:24px;right:24px;z-index:50;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.4);cursor:pointer;transition:all .3s;animation:float 3s ease infinite}
+.whatsapp-float:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(37,211,102,.5)}
+.whatsapp-float svg{width:28px;height:28px;fill:#fff}
+
+/* STATUS */
 .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
 .status-dot.pending{background:var(--gold);animation:pulse 1.5s infinite}
 .status-dot.approved{background:var(--green)}
 
-/* Login screen specific */
-.login-hero{text-align:center;padding:80px 0 40px}
-.login-hero .logo{font-size:48px;letter-spacing:8px;margin-bottom:8px}
-.login-hero .sub{color:var(--text3);font-size:14px;margin-top:12px}
-.login-card{background:linear-gradient(135deg,rgba(229,9,20,0.03),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px 24px}
-.login-features{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
-.login-feature{background:var(--glass);border-radius:10px;padding:12px;text-align:center;font-size:11px;color:var(--text2)}
-.login-feature .emoji{font-size:20px;margin-bottom:4px;display:block}
-
-/* Section title */
-.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:20px 0 12px;padding-left:4px}
-
 @media(max-width:380px){
-.container{padding:0 12px}
-.product-price{font-size:18px}
-.pix-amounts{grid-template-columns:repeat(2,1fr)}
+.container{padding:0 10px}
+.products-grid{gap:8px}
+.product-price{font-size:17px}
+.hero-title{font-size:28px}
 }
 </style>
 </head>
@@ -181,44 +189,100 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:600px;backgro
 
 <div id="toast" class="toast"></div>
 
-<!-- LOGIN SCREEN -->
+<!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/5516996143454" target="_blank" class="whatsapp-float" title="Fale conosco no WhatsApp">
+<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<!-- ==================== LOGIN SCREEN ==================== -->
 <div id="loginScreen" class="screen active">
 <div class="container">
-  <div class="login-hero">
-    <div class="logo">LK LOGINS<span>STORE</span></div>
-    <p class="sub">Logins Premium com entrega automática</p>
-  </div>
-  <div class="login-card animate-in">
-    <div class="input-group">
-      <label>Seu @ do Telegram</label>
-      <input class="input" id="loginUsername" placeholder="@seu_username" autocomplete="off" autofocus>
+  <!-- HERO -->
+  <div class="hero">
+    <img src="img/hero_banner.png" alt="LK LOGINS STORE">
+    <div class="hero-overlay">
+      <div class="hero-title">LK LOGINS STORE</div>
+      <div class="hero-sub">Logins Premium • Entrega Automática</div>
     </div>
-    <button class="btn btn-red" id="loginBtn" onclick="doLogin()">ENTRAR</button>
-    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px">
-      Primeiro cadastre-se no bot <a href="https://t.me/LKLOGINSSTORE77_BOT" target="_blank" style="color:var(--red);text-decoration:none">@LKLOGINSSTORE77_BOT</a>
-    </p>
   </div>
-  <div class="login-features animate-in">
-    <div class="login-feature"><span class="emoji">⚡</span>Entrega Instantânea</div>
-    <div class="login-feature"><span class="emoji">🔐</span>100% Seguro</div>
-    <div class="login-feature"><span class="emoji">💳</span>PIX Automático</div>
-    <div class="login-feature"><span class="emoji">🏆</span>Garantia 30 Dias</div>
+
+  <div class="login-card" style="animation:fadeIn .5s ease both">
+    <!-- TABS LOGIN / REGISTRO -->
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="showLoginTab('login')">ENTRAR</button>
+      <button class="login-tab" onclick="showLoginTab('register')">CRIAR CONTA</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="input-group">
+        <label>Seu @ do Telegram</label>
+        <input class="input" id="loginUsername" placeholder="@seu_username" autocomplete="off" autofocus>
+      </div>
+      <button class="btn btn-red" id="loginBtn" onclick="doLogin()">ENTRAR</button>
+      <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:14px">
+        Novo aqui? <a href="#" onclick="showLoginTab('register');return false" style="color:var(--red);text-decoration:none;font-weight:600">Crie sua conta</a>
+      </p>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none">
+      <div class="input-group">
+        <label>Seu nome</label>
+        <input class="input" id="regName" placeholder="Seu nome" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label>@ do Telegram</label>
+        <input class="input" id="regUsername" placeholder="@seu_username" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label>Contato (Telegram @ ou WhatsApp)</label>
+        <input class="input" id="regContact" placeholder="@telegram ou (11) 99999-9999" autocomplete="off">
+      </div>
+      <button class="btn btn-red" id="regBtn" onclick="doRegister()">CRIAR CONTA</button>
+      <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:14px">
+        Já tem conta? <a href="#" onclick="showLoginTab('login');return false" style="color:var(--red);text-decoration:none;font-weight:600">Entrar</a>
+      </p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;animation:fadeIn .5s .2s ease both;opacity:0">
+    <div style="background:var(--glass2);border-radius:10px;padding:12px;text-align:center;font-size:11px;color:var(--text2)"><span style="font-size:18px;display:block;margin-bottom:4px">⚡</span>Entrega Instantânea</div>
+    <div style="background:var(--glass2);border-radius:10px;padding:12px;text-align:center;font-size:11px;color:var(--text2)"><span style="font-size:18px;display:block;margin-bottom:4px">🔐</span>100% Seguro</div>
+    <div style="background:var(--glass2);border-radius:10px;padding:12px;text-align:center;font-size:11px;color:var(--text2)"><span style="font-size:18px;display:block;margin-bottom:4px">💳</span>PIX Automático</div>
+    <div style="background:var(--glass2);border-radius:10px;padding:12px;text-align:center;font-size:11px;color:var(--text2)"><span style="font-size:18px;display:block;margin-bottom:4px">🏆</span>Garantia 30 Dias</div>
   </div>
 </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- ==================== MAIN APP ==================== -->
 <div id="appScreen" class="screen">
 <div class="container">
-  <div class="header">
-    <div class="logo" onclick="switchTab('products')">LK LOGINS<span>STORE</span></div>
-    <div class="user-pill" id="userPill" onclick="switchTab('balance')">
-      <div class="avatar" id="userAvatar">?</div>
-      <span id="userName">...</span>
-      <span class="balance" id="userBalance">R$0,00</span>
+  <!-- HERO -->
+  <div class="hero" style="cursor:pointer" onclick="switchTab('products')">
+    <img src="img/hero_banner.png" alt="LK LOGINS STORE">
+    <div class="hero-overlay">
+      <div class="hero-title">LK LOGINS STORE</div>
+      <div class="hero-sub">Logins Premium • Entrega Automática</div>
     </div>
   </div>
 
+  <!-- USER BAR -->
+  <div class="user-bar">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div>
+        <div class="user-name" id="userName">...</div>
+        <div class="user-balance-label">Saldo disponível</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="user-bal" id="userBalance">R$0,00</div>
+      <button class="ua-btn" onclick="logout()" style="font-size:10px;padding:4px 10px;margin-top:4px">SAIR</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
   <nav class="nav">
     <button class="nav-btn active" data-tab="products" onclick="switchTab('products')">🛒 Loja</button>
     <button class="nav-btn" data-tab="balance" onclick="switchTab('balance')">💰 Saldo</button>
@@ -226,19 +290,18 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:600px;backgro
     <button class="nav-btn" data-tab="gift" onclick="switchTab('gift')">🎁 Gift</button>
   </nav>
 
-  <!-- PRODUCTS TAB -->
+  <!-- ===== PRODUCTS TAB ===== -->
   <div class="tab-content" id="tab-products">
     <div class="section-title">Produtos Disponíveis</div>
-    <div id="productsList"></div>
+    <div class="products-grid" id="productsList"></div>
   </div>
 
-  <!-- BALANCE TAB -->
+  <!-- ===== BALANCE TAB ===== -->
   <div class="tab-content" id="tab-balance" style="display:none">
-    <div class="card card-glass animate-in" style="text-align:center;padding:30px 20px">
-      <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Seu Saldo</div>
+    <div class="card" style="text-align:center;padding:30px 20px">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Seu Saldo</div>
       <div id="bigBalance" style="font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:800;color:var(--green)">R$0,00</div>
     </div>
-    
     <div class="section-title">Carregar via PIX</div>
     <div class="pix-amounts" id="pixAmounts">
       <div class="pix-amount" onclick="selectPix(this,5)"><div class="val">R$5</div></div>
@@ -255,15 +318,15 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:600px;backgro
     <button class="btn btn-green" onclick="generatePix()">GERAR PIX</button>
   </div>
 
-  <!-- ORDERS TAB -->
+  <!-- ===== ORDERS TAB ===== -->
   <div class="tab-content" id="tab-orders" style="display:none">
     <div class="section-title">Meus Pedidos</div>
     <div id="ordersList"></div>
   </div>
 
-  <!-- GIFT TAB -->
+  <!-- ===== GIFT TAB ===== -->
   <div class="tab-content" id="tab-gift" style="display:none">
-    <div class="card card-glass animate-in" style="text-align:center;padding:30px 20px">
+    <div class="card" style="text-align:center;padding:30px 20px">
       <div style="font-size:48px;margin-bottom:12px">🎁</div>
       <div style="font-size:16px;font-weight:700;margin-bottom:4px">Resgatar Gift Card</div>
       <div style="font-size:12px;color:var(--text3)">Insira o código para adicionar saldo</div>
@@ -300,6 +363,37 @@ let USER = null;
 let _pixCheck = null;
 let _selectedPix = 0;
 
+// Product image mapping
+const PRODUCT_IMAGES = {
+  'netflix completa': 'img/netflix.png',
+  '5 netflix premium': 'img/netflix5.png',
+  'disney': 'img/disney.png',
+  'hbo': 'img/hbo.png',
+  'amazon': 'img/amazon.png',
+  'globo + canais e telecine': 'img/globo_telecine.png',
+  'globo+canais+telecine+ premiere': 'img/globoplay_combo.png',
+  'globo+canais+telecine+premiere': 'img/globoplay_combo.png',
+  'tela extra': 'img/tela_extra.png',
+  'combo': 'img/combo.png',
+};
+
+function getProductImage(name) {
+  const lower = name.toLowerCase().trim();
+  for (const [key, img] of Object.entries(PRODUCT_IMAGES)) {
+    if (lower.includes(key) || key.includes(lower)) return img;
+  }
+  // Fallback by keyword
+  if (lower.includes('netflix')) return 'img/netflix.png';
+  if (lower.includes('disney')) return 'img/disney.png';
+  if (lower.includes('hbo') || lower.includes('max')) return 'img/hbo.png';
+  if (lower.includes('amazon') || lower.includes('prime')) return 'img/amazon.png';
+  if (lower.includes('globo') && lower.includes('premiere')) return 'img/globoplay_combo.png';
+  if (lower.includes('globo')) return 'img/globo_telecine.png';
+  if (lower.includes('telecine')) return 'img/telecine.png';
+  if (lower.includes('tela')) return 'img/tela_extra.png';
+  return 'img/combo.png';
+}
+
 // ===== API =====
 async function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json' };
@@ -314,6 +408,20 @@ function toast(msg, type = 'success') {
   t.textContent = msg;
   t.className = `toast ${type} show`;
   setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ===== LOGIN TABS =====
+function showLoginTab(tab) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  if (tab === 'login') {
+    document.querySelectorAll('.login-tab')[0].classList.add('active');
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+  } else {
+    document.querySelectorAll('.login-tab')[1].classList.add('active');
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+  }
 }
 
 // ===== LOGIN =====
@@ -336,6 +444,29 @@ async function doLogin() {
 }
 document.getElementById('loginUsername').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
+// ===== REGISTER =====
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const username = document.getElementById('regUsername').value.trim();
+  const contact = document.getElementById('regContact').value.trim();
+  if (!name) return toast('Informe seu nome', 'error');
+  if (!username) return toast('Informe seu @ do Telegram', 'error');
+  if (!contact) return toast('Informe seu contato (Telegram ou WhatsApp)', 'error');
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = 'CRIANDO...';
+  const data = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, username, contact }) });
+  if (data.ok) {
+    TOKEN = data.token;
+    localStorage.setItem('lk_token', TOKEN);
+    USER = data.user;
+    showApp();
+    toast(`Conta criada! Bem-vindo, ${USER.first_name}!`);
+  } else {
+    toast(data.error, 'error');
+    btn.disabled = false; btn.textContent = 'CRIAR CONTA';
+  }
+}
+
 // ===== SHOW APP =====
 function showApp() {
   document.getElementById('loginScreen').classList.remove('active');
@@ -343,7 +474,6 @@ function showApp() {
   updateUI();
   loadProducts();
 }
-
 function updateUI() {
   if (!USER) return;
   document.getElementById('userAvatar').textContent = (USER.first_name || '?')[0].toUpperCase();
@@ -351,13 +481,11 @@ function updateUI() {
   document.getElementById('userBalance').textContent = `R$${USER.balance.toFixed(2)}`;
   document.getElementById('bigBalance').textContent = `R$${USER.balance.toFixed(2)}`;
 }
-
 async function refreshUser() {
   const data = await api('/api/me');
   if (data.ok) { USER = data.user; updateUI(); }
   else if (!data.ok && data.error === 'Não autenticado') { logout(); }
 }
-
 function logout() {
   TOKEN = ''; USER = null;
   localStorage.removeItem('lk_token');
@@ -368,22 +496,28 @@ function logout() {
 // ===== PRODUCTS =====
 async function loadProducts() {
   const el = document.getElementById('productsList');
-  el.innerHTML = '<div class="spinner"></div>';
+  el.innerHTML = '<div class="spinner" style="grid-column:1/-1"></div>';
   const data = await api('/api/products');
   if (!data.ok || !data.products.length) {
-    el.innerHTML = '<div class="empty"><div class="icon">📦</div><p>Nenhum produto disponível no momento</p></div>';
+    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="icon">📦</div><p>Nenhum produto disponível</p></div>';
     return;
   }
-  const icons = { 'netflix': '🔴', 'prime': '📦', 'disney': '🏰', 'hbo': '💜', 'globo': '🟢', 'max': '💜', 'paramount': '🔵', 'spotify': '🟢', 'deezer': '🎵' };
-  el.innerHTML = data.products.map(p => {
-    const icon = Object.entries(icons).find(([k]) => p.name.toLowerCase().includes(k))?.[1] || '🎯';
+  el.innerHTML = data.products.map((p, idx) => {
+    const img = getProductImage(p.name);
     const badge = p.qty <= 0 ? 'out' : p.qty <= 3 ? 'low' : '';
-    const badgeText = p.qty <= 0 ? 'ESGOTADO' : p.qty <= 3 ? `${p.qty} un` : `${p.qty} un`;
-    return `<div class="card product-card animate-in" onclick="openBuy('${p.name.replace(/'/g,"\\'")}',${p.price},${p.qty})">
-      <div class="badge ${badge}">${badgeText}</div>
-      <div class="product-name"><div class="icon" style="background:rgba(255,255,255,0.05)">${icon}</div>${p.name}</div>
-      <div class="product-price">R$${p.price.toFixed(0)} <small>/unidade</small></div>
-      <div class="product-stock">Entrega automática • Garantia 30 dias</div>
+    const badgeText = p.qty <= 0 ? 'ESGOTADO' : `${p.qty} un`;
+    return `<div class="product-card" style="animation-delay:${idx*0.06}s" onclick="openBuy('${p.name.replace(/'/g,"\\'")}',${p.price},${p.qty})">
+      <div class="product-badge ${badge}">${badgeText}</div>
+      <img class="product-img" src="${img}" alt="${p.name}" loading="lazy">
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-price-row">
+          <span class="product-price">R$${p.price.toFixed(0)}</span>
+          <span class="product-price-label">/un</span>
+        </div>
+        <div class="product-pix">à vista no PIX</div>
+      </div>
+      <button class="product-btn">COMPRAR</button>
     </div>`;
   }).join('');
 }
@@ -401,13 +535,15 @@ function renderBuyModal() {
   const total = buyProduct.price * buyProduct.selected;
   const bal = USER ? USER.balance : 0;
   const canBuy = bal >= total && buyProduct.selected <= buyProduct.qty;
+  const img = getProductImage(buyProduct.name);
   document.getElementById('buyModalContent').innerHTML = `
-    <div class="card" style="text-align:center">
-      <div style="font-size:16px;font-weight:700">${buyProduct.name}</div>
+    <div style="text-align:center">
+      <img src="${img}" style="width:100%;border-radius:12px;margin-bottom:12px" alt="${buyProduct.name}">
+      <div style="font-size:15px;font-weight:700">${buyProduct.name}</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:800;color:var(--red2);margin:8px 0">R$${total.toFixed(0)}</div>
     </div>
     <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:4px">QUANTIDADE</div>
-    <div class="qty-row" style="justify-content:center">
+    <div class="qty-row">
       <button class="qty-btn" onclick="changeQty(-1)">−</button>
       <span class="qty-val">${buyProduct.selected}</span>
       <button class="qty-btn" onclick="changeQty(1)">+</button>
@@ -435,7 +571,6 @@ async function confirmBuy() {
   btn.disabled = true; btn.textContent = 'PROCESSANDO...';
   const data = await api('/api/buy', { method: 'POST', body: JSON.stringify({ product_name: buyProduct.name, price: buyProduct.price, qty: buyProduct.selected }) });
   if (data.ok) {
-    closeBuy();
     USER.balance = data.balance;
     updateUI();
     const creds = data.items.map((it,i) => `${data.items.length > 1 ? (i+1)+'. ' : ''}<code>${it.credentials}</code>`).join('<br>');
@@ -444,11 +579,16 @@ async function confirmBuy() {
         <div style="font-size:48px;margin-bottom:12px">✅</div>
         <div style="font-size:18px;font-weight:800;margin-bottom:4px">Compra Realizada!</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:20px">${buyProduct.selected}x ${buyProduct.name} • R$${data.total.toFixed(0)}</div>
-        <div style="background:var(--bg);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--blue);line-height:2">${creds}</div>
+        <div style="background:var(--bg);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--blue);line-height:2">${creds}</div>
         <p style="font-size:11px;color:var(--text3);margin-top:12px">Clique nos logins para copiar</p>
+        <div style="margin-top:16px;padding:14px;background:rgba(229,9,20,.05);border:1px solid rgba(229,9,20,.15);border-radius:10px;text-align:left;font-size:12px;line-height:1.6">
+          <b>🔐 SENHA INCORRETA?</b><br>
+          🔄 Redefina você mesmo no nosso site!<br>
+          👉 <a href="https://lklogins-production.up.railway.app" target="_blank" style="color:var(--red);text-decoration:none">Clique aqui para redefinir</a><br>
+          ⚡ Rápido, fácil e automático!
+        </div>
       </div>
       <button class="btn btn-outline" onclick="closeBuy();loadProducts();">FECHAR</button>`;
-    document.getElementById('buyModal').classList.add('active');
     // Copy on click
     document.querySelectorAll('#buyModalContent code').forEach(el => {
       el.style.cursor = 'pointer';
@@ -472,10 +612,8 @@ async function generatePix() {
   const custom = parseFloat(document.getElementById('pixCustom').value);
   const amount = custom > 0 ? custom : _selectedPix;
   if (!amount || amount < 1) return toast('Escolha um valor', 'error');
-  
   const data = await api('/api/pix/create', { method: 'POST', body: JSON.stringify({ amount }) });
   if (!data.ok) return toast(data.error, 'error');
-  
   document.getElementById('pixModalContent').innerHTML = `
     <div style="text-align:center;font-size:14px;color:var(--text2);margin-bottom:12px">
       Valor: <span style="color:var(--green);font-weight:700;font-family:'JetBrains Mono',monospace">R$${data.amount.toFixed(2)}</span>
@@ -488,18 +626,14 @@ async function generatePix() {
       <span style="font-size:13px;color:var(--gold)" id="pixStatus">Aguardando pagamento...</span>
     </div>
     <button class="btn btn-outline" onclick="closePixModal()">CANCELAR</button>
-    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:12px">⏱ Validade: 30 minutos</p>
-  `;
+    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:12px">⏱ Validade: 30 minutos</p>`;
   document.getElementById('pixModal').classList.add('active');
-  
-  // Auto-check every 3s
   if (_pixCheck) clearInterval(_pixCheck);
   _pixCheck = setInterval(async () => {
     const check = await api(`/api/pix/check/${data.mp_id}`);
     if (check.ok && (check.status === 'approved' || check.status === 'already_approved')) {
       clearInterval(_pixCheck); _pixCheck = null;
-      USER.balance = check.balance;
-      updateUI();
+      USER.balance = check.balance; updateUI();
       document.getElementById('pixModalContent').innerHTML = `
         <div style="text-align:center;padding:30px 0">
           <div style="font-size:48px;margin-bottom:12px">✅</div>
@@ -535,13 +669,13 @@ async function loadOrders() {
     return;
   }
   el.innerHTML = data.orders.map(o => `
-    <div class="card order-card animate-in">
+    <div class="card order-card" style="animation:fadeIn .4s ease both">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <span style="font-weight:700;font-size:14px">${o.product_name}</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--red2);font-weight:600">R$${o.price.toFixed(0)}</span>
       </div>
       <div class="cred" onclick="navigator.clipboard.writeText(this.textContent);toast('Copiado!')">${o.credentials}</div>
-      <div class="order-date" style="margin-top:8px">📅 ${o.created_at}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px">📅 ${o.created_at}</div>
     </div>
   `).join('');
 }
@@ -552,13 +686,10 @@ async function redeemGift() {
   if (!code) return toast('Informe o código', 'error');
   const data = await api('/api/gift/redeem', { method: 'POST', body: JSON.stringify({ code }) });
   if (data.ok) {
-    USER.balance = data.balance;
-    updateUI();
+    USER.balance = data.balance; updateUI();
     document.getElementById('giftCode').value = '';
     toast(`Gift resgatado! +R$${data.amount.toFixed(2)} ✅`);
-  } else {
-    toast(data.error, 'error');
-  }
+  } else { toast(data.error, 'error'); }
 }
 
 // ===== TABS =====

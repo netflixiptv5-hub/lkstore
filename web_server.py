@@ -97,7 +97,7 @@ def login():
     conn.close()
     
     if not user:
-        return jsonify({"ok": False, "error": "Usuário não encontrado. Primeiro use o bot @LKLOGINSSTORE77_BOT no Telegram para se cadastrar."})
+        return jsonify({"ok": False, "error": "Usuário não encontrado. Crie uma conta na aba 'CRIAR CONTA'."})
     
     if user["banned"]:
         return jsonify({"ok": False, "error": "Conta bloqueada. Entre em contato com o suporte."})
@@ -118,6 +118,76 @@ def login():
             "username": username,
             "first_name": user["first_name"] or username,
             "balance": user["balance"]
+        }
+    })
+
+@app.route("/api/auth/register", methods=["POST"])
+def register():
+    """Register a new user directly from the web (no need to use bot first)."""
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip()
+    username = (data.get("username") or "").strip().lower().lstrip("@")
+    contact = (data.get("contact") or "").strip()
+    
+    if not name:
+        return jsonify({"ok": False, "error": "Informe seu nome"})
+    if not username:
+        return jsonify({"ok": False, "error": "Informe seu @ do Telegram"})
+    if not contact:
+        return jsonify({"ok": False, "error": "Informe seu contato (Telegram ou WhatsApp)"})
+    
+    conn = get_db()
+    
+    # Check if username already exists
+    existing = conn.execute("SELECT * FROM users WHERE LOWER(username) = ?", (username,)).fetchone()
+    if existing:
+        conn.close()
+        return jsonify({"ok": False, "error": "Esse username já está cadastrado. Use 'ENTRAR'."})
+    
+    # Generate a unique web telegram_id (negative to avoid collision with real Telegram IDs)
+    import random
+    web_tid = f"web_{int(time.time())}_{random.randint(1000,9999)}"
+    
+    # Add contact column if it doesn't exist
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN contact TEXT DEFAULT ''")
+        conn.commit()
+    except:
+        pass  # Column already exists
+    
+    # Insert new user
+    conn.execute(
+        "INSERT INTO users (telegram_id, username, first_name, balance, banned, contact) VALUES (?, ?, ?, 0, 0, ?)",
+        (web_tid, username, name, contact)
+    )
+    conn.commit()
+    conn.close()
+    
+    # Notify admin about new registration
+    for admin_id in ADMIN_IDS:
+        send_telegram_message(admin_id,
+            f"🆕 <b>NOVO CADASTRO WEB!</b>\n\n"
+            f"👤 Nome: {name}\n"
+            f"📱 Username: @{username}\n"
+            f"📞 Contato: {contact}\n"
+            f"🆔 ID: <code>{web_tid}</code>")
+    
+    token = secrets.token_urlsafe(32)
+    _sessions[token] = {
+        "telegram_id": web_tid,
+        "username": username,
+        "first_name": name,
+        "created": time.time()
+    }
+    
+    return jsonify({
+        "ok": True,
+        "token": token,
+        "user": {
+            "telegram_id": web_tid,
+            "username": username,
+            "first_name": name,
+            "balance": 0
         }
     })
 
@@ -200,17 +270,29 @@ def buy():
     new_balance = conn.execute("SELECT balance FROM users WHERE telegram_id = ?", (tid,)).fetchone()["balance"]
     conn.close()
     
-    # Notify admin via Telegram
+    # Notify admin via Telegram (same format as bot)
     username = request.user.get("username", "?")
-    creds_list = "\n".join([f"  {i+1}. {d['credentials']}" for i, d in enumerate(delivered)])
+    creds_text = ""
+    for i, d in enumerate(delivered, 1):
+        creds = d['credentials'].strip()
+        if qty > 1:
+            creds_text += f"  {i}. <code>{creds}</code>\n"
+        else:
+            creds_text += f"  <code>{creds}</code>\n"
+    
     for admin_id in ADMIN_IDS:
         send_telegram_message(admin_id,
-            f"🌐 <b>VENDA WEB!</b>\n\n"
-            f"👤 @{username} (<code>{tid}</code>)\n"
-            f"📦 {product_name} x{qty}\n"
-            f"💵 R${total:.2f}\n"
-            f"💰 Saldo: R${new_balance:.2f}\n\n"
-            f"🔑 Logins:\n{creds_list}")
+            f"🛒 <b>NOVA COMPRA!</b>\n\n"
+            f"👤 Usuário: <code>{tid}</code> (@{username})\n"
+            f"📦 Produto: {product_name}\n"
+            f"🔢 Qtd: {qty}\n"
+            f"💵 Total: R${total:.2f}\n"
+            f"💰 Saldo restante: R${new_balance:.2f}\n\n"
+            f"━━━━━━━━━━━━━━━━\n"
+            f"🔑 <b>LOGINS ENTREGUES:</b>\n\n"
+            f"{creds_text}"
+            f"━━━━━━━━━━━━━━━━\n"
+            f"🌐 <i>(via Web Store)</i>")
     
     return jsonify({
         "ok": True,
