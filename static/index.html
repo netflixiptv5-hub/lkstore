@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LK LOGINS STORE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#050508;--bg2:#0a0a10;--bg3:#111118;--bg4:#1a1a24;
+--red:#E50914;--red2:#FF1A26;--red3:#ff3344;
+--gold:#FFD700;--gold2:#FFA500;
+--green:#00E676;--green2:#00C853;
+--blue:#4FC3F7;
+--text:#EAEAEA;--text2:#999;--text3:#555;
+--glass:rgba(255,255,255,0.03);
+--glass2:rgba(255,255,255,0.06);
+--glow:0 0 30px rgba(229,9,20,0.3);
+--radius:16px;--radius2:12px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:600px;background:radial-gradient(ellipse at 50% -200px,rgba(229,9,20,0.08) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(229,9,20,0.2)}50%{box-shadow:0 0 40px rgba(229,9,20,0.4)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.animate-in{animation:fadeIn .5s ease both}
+.animate-in:nth-child(2){animation-delay:.1s}
+.animate-in:nth-child(3){animation-delay:.2s}
+.animate-in:nth-child(4){animation-delay:.3s}
+
+/* Layout */
+.container{max-width:480px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
+.screen{display:none;min-height:100vh;padding-bottom:100px}
+.screen.active{display:block}
+
+/* Header */
+.header{padding:20px 0;text-align:center;position:relative}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:6px;color:var(--red);text-shadow:0 0 30px rgba(229,9,20,0.4);cursor:pointer}
+.logo span{color:var(--text);font-size:18px;letter-spacing:3px;display:block;margin-top:-4px;opacity:.5}
+.user-pill{display:inline-flex;align-items:center;gap:8px;background:var(--glass2);border:1px solid rgba(255,255,255,0.06);border-radius:100px;padding:6px 16px 6px 10px;margin-top:12px;font-size:13px;color:var(--text2);transition:all .3s}
+.user-pill:hover{border-color:rgba(229,9,20,0.3)}
+.user-pill .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red3));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.user-pill .balance{color:var(--green);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px}
+
+/* Nav */
+.nav{display:flex;gap:4px;padding:8px;background:var(--bg2);border-radius:14px;margin:16px 0;border:1px solid rgba(255,255,255,0.04)}
+.nav-btn{flex:1;padding:10px 4px;border:none;background:transparent;color:var(--text3);font-size:11px;font-weight:600;border-radius:10px;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter',sans-serif}
+.nav-btn.active{background:var(--red);color:#fff;box-shadow:0 4px 15px rgba(229,9,20,0.3)}
+.nav-btn:hover:not(.active){color:var(--text2);background:var(--glass2)}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:20px;margin-bottom:12px;transition:all .3s;position:relative;overflow:hidden}
+.card:hover{border-color:rgba(229,9,20,0.15);transform:translateY(-2px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(229,9,20,0.2),transparent)}
+.card-glass{background:linear-gradient(135deg,var(--glass),var(--glass2));backdrop-filter:blur(20px)}
+
+/* Product Card */
+.product-card{cursor:pointer;position:relative}
+.product-card .badge{position:absolute;top:12px;right:12px;background:var(--green);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+.product-card .badge.low{background:var(--gold)}
+.product-card .badge.out{background:var(--red)}
+.product-name{font-size:15px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.product-name .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.product-price{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--red2);margin:8px 0 4px}
+.product-price small{font-size:12px;color:var(--text3);font-weight:400}
+.product-stock{font-size:12px;color:var(--text3)}
+
+/* Buttons */
+.btn{width:100%;padding:14px;border:none;border-radius:var(--radius2);font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:1px;font-family:'Inter',sans-serif;position:relative;overflow:hidden}
+.btn-red{background:linear-gradient(135deg,var(--red),#c2070f);color:#fff;box-shadow:0 4px 20px rgba(229,9,20,0.25)}
+.btn-red:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(229,9,20,0.35)}
+.btn-red:active{transform:translateY(0)}
+.btn-red:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text2)}
+.btn-outline:hover{border-color:rgba(229,9,20,0.3);color:var(--text)}
+.btn-green{background:linear-gradient(135deg,var(--green2),#009624);color:#000}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000}
+.btn-sm{padding:10px 16px;font-size:12px;width:auto;border-radius:8px}
+
+/* Inputs */
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius2);color:var(--text);font-size:14px;outline:none;transition:all .25s;font-family:'Inter',sans-serif}
+.input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,9,20,0.1)}
+.input::placeholder{color:var(--text3)}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:100;display:none;align-items:flex-end;justify-content:center;padding:16px}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:20px 20px 16px 16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease;padding:24px}
+.modal-title{font-size:18px;font-weight:800;text-align:center;margin-bottom:20px}
+
+/* QR Code */
+.qr-container{text-align:center;padding:20px;background:white;border-radius:12px;margin:16px 0}
+.qr-container img{max-width:200px;width:100%}
+
+/* PIX Code */
+.pix-code{background:var(--bg);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;word-break:break-all;color:var(--text2);cursor:pointer;transition:all .2s;position:relative}
+.pix-code:hover{border-color:var(--red)}
+.pix-code::after{content:'COPIAR';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:var(--red);background:var(--bg);padding:2px 6px;border-radius:4px;font-family:'Inter',sans-serif}
+.pix-code.copied{border-color:var(--green)}
+.pix-code.copied::after{content:'COPIADO ✓';color:var(--green)}
+
+/* Order card */
+.order-card{padding:16px}
+.order-card .cred{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg);padding:8px 12px;border-radius:8px;margin-top:8px;cursor:pointer;transition:all .2s;border:1px solid transparent;color:var(--blue)}
+.order-card .cred:hover{border-color:var(--blue)}
+.order-date{font-size:11px;color:var(--text3)}
+
+/* Empty state */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty .icon{font-size:48px;margin-bottom:12px;opacity:.3}
+.empty p{font-size:14px}
+
+/* Loading */
+.spinner{width:24px;height:24px;border:3px solid var(--bg4);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:20px auto}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--bg3);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:500;z-index:200;transition:transform .3s ease;max-width:90%;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(0,230,118,0.3);color:var(--green)}
+.toast.error{border-color:rgba(229,9,20,0.3);color:var(--red2)}
+
+/* Qty selector */
+.qty-row{display:flex;align-items:center;gap:12px;margin:16px 0}
+.qty-btn{width:44px;height:44px;border:1px solid rgba(255,255,255,0.1);background:var(--bg);color:var(--text);border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.qty-btn:hover{border-color:var(--red);color:var(--red)}
+.qty-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;min-width:40px;text-align:center}
+
+/* Divider */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);margin:16px 0}
+
+/* Pix amounts */
+.pix-amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.pix-amount{padding:14px 8px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-align:center;cursor:pointer;transition:all .25s;background:var(--bg)}
+.pix-amount:hover{border-color:var(--red);background:rgba(229,9,20,0.05)}
+.pix-amount.selected{border-color:var(--red);background:rgba(229,9,20,0.1);color:var(--red2)}
+.pix-amount .val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
+.pix-amount .label{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* Status badge */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.status-dot.pending{background:var(--gold);animation:pulse 1.5s infinite}
+.status-dot.approved{background:var(--green)}
+
+/* Login screen specific */
+.login-hero{text-align:center;padding:80px 0 40px}
+.login-hero .logo{font-size:48px;letter-spacing:8px;margin-bottom:8px}
+.login-hero .sub{color:var(--text3);font-size:14px;margin-top:12px}
+.login-card{background:linear-gradient(135deg,rgba(229,9,20,0.03),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px 24px}
+.login-features{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
+.login-feature{background:var(--glass);border-radius:10px;padding:12px;text-align:center;font-size:11px;color:var(--text2)}
+.login-feature .emoji{font-size:20px;margin-bottom:4px;display:block}
+
+/* Section title */
+.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:20px 0 12px;padding-left:4px}
+
+@media(max-width:380px){
+.container{padding:0 12px}
+.product-price{font-size:18px}
+.pix-amounts{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
+<div class="container">
+  <div class="login-hero">
+    <div class="logo">LK LOGINS<span>STORE</span></div>
+    <p class="sub">Logins Premium com entrega automática</p>
+  </div>
+  <div class="login-card animate-in">
+    <div class="input-group">
+      <label>Seu @ do Telegram</label>
+      <input class="input" id="loginUsername" placeholder="@seu_username" autocomplete="off" autofocus>
+    </div>
+    <button class="btn btn-red" id="loginBtn" onclick="doLogin()">ENTRAR</button>
+    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px">
+      Primeiro cadastre-se no bot <a href="https://t.me/LKLOGINSSTORE77_BOT" target="_blank" style="color:var(--red);text-decoration:none">@LKLOGINSSTORE77_BOT</a>
+    </p>
+  </div>
+  <div class="login-features animate-in">
+    <div class="login-feature"><span class="emoji">⚡</span>Entrega Instantânea</div>
+    <div class="login-feature"><span class="emoji">🔐</span>100% Seguro</div>
+    <div class="login-feature"><span class="emoji">💳</span>PIX Automático</div>
+    <div class="login-feature"><span class="emoji">🏆</span>Garantia 30 Dias</div>
+  </div>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appScreen" class="screen">
+<div class="container">
+  <div class="header">
+    <div class="logo" onclick="switchTab('products')">LK LOGINS<span>STORE</span></div>
+    <div class="user-pill" id="userPill" onclick="switchTab('balance')">
+      <div class="avatar" id="userAvatar">?</div>
+      <span id="userName">...</span>
+      <span class="balance" id="userBalance">R$0,00</span>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" data-tab="products" onclick="switchTab('products')">🛒 Loja</button>
+    <button class="nav-btn" data-tab="balance" onclick="switchTab('balance')">💰 Saldo</button>
+    <button class="nav-btn" data-tab="orders" onclick="switchTab('orders')">📋 Pedidos</button>
+    <button class="nav-btn" data-tab="gift" onclick="switchTab('gift')">🎁 Gift</button>
+  </nav>
+
+  <!-- PRODUCTS TAB -->
+  <div class="tab-content" id="tab-products">
+    <div class="section-title">Produtos Disponíveis</div>
+    <div id="productsList"></div>
+  </div>
+
+  <!-- BALANCE TAB -->
+  <div class="tab-content" id="tab-balance" style="display:none">
+    <div class="card card-glass animate-in" style="text-align:center;padding:30px 20px">
+      <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Seu Saldo</div>
+      <div id="bigBalance" style="font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:800;color:var(--green)">R$0,00</div>
+    </div>
+    
+    <div class="section-title">Carregar via PIX</div>
+    <div class="pix-amounts" id="pixAmounts">
+      <div class="pix-amount" onclick="selectPix(this,5)"><div class="val">R$5</div></div>
+      <div class="pix-amount" onclick="selectPix(this,10)"><div class="val">R$10</div></div>
+      <div class="pix-amount" onclick="selectPix(this,20)"><div class="val">R$20</div></div>
+      <div class="pix-amount" onclick="selectPix(this,50)"><div class="val">R$50</div></div>
+      <div class="pix-amount" onclick="selectPix(this,100)"><div class="val">R$100</div></div>
+      <div class="pix-amount" onclick="selectPix(this,200)"><div class="val">R$200</div></div>
+    </div>
+    <div class="input-group">
+      <label>Ou digite o valor</label>
+      <input class="input" id="pixCustom" type="number" placeholder="R$ valor" min="1" max="500">
+    </div>
+    <button class="btn btn-green" onclick="generatePix()">GERAR PIX</button>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div class="tab-content" id="tab-orders" style="display:none">
+    <div class="section-title">Meus Pedidos</div>
+    <div id="ordersList"></div>
+  </div>
+
+  <!-- GIFT TAB -->
+  <div class="tab-content" id="tab-gift" style="display:none">
+    <div class="card card-glass animate-in" style="text-align:center;padding:30px 20px">
+      <div style="font-size:48px;margin-bottom:12px">🎁</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px">Resgatar Gift Card</div>
+      <div style="font-size:12px;color:var(--text3)">Insira o código para adicionar saldo</div>
+    </div>
+    <div class="input-group">
+      <label>Código do Gift</label>
+      <input class="input" id="giftCode" placeholder="XXXX-XXXX" style="text-transform:uppercase;text-align:center;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:2px">
+    </div>
+    <button class="btn btn-gold" onclick="redeemGift()">RESGATAR</button>
+  </div>
+</div>
+</div>
+
+<!-- BUY MODAL -->
+<div class="modal-overlay" id="buyModal">
+<div class="modal">
+  <div class="modal-title">📦 Confirmar Compra</div>
+  <div id="buyModalContent"></div>
+</div>
+</div>
+
+<!-- PIX MODAL -->
+<div class="modal-overlay" id="pixModal">
+<div class="modal">
+  <div class="modal-title">💳 Pagamento PIX</div>
+  <div id="pixModalContent"></div>
+</div>
+</div>
+
+<script>
+const API = '';
+let TOKEN = localStorage.getItem('lk_token') || '';
+let USER = null;
+let _pixCheck = null;
+let _selectedPix = 0;
+
+// ===== API =====
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
+  const res = await fetch(API + path, { ...opts, headers: { ...headers, ...opts.headers } });
+  return res.json();
+}
+
+// ===== TOAST =====
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ===== LOGIN =====
+async function doLogin() {
+  const u = document.getElementById('loginUsername').value.trim();
+  if (!u) return toast('Informe seu @username', 'error');
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'ENTRANDO...';
+  const data = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: u }) });
+  if (data.ok) {
+    TOKEN = data.token;
+    localStorage.setItem('lk_token', TOKEN);
+    USER = data.user;
+    showApp();
+    toast(`Bem-vindo, ${USER.first_name}!`);
+  } else {
+    toast(data.error, 'error');
+    btn.disabled = false; btn.textContent = 'ENTRAR';
+  }
+}
+document.getElementById('loginUsername').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ===== SHOW APP =====
+function showApp() {
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+  updateUI();
+  loadProducts();
+}
+
+function updateUI() {
+  if (!USER) return;
+  document.getElementById('userAvatar').textContent = (USER.first_name || '?')[0].toUpperCase();
+  document.getElementById('userName').textContent = '@' + (USER.username || '?');
+  document.getElementById('userBalance').textContent = `R$${USER.balance.toFixed(2)}`;
+  document.getElementById('bigBalance').textContent = `R$${USER.balance.toFixed(2)}`;
+}
+
+async function refreshUser() {
+  const data = await api('/api/me');
+  if (data.ok) { USER = data.user; updateUI(); }
+  else if (!data.ok && data.error === 'Não autenticado') { logout(); }
+}
+
+function logout() {
+  TOKEN = ''; USER = null;
+  localStorage.removeItem('lk_token');
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+}
+
+// ===== PRODUCTS =====
+async function loadProducts() {
+  const el = document.getElementById('productsList');
+  el.innerHTML = '<div class="spinner"></div>';
+  const data = await api('/api/products');
+  if (!data.ok || !data.products.length) {
+    el.innerHTML = '<div class="empty"><div class="icon">📦</div><p>Nenhum produto disponível no momento</p></div>';
+    return;
+  }
+  const icons = { 'netflix': '🔴', 'prime': '📦', 'disney': '🏰', 'hbo': '💜', 'globo': '🟢', 'max': '💜', 'paramount': '🔵', 'spotify': '🟢', 'deezer': '🎵' };
+  el.innerHTML = data.products.map(p => {
+    const icon = Object.entries(icons).find(([k]) => p.name.toLowerCase().includes(k))?.[1] || '🎯';
+    const badge = p.qty <= 0 ? 'out' : p.qty <= 3 ? 'low' : '';
+    const badgeText = p.qty <= 0 ? 'ESGOTADO' : p.qty <= 3 ? `${p.qty} un` : `${p.qty} un`;
+    return `<div class="card product-card animate-in" onclick="openBuy('${p.name.replace(/'/g,"\\'")}',${p.price},${p.qty})">
+      <div class="badge ${badge}">${badgeText}</div>
+      <div class="product-name"><div class="icon" style="background:rgba(255,255,255,0.05)">${icon}</div>${p.name}</div>
+      <div class="product-price">R$${p.price.toFixed(0)} <small>/unidade</small></div>
+      <div class="product-stock">Entrega automática • Garantia 30 dias</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== BUY MODAL =====
+let buyProduct = {};
+function openBuy(name, price, qty) {
+  if (qty <= 0) return toast('Produto esgotado!', 'error');
+  buyProduct = { name, price, qty, selected: 1 };
+  renderBuyModal();
+  document.getElementById('buyModal').classList.add('active');
+}
+function closeBuy() { document.getElementById('buyModal').classList.remove('active'); }
+function renderBuyModal() {
+  const total = buyProduct.price * buyProduct.selected;
+  const bal = USER ? USER.balance : 0;
+  const canBuy = bal >= total && buyProduct.selected <= buyProduct.qty;
+  document.getElementById('buyModalContent').innerHTML = `
+    <div class="card" style="text-align:center">
+      <div style="font-size:16px;font-weight:700">${buyProduct.name}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:800;color:var(--red2);margin:8px 0">R$${total.toFixed(0)}</div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:4px">QUANTIDADE</div>
+    <div class="qty-row" style="justify-content:center">
+      <button class="qty-btn" onclick="changeQty(-1)">−</button>
+      <span class="qty-val">${buyProduct.selected}</span>
+      <button class="qty-btn" onclick="changeQty(1)">+</button>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+      <span style="color:var(--text3)">Seu saldo</span>
+      <span style="color:${bal >= total ? 'var(--green)' : 'var(--red2)'};font-family:'JetBrains Mono',monospace;font-weight:600">R$${bal.toFixed(2)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:16px">
+      <span style="color:var(--text3)">Total</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-weight:700">R$${total.toFixed(2)}</span>
+    </div>
+    ${!canBuy && bal < total ? `<p style="text-align:center;font-size:12px;color:var(--red2);margin-bottom:12px">Saldo insuficiente! Carregue R$${(total-bal).toFixed(0)} via PIX</p>` : ''}
+    <button class="btn btn-red" ${canBuy ? '' : 'disabled'} onclick="confirmBuy()">COMPRAR AGORA</button>
+    <button class="btn btn-outline" style="margin-top:8px" onclick="closeBuy()">CANCELAR</button>
+  `;
+}
+function changeQty(d) {
+  buyProduct.selected = Math.max(1, Math.min(buyProduct.qty, buyProduct.selected + d));
+  renderBuyModal();
+}
+async function confirmBuy() {
+  const btn = document.querySelector('#buyModalContent .btn-red');
+  btn.disabled = true; btn.textContent = 'PROCESSANDO...';
+  const data = await api('/api/buy', { method: 'POST', body: JSON.stringify({ product_name: buyProduct.name, price: buyProduct.price, qty: buyProduct.selected }) });
+  if (data.ok) {
+    closeBuy();
+    USER.balance = data.balance;
+    updateUI();
+    const creds = data.items.map((it,i) => `${data.items.length > 1 ? (i+1)+'. ' : ''}<code>${it.credentials}</code>`).join('<br>');
+    document.getElementById('buyModalContent').innerHTML = `
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:48px;margin-bottom:12px">✅</div>
+        <div style="font-size:18px;font-weight:800;margin-bottom:4px">Compra Realizada!</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:20px">${buyProduct.selected}x ${buyProduct.name} • R$${data.total.toFixed(0)}</div>
+        <div style="background:var(--bg);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--blue);line-height:2">${creds}</div>
+        <p style="font-size:11px;color:var(--text3);margin-top:12px">Clique nos logins para copiar</p>
+      </div>
+      <button class="btn btn-outline" onclick="closeBuy();loadProducts();">FECHAR</button>`;
+    document.getElementById('buyModal').classList.add('active');
+    // Copy on click
+    document.querySelectorAll('#buyModalContent code').forEach(el => {
+      el.style.cursor = 'pointer';
+      el.onclick = () => { navigator.clipboard.writeText(el.textContent); toast('Copiado!'); };
+    });
+    loadProducts();
+  } else {
+    toast(data.error, 'error');
+    btn.disabled = false; btn.textContent = 'COMPRAR AGORA';
+  }
+}
+
+// ===== PIX =====
+function selectPix(el, val) {
+  document.querySelectorAll('.pix-amount').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  _selectedPix = val;
+  document.getElementById('pixCustom').value = '';
+}
+async function generatePix() {
+  const custom = parseFloat(document.getElementById('pixCustom').value);
+  const amount = custom > 0 ? custom : _selectedPix;
+  if (!amount || amount < 1) return toast('Escolha um valor', 'error');
+  
+  const data = await api('/api/pix/create', { method: 'POST', body: JSON.stringify({ amount }) });
+  if (!data.ok) return toast(data.error, 'error');
+  
+  document.getElementById('pixModalContent').innerHTML = `
+    <div style="text-align:center;font-size:14px;color:var(--text2);margin-bottom:12px">
+      Valor: <span style="color:var(--green);font-weight:700;font-family:'JetBrains Mono',monospace">R$${data.amount.toFixed(2)}</span>
+    </div>
+    <div class="qr-container"><img src="data:image/png;base64,${data.pix_qr}" alt="QR PIX"></div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:8px">Ou copie o código:</div>
+    <div class="pix-code" id="pixCodeEl" onclick="copyPix()">${data.pix_code}</div>
+    <div style="text-align:center;margin:16px 0">
+      <span class="status-dot pending"></span>
+      <span style="font-size:13px;color:var(--gold)" id="pixStatus">Aguardando pagamento...</span>
+    </div>
+    <button class="btn btn-outline" onclick="closePixModal()">CANCELAR</button>
+    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:12px">⏱ Validade: 30 minutos</p>
+  `;
+  document.getElementById('pixModal').classList.add('active');
+  
+  // Auto-check every 3s
+  if (_pixCheck) clearInterval(_pixCheck);
+  _pixCheck = setInterval(async () => {
+    const check = await api(`/api/pix/check/${data.mp_id}`);
+    if (check.ok && (check.status === 'approved' || check.status === 'already_approved')) {
+      clearInterval(_pixCheck); _pixCheck = null;
+      USER.balance = check.balance;
+      updateUI();
+      document.getElementById('pixModalContent').innerHTML = `
+        <div style="text-align:center;padding:30px 0">
+          <div style="font-size:48px;margin-bottom:12px">✅</div>
+          <div style="font-size:18px;font-weight:800;margin-bottom:4px;color:var(--green)">Pagamento Confirmado!</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:800;margin:12px 0">R$${check.credited ? check.credited.toFixed(2) : data.amount.toFixed(2)}</div>
+          <div style="font-size:13px;color:var(--text3)">creditado no seu saldo</div>
+        </div>
+        <button class="btn btn-green" onclick="closePixModal()">CONTINUAR</button>`;
+      toast('Pagamento confirmado! ✅');
+    }
+  }, 3000);
+}
+function copyPix() {
+  const el = document.getElementById('pixCodeEl');
+  navigator.clipboard.writeText(el.textContent);
+  el.classList.add('copied');
+  setTimeout(() => el.classList.remove('copied'), 2000);
+  toast('Código PIX copiado!');
+}
+function closePixModal() {
+  if (_pixCheck) { clearInterval(_pixCheck); _pixCheck = null; }
+  document.getElementById('pixModal').classList.remove('active');
+  refreshUser();
+}
+
+// ===== ORDERS =====
+async function loadOrders() {
+  const el = document.getElementById('ordersList');
+  el.innerHTML = '<div class="spinner"></div>';
+  const data = await api('/api/orders');
+  if (!data.ok || !data.orders.length) {
+    el.innerHTML = '<div class="empty"><div class="icon">📋</div><p>Nenhum pedido ainda</p></div>';
+    return;
+  }
+  el.innerHTML = data.orders.map(o => `
+    <div class="card order-card animate-in">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-weight:700;font-size:14px">${o.product_name}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--red2);font-weight:600">R$${o.price.toFixed(0)}</span>
+      </div>
+      <div class="cred" onclick="navigator.clipboard.writeText(this.textContent);toast('Copiado!')">${o.credentials}</div>
+      <div class="order-date" style="margin-top:8px">📅 ${o.created_at}</div>
+    </div>
+  `).join('');
+}
+
+// ===== GIFT =====
+async function redeemGift() {
+  const code = document.getElementById('giftCode').value.trim();
+  if (!code) return toast('Informe o código', 'error');
+  const data = await api('/api/gift/redeem', { method: 'POST', body: JSON.stringify({ code }) });
+  if (data.ok) {
+    USER.balance = data.balance;
+    updateUI();
+    document.getElementById('giftCode').value = '';
+    toast(`Gift resgatado! +R$${data.amount.toFixed(2)} ✅`);
+  } else {
+    toast(data.error, 'error');
+  }
+}
+
+// ===== TABS =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).style.display = 'block';
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  if (tab === 'products') loadProducts();
+  if (tab === 'orders') loadOrders();
+  if (tab === 'balance') refreshUser();
+}
+
+// ===== INIT =====
+(async function init() {
+  if (TOKEN) {
+    const data = await api('/api/me');
+    if (data.ok) { USER = data.user; showApp(); }
+    else { TOKEN = ''; localStorage.removeItem('lk_token'); }
+  }
+})();
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); if (_pixCheck) { clearInterval(_pixCheck); _pixCheck = null; } } });
+});
+</script>
+</body>
+</html>

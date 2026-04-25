@@ -10,4 +10,10 @@ else
     echo "[start.sh] lkstore.db already exists, skipping seed."
 fi
 
+# Start web server in background
+echo "[start.sh] Starting web server on port ${WEB_PORT:-5000}..."
+python web_server.py &
+
+# Start bot (foreground)
+echo "[start.sh] Starting Telegram bot..."
 exec python bot.py
