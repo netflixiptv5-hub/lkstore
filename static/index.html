@@ -79,7 +79,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 @media(min-width:1000px){.products-grid{grid-template-columns:repeat(6,1fr)}}
 .product-card{background:var(--bg2);border:1px solid rgba(255,255,255,.05);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .3s;animation:fadeIn .5s ease both;position:relative}
 .product-card:hover{border-color:rgba(229,9,20,.2);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
-.product-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:var(--bg3)}
+.product-img{width:100%;display:block;background:var(--bg3)}
 .product-body{padding:8px}
 .product-name{font-size:10px;font-weight:700;margin-bottom:4px;line-height:1.2;min-height:24px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .product-price-row{display:flex;align-items:baseline;gap:2px}
@@ -396,17 +396,14 @@ let _selectedPix = 0;
 const PRODUCT_IMAGES = {
   'netflix completa': 'img/netflix.png',
   '5 netflix premium': 'img/netflix5.png',
-  'disney': 'img/disney.png',
-  'hbo': 'img/hbo.png',
+  'disney padrao': 'img/disney.png',
+  'hbo max': 'img/hbo.png',
   'amazon + hbo + premiere': 'img/amazon_hbo_premiere.png',
-  'amazon + premiere e hbo': 'img/amazon_hbo_premiere.png',
+  'amazon + premiere e hbo max': 'img/amazon_hbo_premiere.png',
   'amazon + hbo max': 'img/amazon_hbo.png',
-  'amazon': 'img/amazon.png',
   'globo + canais e telecine': 'img/globo_telecine.png',
   'globo+canais+telecine+ premiere': 'img/globoplay_combo.png',
-  'globo+canais+telecine+premiere': 'img/globoplay_combo.png',
   'tela extra': 'img/tela_extra.png',
-  'combo': 'img/combo.png',
 };
 
 function getProductImage(name) {
