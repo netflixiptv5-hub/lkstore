@@ -408,18 +408,24 @@ const PRODUCT_IMAGES = {
 
 function getProductImage(name) {
   const lower = name.toLowerCase().trim();
-  for (const [key, img] of Object.entries(PRODUCT_IMAGES)) {
-    if (lower.includes(key) || key.includes(lower)) return img;
-  }
-  // Fallback by keyword
-  if (lower.includes('netflix')) return 'img/netflix.png';
-  if (lower.includes('disney')) return 'img/disney.png';
-  if (lower.includes('hbo') || lower.includes('max')) return 'img/hbo.png';
+  // Amazon combos first (most specific)
+  if (lower.includes('amazon') && lower.includes('premiere')) return 'img/amazon_hbo_premiere.png';
+  if (lower.includes('amazon') && lower.includes('hbo')) return 'img/amazon_hbo.png';
   if (lower.includes('amazon') || lower.includes('prime')) return 'img/amazon.png';
+  // Netflix
+  if (lower.includes('5 netflix') || lower.includes('netflix premium')) return 'img/netflix5.png';
+  if (lower.includes('netflix')) return 'img/netflix.png';
+  // Disney
+  if (lower.includes('disney')) return 'img/disney.png';
+  // HBO solo
+  if (lower.includes('hbo') || lower.includes('max')) return 'img/hbo.png';
+  // Globo combos
   if (lower.includes('globo') && lower.includes('premiere')) return 'img/globoplay_combo.png';
   if (lower.includes('globo')) return 'img/globo_telecine.png';
-  if (lower.includes('telecine')) return 'img/telecine.png';
+  // Tela extra
   if (lower.includes('tela')) return 'img/tela_extra.png';
+  // Telecine
+  if (lower.includes('telecine')) return 'img/telecine.png';
   return 'img/combo.png';
 }
 
